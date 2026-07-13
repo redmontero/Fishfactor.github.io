@@ -1,0 +1,3093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f1a1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fish Factor">
+<title>Fish Factor</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23e8a832'/><text x='50' y='72' font-size='55' text-anchor='middle'>&#x1F41F;</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+:root{--bg:#0f1a1e;--bg2:#162228;--card:#1c2e35;--card-hover:#223a43;--border:#2a4650;--fg:#e8f0f2;--fg-muted:#8ba8b4;--accent:#e8a832;--accent-glow:rgba(232,168,50,0.12);--danger:#e05252;--danger-bg:rgba(224,82,82,0.1);--success:#3cc68a;--info:#5ab8e8;--info-bg:rgba(90,184,232,0.1);--radius:14px;--radius-sm:8px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+body::before{content:'';position:fixed;top:-30%;left:-10%;width:60vw;height:60vw;background:radial-gradient(circle,rgba(232,168,50,0.04) 0%,transparent 70%);pointer-events:none}
+body::after{content:'';position:fixed;bottom:-20%;right:-15%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(60,198,138,0.03) 0%,transparent 70%);pointer-events:none}
+.screen{position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;flex-direction:column;align-items:center;padding:30px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch;transition:opacity .35s,transform .35s}
+.screen.hidden{opacity:0;transform:scale(1.04);pointer-events:none}
+.screen-logo{width:60px;height:60px;background:linear-gradient(135deg,var(--accent),#d4922a);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;color:#0f1a1e;box-shadow:0 8px 32px rgba(232,168,50,.3);margin-bottom:12px;flex-shrink:0}
+.screen-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px;text-align:center;flex-shrink:0}
+.screen-sub{font-size:13px;color:var(--fg-muted);margin-bottom:20px;text-align:center;flex-shrink:0}
+.screen-box{width:100%;max-width:360px;flex-shrink:0}
+.s-field{margin-bottom:11px}
+.s-field label{display:block;font-size:10px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.s-field input{width:100%;padding:13px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:14px;font-family:inherit;outline:none;transition:all .2s}
+.s-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.s-field input::placeholder{color:#4a6a76}
+.s-btn{width:100%;height:48px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;transition:transform .1s}
+.s-btn:active{transform:scale(.97)}
+.s-btn.outline{background:transparent;border:1.5px solid var(--border);color:var(--fg);font-weight:500}
+.s-btn.outline:active{border-color:var(--accent);color:var(--accent)}
+.s-msg{font-size:12px;margin-top:10px;text-align:center;min-height:16px}
+.s-msg.error{color:var(--danger)}
+.s-link{font-size:12px;color:var(--fg-muted);margin-top:14px;text-align:center}
+.s-link a{color:var(--accent);cursor:pointer;font-weight:600;text-decoration:none}
+.comp-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:45vh;overflow-y:auto;padding-right:4px}
+.comp-list::-webkit-scrollbar{width:3px}
+.comp-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.comp-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
+.comp-card:active{border-color:var(--accent);background:var(--card-hover);transform:scale(.98)}
+.comp-card-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.comp-card-info{flex:1;min-width:0}
+.comp-card-name{font-size:14px;font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comp-card-meta{font-size:11px;color:var(--fg-muted);margin-top:2px}
+.comp-card-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.comp-card-arrow{color:var(--fg-muted);font-size:13px}
+.comp-edit-btn{width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px}
+.comp-edit-btn:active{background:var(--accent-glow);color:var(--accent)}
+.empty-comp{text-align:center;padding:24px 16px;color:var(--fg-muted);font-size:13px;line-height:1.6}
+.form-group select{width:100%;padding:13px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;min-height:48px}
+.form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.filter-select{padding:8px 28px 8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:12px;font-family:inherit;outline:none;cursor:pointer;max-width:120px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238ba8b4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.install-banner{position:fixed;bottom:0;left:0;right:0;z-index:200;background:linear-gradient(135deg,#1c3040,#1a2e36);border-top:1px solid var(--accent);padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 -4px 30px rgba(0,0,0,.4);transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1)}
+.install-banner.show{transform:translateY(0)}
+.install-icon{width:44px;height:44px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--accent),#d4922a);display:flex;align-items:center;justify-content:center;font-size:20px;color:#0f1a1e}
+.install-text{flex:1}
+.install-text strong{font-size:13px;display:block;margin-bottom:1px}
+.install-text span{font-size:11px;color:var(--fg-muted)}
+.install-btn{padding:10px 18px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap}
+.install-dismiss{background:none;border:none;color:var(--fg-muted);font-size:16px;cursor:pointer;padding:6px}
+header{position:sticky;top:0;z-index:100;background:rgba(15,26,30,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:11px}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),#d4922a);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#0f1a1e;box-shadow:0 3px 16px rgba(232,168,50,.25)}
+.logo-text h1{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
+.logo-text span{font-size:10px;color:var(--fg-muted);display:block}
+.header-actions{display:flex;gap:6px;align-items:center}
+.header-btn{padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:11px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit}
+.header-btn:active{background:var(--card-hover)}
+.header-btn.accent-btn{background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;border-color:transparent;font-weight:700}
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;transition:all .3s}
+.sync-dot.online{background:var(--success);box-shadow:0 0 8px rgba(60,198,138,.6)}
+.sync-dot.connecting{background:#e8d83c;box-shadow:0 0 8px rgba(232,216,60,.5);animation:sp 1s infinite}
+.sync-dot.offline{background:var(--danger);box-shadow:0 0 8px rgba(224,82,82,.5);animation:sp 1.5s infinite}
+.sync-dot.local{background:var(--fg-muted);opacity:.5}
+@keyframes sp{0%,100%{opacity:1}50%{opacity:.4}}
+.role-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.role-badge.user{background:rgba(90,184,232,.12);color:var(--info)}
+.role-badge.admin{background:var(--accent-glow);color:var(--accent)}
+.lock-btn{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--fg-muted);font-size:13px;cursor:pointer;padding:8px 10px;display:flex;align-items:center}
+.lock-btn:active{border-color:var(--accent);color:var(--accent)}
+.company-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(60,198,138,.1);color:var(--success);white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis}
+.user-tag{font-size:11px;color:var(--fg-muted);display:flex;align-items:center;gap:4px;white-space:nowrap;cursor:pointer}
+.user-tag i{color:var(--accent);font-size:10px}
+main{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px;padding:14px 16px 80px;max-width:700px;margin:0 auto}
+.mgmt-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.mgmt-row{padding:12px 14px;display:flex;align-items:center;gap:10px}
+.mgmt-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.mgmt-icon.fish{background:rgba(232,168,50,.12);color:var(--accent)}
+.mgmt-icon.sup{background:rgba(60,198,138,.1);color:var(--success)}
+.mgmt-icon.buyr{background:rgba(90,184,232,.1);color:var(--info)}
+.mgmt-icon.usr{background:rgba(90,184,232,.1);color:var(--info)}
+/* Quick Select button */
+#quickEntryBtn:hover{background:var(--accent);color:#0f1a1e}
+#quickEntryBtn:active{transform:scale(.96)}
+/* Quick Entry modal buyer rows */
+.qe-row{display:flex;gap:5px;align-items:center;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:6px;background:var(--bg2);flex-wrap:nowrap}
+.qe-row-num{width:22px;height:22px;border-radius:50%;background:var(--accent-glow);color:var(--accent);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Space Grotesk',sans-serif}
+.qe-buyer-sel{padding:7px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--fg);font-size:12px;font-family:inherit;min-width:90px;outline:none;flex-shrink:0}
+.qe-buyer-sel:focus{border-color:var(--accent)}
+.qe-rate,.qe-amt{padding:7px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--fg);font-size:12px;font-family:inherit;outline:none;width:72px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums}
+.qe-rate:focus,.qe-amt:focus{border-color:var(--accent)}
+.qe-wt{padding:7px 6px;border-radius:var(--radius-sm);border:1px solid transparent;background:transparent;color:var(--success);font-size:11px;font-weight:700;width:56px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif}
+.qe-del-row{width:26px;height:26px;border-radius:6px;border:none;background:transparent;color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.qe-del-row:active{color:var(--danger);background:var(--danger-bg)}
+.mgmt-info{flex:1;min-width:0}
+.mgmt-name{font-size:13px;font-weight:700;display:block}
+.mgmt-hint{font-size:11px;color:var(--fg-muted);display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mgmt-count{background:var(--accent-glow);color:var(--accent);font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px;font-family:'Space Grotesk',sans-serif;flex-shrink:0}
+.mgmt-toggle{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s;flex-shrink:0}
+.mgmt-toggle:active{border-color:var(--accent);color:var(--accent)}
+.mgmt-toggle.open{background:var(--accent-glow);border-color:var(--accent);color:var(--accent)}
+.mgmt-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.mgmt-card.open .mgmt-body{max-height:600px}
+.mgmt-add{padding:0 14px 8px;display:flex;gap:6px;flex-wrap:wrap}
+.mgmt-add input,.mgmt-add select{padding:9px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:13px;font-family:inherit;outline:none;min-height:38px}
+.mgmt-add input::placeholder{color:#4a6a76}
+.mgmt-add input:focus,.mgmt-add select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.mgmt-add .ni{flex:1;min-width:100px}
+.mgmt-add .pi{flex:1;min-width:100px}
+.mgmt-add .ri{width:90px;flex-shrink:0}
+.mgmt-add-btn{height:38px;padding:0 14px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;flex-shrink:0;font-family:inherit}
+.mgmt-add-btn:active{transform:scale(.95)}
+.mgmt-upload{padding:0 14px 10px;display:flex;gap:6px;align-items:center}
+.mgmt-upload-label{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--fg-muted);cursor:pointer;padding:6px 10px;border:1px dashed var(--border);border-radius:var(--radius-sm);transition:all .2s}
+.mgmt-upload-label:active{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+.mgmt-list{max-height:200px;overflow-y:auto;padding:0 14px 10px}
+.mgmt-list::-webkit-scrollbar{width:3px}
+.mgmt-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.mgmt-item{padding:8px 0;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(42,70,80,.3);font-size:13px}
+.mgmt-item:last-child{border-bottom:none}
+.mgmt-item-info{flex:1;min-width:0}
+.mgmt-item-name{font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mgmt-item-meta{font-size:11px;color:var(--fg-muted)}
+.mgmt-item-del{width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .15s}
+.mgmt-item-del:active{color:var(--danger);background:var(--danger-bg)}
+.mgmt-item-del.off{opacity:.3;pointer-events:none}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 10px;text-align:center}
+.stat-label{font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.stat-value{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--fg)}
+.stat-value.success{color:var(--success)}
+.stat-value.accent{color:var(--accent)}
+.stat-unit{font-size:11px;font-weight:500;opacity:.7}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative}
+.form-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.form-title i{color:var(--accent)}
+.edit-bar{display:none;padding:8px 14px;background:var(--accent-glow);border:1px solid var(--accent);border-radius:var(--radius-sm);margin-bottom:14px;font-size:12px;font-weight:600;color:var(--accent);align-items:center;gap:8px}
+.edit-bar.active{display:flex}
+.cancel-edit{margin-left:auto;background:none;border:none;color:var(--fg-muted);cursor:pointer;font-size:11px;font-family:inherit;text-decoration:underline}
+.cancel-edit:hover{color:var(--fg)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-group label{display:block;font-size:10px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.form-group input,.form-group select{width:100%;padding:11px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.form-group input::placeholder{color:#4a6a76}
+.form-actions{grid-column:1/-1;display:flex;gap:8px;margin-top:4px}
+.btn-submit{flex:1;height:46px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s}
+.btn-submit:active{transform:scale(.97)}
+.btn-submit.editing{background:linear-gradient(135deg,var(--info),#4a9cc8)}
+.btn-clear{width:46px;height:46px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.btn-clear:active{border-color:var(--danger);color:var(--danger)}
+.date-filter-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 4px}
+.date-filter-label{font-size:12px;color:var(--fg-muted);display:flex;align-items:center;gap:6px}
+.date-badge{font-weight:700;color:var(--fg);padding:2px 10px;border-radius:20px;background:var(--card);border:1px solid var(--border);font-size:11px}
+.show-all-btn{display:none;align-items:center;gap:4px;padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);color:var(--fg-muted);font-size:11px;font-family:inherit;cursor:pointer}
+.show-all-btn:active{border-color:var(--accent);color:var(--accent)}
+.table-area{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-title{padding:12px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.table-title i{color:var(--accent)}
+.record-count{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:var(--fg-muted);margin-left:auto;background:var(--bg2);padding:2px 10px;border-radius:20px}
+.table-filters{padding:8px 10px;display:flex;gap:6px;align-items:center;border-bottom:1px solid rgba(42,70,80,.3);flex-wrap:wrap}
+.search-box{flex:1;min-width:120px;position:relative}
+.search-box i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--fg-muted)}
+.search-box input{width:100%;padding:7px 10px 7px 30px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--fg);font-size:12px;font-family:inherit;outline:none}
+.search-box input:focus{border-color:var(--accent)}
+.table-container{overflow-x:auto}
+.table-scroll{min-width:500px;max-height:50vh;overflow-y:auto}
+table{width:100%;border-collapse:collapse}
+thead th{padding:9px 10px;font-size:10px;font-weight:700;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.5px;text-align:left;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0}
+tbody tr{border-bottom:1px solid rgba(42,70,80,.2);transition:background .15s}
+tbody tr:hover{background:rgba(232,168,50,.03)}
+tbody td{padding:9px 10px;font-size:12px;vertical-align:middle}
+.fish-badge,.supplier-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.price-cell{font-family:'Space Grotesk',sans-serif;font-weight:600;font-variant-numeric:tabular-nums;font-size:12px}
+.weight-cell{font-weight:600;font-variant-numeric:tabular-nums;font-size:11px}
+.date-cell{font-size:10px;color:var(--fg-muted);white-space:nowrap}
+.row-actions{display:flex;gap:4px}
+.row-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px}
+.row-btn:active{border-color:var(--accent);color:var(--accent)}
+.row-btn.delete:active{border-color:var(--danger);color:var(--danger);background:var(--danger-bg)}
+.table-footer{padding:10px 12px;border-top:1px solid var(--border);background:var(--bg2);display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.table-footer .total-label{color:var(--fg-muted)}
+.table-footer .total-amount{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--accent)}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center}
+.empty-icon{width:56px;height:56px;background:var(--accent-glow);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--accent);margin-bottom:12px}
+.empty-state h3{font-size:14px;margin-bottom:4px}
+.empty-state p{color:var(--fg-muted);font-size:11px;max-width:220px}
+.toast-container{position:fixed;top:66px;left:14px;right:14px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{padding:11px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;display:flex;align-items:center;gap:9px;animation:tIn .3s ease-out;box-shadow:0 8px 28px rgba(0,0,0,.4);pointer-events:auto}
+.toast.success{background:#1a3d2a;border:1px solid #2a6040;color:var(--success)}
+.toast.error{background:#3d1a1a;border:1px solid #602a2a;color:var(--danger)}
+.toast.info{background:#1a2d3d;border:1px solid #2a4060;color:var(--info)}
+.toast.out{animation:tOut .3s ease-in forwards}
+@keyframes tIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-12px)}}
+.modal-overlay{position:fixed;inset:0;z-index:50000;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.active{opacity:1;pointer-events:auto}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:360px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.modal h3{font-size:15px;margin-bottom:8px;display:flex;align-items:center}
+.modal p{font-size:13px;color:var(--fg-muted);margin-bottom:16px;line-height:1.5}
+.modal-input{width:100%;padding:11px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:13px;font-family:inherit;outline:none;margin-bottom:8px}
+.modal-input:focus{border-color:var(--accent)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.modal-btn{padding:9px 20px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;color:var(--fg);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s}
+.modal-btn:active{background:var(--card-hover)}
+.modal-btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.setup-textarea{width:100%;height:130px;padding:10px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:11px;font-family:monospace;resize:vertical;outline:none;margin-bottom:12px}
+.setup-textarea:focus{border-color:var(--accent)}
+.setup-steps{font-size:12px;color:var(--fg-muted);margin-bottom:12px;line-height:1.6}
+.setup-steps strong{color:var(--fg)}
+.setup-steps a{color:var(--accent);text-decoration:none}
+.setup-steps ol{padding-left:18px;margin:6px 0 0}
+.setup-steps li{margin-bottom:2px}
+.loading-hint{font-size:11px;color:var(--fg-muted);text-align:center;padding:16px;display:none;align-items:center;justify-content:center;gap:8px}
+.loading-hint.show{display:flex}
+.loading-hint i{color:var(--accent);animation:sp 1s infinite}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(max-width:480px){.header-actions{gap:4px}.header-btn{padding:6px 8px;font-size:10px}.header-btn .btn-label{display:none}.stats-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- Company selection screen -->
+<div class="screen" id="companyScreen">
+  <div class="screen-logo"><i class="fa-solid fa-fish"></i></div>
+  <div class="screen-title">Fish Factor</div>
+  <div class="screen-sub" id="companySub">Select your company</div>
+  <div class="screen-box">
+    <div id="compListView">
+      <div class="comp-list" id="compList"></div>
+      <div class="loading-hint" id="compLoading"><i class="fa-solid fa-spinner"></i> Loading companies...</div>
+      <button class="s-btn outline" id="createCompBtn"><i class="fa-solid fa-plus"></i> Create New Company</button>
+      <div id="cloudStatusBar" style="margin-top:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--bg2);border:1px solid var(--border);font-size:11px;display:none;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <i class="fa-solid fa-cloud" style="color:var(--fg-muted);font-size:12px;"></i>
+          <span id="cloudStatusText" style="color:var(--fg-muted);">Checking cloud...</span>
+        </div>
+        <div id="debugLog" style="font-size:10px;color:var(--fg-muted);max-height:120px;overflow-y:auto;margin-top:4px;line-height:1.5;"></div>
+        <button id="retryCloudBtn" style="display:none;margin-top:8px;padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:11px;font-family:inherit;cursor:pointer;">
+          <i class="fa-solid fa-rotate-right"></i> Retry Cloud Sync
+        </button>
+      </div>
+    </div>
+    <div id="createCompBox" style="display:none">
+      <div class="s-field"><label>Company Name</label><input type="text" id="newCompName" placeholder="e.g. Ocean Fish Traders"></div>
+      <button class="s-btn" id="doCreateCompBtn"><i class="fa-solid fa-building"></i> Create Company</button>
+      <div class="s-msg" id="compMsg"></div>
+      <div class="s-link"><a id="backToCompListLink">Back to list</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- Login screen -->
+<div class="screen hidden" id="loginScreen">
+  <div class="screen-logo"><i class="fa-solid fa-fish"></i></div>
+  <div class="screen-title" id="loginCompName">Company</div>
+  <div class="screen-sub" id="loginSub">Create your first admin account</div>
+  <div class="screen-box">
+    <div class="s-field"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username" autocomplete="off" autocapitalize="off"></div>
+    <div class="s-field"><label>Password</label><input type="password" id="loginPass" placeholder="Enter password"></div>
+    <div class="s-field" id="confirmPassField"><label>Confirm Password</label><input type="password" id="loginPassConfirm" placeholder="Confirm password"></div>
+    <button class="s-btn" id="loginBtn"><i class="fa-solid fa-user-plus"></i> <span id="loginBtnText">Create Admin Account</span></button>
+    <div class="s-msg" id="loginMsg"></div>
+    <div class="s-link"><a id="switchCompLink">Switch Company</a></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- PWA install banner -->
+<div class="install-banner" id="installBanner">
+  <div class="install-icon"><i class="fa-solid fa-fish"></i></div>
+  <div class="install-text"><strong>Install Fish Factor</strong><span>Add to home screen</span></div>
+  <button class="install-btn" id="installBtn">Install</button>
+  <button class="install-dismiss" id="installDismiss"><i class="fa-solid fa-xmark"></i></button>
+</div>
+
+<input type="file" id="recordImportFile" accept=".csv,.txt" style="display:none">
+
+<!-- Delete record modal -->
+<div class="modal-overlay" id="deleteModal"><div class="modal"><h3><i class="fa-solid fa-triangle-exclamation" style="color:var(--danger);margin-right:6px"></i>Delete Record</h3><p>Are you sure you want to delete this record?</p><div class="modal-actions"><button class="modal-btn" data-close="deleteModal">Cancel</button><button class="modal-btn danger" id="confirmDeleteBtn">Delete</button></div></div></div>
+<!-- Clear all modal -->
+<div class="modal-overlay" id="clearModal"><div class="modal"><h3><i class="fa-solid fa-broom" style="color:var(--danger);margin-right:6px"></i>Clear All</h3><p>Remove all entries? This cannot be undone.</p><div class="modal-actions"><button class="modal-btn" data-close="clearModal">Cancel</button><button class="modal-btn danger" id="confirmClearBtn">Clear All</button></div></div></div>
+<!-- Delete fish type modal -->
+<div class="modal-overlay" id="deleteFishModal"><div class="modal"><h3><i class="fa-solid fa-fish" style="color:var(--danger);margin-right:6px"></i>Remove Fish Type</h3><p id="deleteFishMsg"></p><div class="modal-actions"><button class="modal-btn" data-close="deleteFishModal">Cancel</button><button class="modal-btn danger" id="confirmDeleteFishBtn">Remove</button></div></div></div>
+<!-- Delete supplier modal -->
+<div class="modal-overlay" id="deleteSupplierModal"><div class="modal"><h3><i class="fa-solid fa-truck" style="color:var(--danger);margin-right:6px"></i>Remove Supplier</h3><p id="deleteSupplierMsg"></p><div class="modal-actions"><button class="modal-btn" data-close="deleteSupplierModal">Cancel</button><button class="modal-btn danger" id="confirmDeleteSupplierBtn">Remove</button></div></div></div>
+<!-- Import result modal -->
+<div class="modal-overlay" id="importModal"><div class="modal" style="max-width:400px"><h3><i class="fa-solid fa-file-import" style="color:var(--accent);margin-right:6px"></i>Import Complete</h3><p id="importResultMsg"></p><div class="modal-actions"><button class="modal-btn" data-close="importModal" style="background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">OK</button></div></div></div>
+<!-- Delete user modal -->
+<div class="modal-overlay" id="deleteUserModal"><div class="modal"><h3><i class="fa-solid fa-user-minus" style="color:var(--danger);margin-right:6px"></i>Delete User</h3><p id="deleteUserMsg"></p><div class="modal-actions"><button class="modal-btn" data-close="deleteUserModal">Cancel</button><button class="modal-btn danger" id="confirmDeleteUserBtn">Delete</button></div></div></div>
+<!-- Change password modal -->
+<div class="modal-overlay" id="changePassModal"><div class="modal" style="max-width:340px"><h3><i class="fa-solid fa-key" style="color:var(--accent);margin-right:6px"></i>Change Password</h3><p>Enter current, then new password.</p><input class="modal-input" type="password" id="cpCurrent" placeholder="Current password"><input class="modal-input" type="password" id="cpNew" placeholder="New password"><input class="modal-input" type="password" id="cpConfirm" placeholder="Confirm new password"><div class="modal-actions"><button class="modal-btn" data-close="changePassModal">Cancel</button><button class="modal-btn" id="cpSaveBtn" style="background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">Save</button></div></div></div>
+<!-- Rename company modal -->
+<div class="modal-overlay" id="editCompModal"><div class="modal" style="max-width:340px"><h3><i class="fa-solid fa-pen" style="color:var(--accent);margin-right:6px"></i>Rename Company</h3><p>Enter the new company name.</p><input class="modal-input" type="text" id="editCompName" placeholder="New company name"><div class="modal-actions"><button class="modal-btn" data-close="editCompModal">Cancel</button><button class="modal-btn" id="saveCompNameBtn" style="background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">Save</button></div></div></div>
+  <div class="modal-overlay" id="deleteBuyerModal"><div class="modal"><h3><i class="fa-solid fa-cart-shopping" style="color:var(--danger);margin-right:6px"></i>Remove Buyer</h3><p id="deleteBuyerMsg"></p><div class="modal-actions"><button class="modal-btn" data-close="deleteBuyerModal">Cancel</button><button class="modal-btn danger" id="confirmDeleteBuyerBtn">Remove</button></div></div></div>
+  <div class="modal-overlay" id="quickEntryModal"><div class="modal" style="max-width:520px;max-height:85vh;display:flex;flex-direction:column"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h3 style="margin-bottom:0"><i class="fa-solid fa-bolt" style="color:var(--accent);margin-right:6px"></i>Quick Entry</h3><button class="modal-btn" data-close="quickEntryModal" style="padding:6px 10px;border:none;background:transparent;color:var(--fg-muted);font-size:16px;cursor:pointer"><i class="fa-solid fa-xmark"></i></button></div><p style="margin-bottom:10px;font-size:12px;color:var(--fg-muted)">Select fish type, then add buyers with rate &amp; amount.</p><!-- Fish type selector row --><div style="display:flex;gap:6px;margin-bottom:10px;align-items:center"><label style="font-size:11px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">Fish</label><select id="qeFishSelect" style="flex:1;padding:9px 10px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:13px;font-family:inherit;outline:none"></select></div><!-- Buyer rows container --><div id="qeBuyerRows" style="flex:1;overflow-y:auto;max-height:50vh;min-height:60px"></div><!-- Add buyer row + manage buyers --><div style="display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap"><button type="button" id="qeAddRowBtn" style="padding:7px 14px;border-radius:var(--radius-sm);border:1.5px dashed var(--border);background:transparent;color:var(--fg-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-plus"></i> Add Buyer</button><div style="flex:1"></div><button type="button" id="qeNewBuyerToggle" style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit"><i class="fa-solid fa-user-plus" style="margin-right:3px"></i> New Buyer</button><label style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px"><i class="fa-solid fa-file-arrow-up"></i> Import CSV<input type="file" id="qeBuyerCsvInput" accept=".csv,.txt" style="display:none"></label></div><!-- Inline new buyer input (hidden by default) --><div id="qeNewBuyerRow" style="display:none;margin-top:6px;gap:6px;align-items:center"><input type="text" id="qeNewBuyerInput" placeholder="Buyer name" style="flex:1;padding:8px 10px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:12px;font-family:inherit;outline:none"><button type="button" id="qeNewBuyerSave" style="padding:8px 14px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#0f1a1e;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Add</button></div><!-- Submit --><div class="modal-actions" style="margin-top:12px;justify-content:stretch;gap:8px"><button type="button" id="qeSubmitAll" style="flex:1;height:44px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-check-double"></i> Submit All</button></div></div></div>
+<!-- Cloud sync setup modal -->
+<div class="modal-overlay" id="setupModal"><div class="modal" style="max-width:430px"><div style="text-align:center;margin-bottom:14px"><div style="width:52px;height:52px;background:var(--accent-glow);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:22px;color:var(--accent);margin-bottom:8px"><i class="fa-solid fa-cloud-arrow-up"></i></div><h3>Cloud Sync Setup</h3></div><p style="text-align:center;margin-bottom:14px">Connect to Firebase Realtime Database for cross-device sync.</p><div class="setup-steps"><strong>Quick Setup:</strong><ol><li>Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li><li>Create a project, then Realtime Database, start in test mode</li><li>Settings > Project settings > Add web app, copy config JSON</li><li>Paste the full JSON below</li></ol></div><textarea class="setup-textarea" id="firebaseConfigInput" placeholder='Paste Firebase config JSON here:
+{
+  "apiKey": "AIzaSy...",
+  "databaseURL": "https://your-project.firebaseio.com",
+  ...
+}'></textarea><div class="modal-actions" style="justify-content:stretch;gap:8px"><button class="modal-btn" id="setupLocalBtn" style="flex:1;text-align:center">Local Only</button><button class="modal-btn" id="setupConnectBtn" style="flex:1;text-align:center;background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">Connect</button></div></div></div>
+
+<!-- Main app header -->
+<header id="appHeader" style="display:none">
+  <div class="logo"><div class="logo-icon"><i class="fa-solid fa-fish"></i></div><div class="logo-text"><h1>Fish Factor</h1><span class="company-tag" id="headerCompName">-</span></div></div>
+  <div class="header-actions">
+    <div class="user-tag" id="userTagBtn" title="Change password"><i class="fa-solid fa-user"></i> <span id="currentUserDisplay">-</span></div>
+    <span id="roleBadge" class="role-badge admin">Admin</span>
+    <span id="syncIndicator" class="sync-dot local" title="Local mode"></span>
+    <button class="header-btn" id="cloudBtn" title="Cloud settings"><i class="fa-solid fa-cloud"></i></button>
+    <button class="header-btn accent-btn" id="importBtn" title="Import CSV"><i class="fa-solid fa-file-import"></i> <span class="btn-label">Import</span></button>
+    <button class="header-btn" id="exportBtn" title="Export CSV"><i class="fa-solid fa-file-export"></i> <span class="btn-label">Export</span></button>
+    <button class="header-btn" id="clearAllBtn" title="Clear all records"><i class="fa-solid fa-trash-can"></i></button>
+    <button class="lock-btn" id="lockBtn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </div>
+</header>
+
+<!-- Main app content -->
+<main id="appMain" style="display:none">
+  <div class="mgmt-card" id="usersCard"><div class="mgmt-row"><div class="mgmt-icon usr"><i class="fa-solid fa-users-gear"></i></div><div class="mgmt-info"><span class="mgmt-name">Users</span><span class="mgmt-hint" id="usersHint">Manage access</span></div><span class="mgmt-count" id="usersCount">0</span><button class="mgmt-toggle" id="usersToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input class="ni" type="text" id="newUserName" placeholder="Username"><input class="pi" type="password" id="newUserPass" placeholder="Password"><select class="ri" id="newUserRole"><option value="user">User</option><option value="admin">Admin</option></select><button class="mgmt-add-btn" id="addUserBtn"><i class="fa-solid fa-plus"></i> Add</button></div><div class="mgmt-list" id="usersList"></div></div></div>
+  <div class="mgmt-card" id="fishCard"><div class="mgmt-row"><div class="mgmt-icon fish"><i class="fa-solid fa-fish-fins"></i></div><div class="mgmt-info"><span class="mgmt-name">Fish Types</span><span class="mgmt-hint" id="fishHint">Tap to manage</span></div><span class="mgmt-count" id="fishTypeCount">0</span><button class="mgmt-toggle" id="fishToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input type="text" id="newFishType" placeholder="Type name, tap +"><button class="mgmt-add-btn" id="addFishBtn"><i class="fa-solid fa-plus"></i></button></div><div class="mgmt-upload"><label class="mgmt-upload-label" for="fishUpload"><i class="fa-solid fa-file-arrow-up"></i> Upload names list</label><input type="file" id="fishUpload" accept=".csv,.txt" style="display:none"></div><div class="mgmt-list" id="fishTypeList"></div></div></div>
+  <div class="mgmt-card" id="supplierCard"><div class="mgmt-row"><div class="mgmt-icon sup"><i class="fa-solid fa-truck-field"></i></div><div class="mgmt-info"><span class="mgmt-name">Suppliers</span><span class="mgmt-hint" id="supplierHint">Tap to manage</span></div><span class="mgmt-count" id="supplierCount">0</span><button class="mgmt-toggle" id="supplierToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input type="text" id="newSupplier" placeholder="Type name, tap +"><button class="mgmt-add-btn" id="addSupBtn"><i class="fa-solid fa-plus"></i></button></div><div class="mgmt-upload"><label class="mgmt-upload-label" for="supplierUpload"><i class="fa-solid fa-file-arrow-up"></i> Upload names list</label><input type="file" id="supplierUpload" accept=".csv,.txt" style="display:none"></div><div class="mgmt-list" id="supplierList"></div></div></div>
+  <div class="mgmt-card" id="buyerCard"><div class="mgmt-row"><div class="mgmt-icon buyr"><i class="fa-solid fa-cart-shopping"></i></div><div class="mgmt-info"><span class="mgmt-name">Buyers</span><span class="mgmt-hint" id="buyerHint">Tap to manage</span></div><span class="mgmt-count" id="buyerCount">0</span><button class="mgmt-toggle" id="buyerToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input type="text" id="newBuyer" placeholder="Type name, tap +"><button class="mgmt-add-btn" id="addBuyerBtn"><i class="fa-solid fa-plus"></i></button></div><div class="mgmt-upload"><label class="mgmt-upload-label" for="buyerUpload"><i class="fa-solid fa-file-arrow-up"></i> Upload names list</label><input type="file" id="buyerUpload" accept=".csv,.txt" style="display:none"></div><div class="mgmt-list" id="buyerList"></div></div></div>
+  <div class="stats-row"><div class="stat-card"><div class="stat-label">Entries</div><div class="stat-value" id="statEntries">0</div></div><div class="stat-card"><div class="stat-label">Weight</div><div class="stat-value success" id="statWeight">0 <span class="stat-unit">Kg</span></div></div><div class="stat-card"><div class="stat-label">Amount</div><div class="stat-value accent" id="statValue">0</div></div><div class="stat-card"><div class="stat-label">Avg/Kg</div><div class="stat-value" id="statAvg" style="color:var(--info)">0</div></div></div>
+  <div class="form-card"><div class="edit-bar" id="editBar"><i class="fa-solid fa-pen"></i><span>Editing record</span><button class="cancel-edit" id="cancelEditBtn">Cancel</button></div><div class="form-title" id="formTitle"><i class="fa-solid fa-pen-to-square"></i> New Entry</div><form id="fishForm" autocomplete="off"><div class="form-grid"><div class="form-group"><label>Date</label><input type="date" id="entryDate" required></div><div class="form-group"><label>Supplier</label><select id="supplier" required></select></div><div class="form-group"><label>Fish Type</label><select id="fishType" required></select></div><div class="form-group" style="display:flex;align-items:flex-end"><button type="button" id="quickEntryBtn" style="width:100%;height:46px;border-radius:var(--radius-sm);border:1.5px solid var(--accent);background:var(--accent-glow);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-bolt"></i> Quick Entry</button></div></div></form></div>
+  <div class="date-filter-bar"><div class="date-filter-label"><i class="fa-solid fa-calendar-day" style="color:var(--accent)"></i> Showing: <span class="date-badge" id="dateBadge">--</span></div><button class="show-all-btn" id="showAllBtn"><i class="fa-solid fa-layer-group" style="font-size:10px"></i> All Dates</button></div>
+  <div class="table-area"><div class="table-title"><i class="fa-solid fa-table-list" style="color:var(--accent)"></i> Records <span class="record-count" id="recordCount">0</span></div><div class="table-filters"><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="searchInput" placeholder="Search..."></div><select class="filter-select" id="filterFish"><option value="">All Fish</option></select><select class="filter-select" id="filterSupplier"><option value="">All Suppliers</option></select></div></div>
+  <div class="table-container"><div class="table-scroll"><table><thead><tr><th>#</th><th>Date</th><th>Fish</th><th>Supplier</th><th>Buyer</th><th>Rate</th><th>Amount</th><th>Weight</th><th></th></tr></thead><tbody id="tableBody"></tbody></table><div class="empty-state" id="emptyState"><div class="empty-icon"><i class="fa-solid fa-fish-fins"></i></div><h3>No Records</h3><p id="emptyMsg">Add entries or import CSV.</p></div></div><div class="table-footer" id="tableFooter" style="display:none"><span class="total-label">Total</span><span class="total-amount" id="filteredTotal">0.00</span></div></div>
+</main>
+
+<script>
+// ====================================================================
+// IMMEDIATE CLOUD FETCH — runs before anything else, zero dependencies
+// This loads companies directly from Firebase REST API on startup.
+// It writes results directly to the DOM so even if the rest of the
+// script has errors, companies will still appear.
+// ====================================================================
+(function() {
+  var DB = 'https://fishfactor-32aed-default-rtdb.firebaseio.com';
+  var VER = 'v4-direct';
+
+  // Simple HTML escape (no dependencies)
+  function safe(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // Write to the on-screen debug log (or create one if missing)
+  function log(m) {
+    console.log('[FF-' + VER + '] ' + m);
+    var el = document.getElementById('debugLog');
+    if (!el) return;
+    var bar = document.getElementById('cloudStatusBar');
+    if (bar) bar.style.display = '';
+    var t = new Date().toLocaleTimeString();
+    el.innerHTML += '<div>' + t + ' ' + safe(m) + '</div>';
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function setStatus(m) {
+    var el = document.getElementById('cloudStatusText');
+    if (el) el.textContent = m;
+  }
+
+  log('Script starting. Version: ' + VER);
+
+  if (typeof fetch === 'undefined') {
+    log('ERROR: fetch() not available in this browser');
+    setStatus('Browser too old - fetch not supported');
+    return;
+  }
+
+  log('Fetching companies from cloud...');
+
+  var timeout = setTimeout(function() {
+    log('Cloud fetch timed out (5s)');
+    setStatus('Cloud timed out - tap Retry');
+    var btn = document.getElementById('retryCloudBtn');
+    if (btn) { btn.style.display = ''; btn.onclick = doFetch; }
+    document.getElementById('compLoading').classList.remove('show');
+    document.getElementById('createCompBtn').style.display = '';
+  }, 5000);
+
+  function doFetch() {
+    var btn = document.getElementById('retryCloudBtn');
+    if (btn) btn.style.display = 'none';
+    document.getElementById('compLoading').classList.add('show');
+    document.getElementById('createCompBtn').style.display = 'none';
+    setStatus('Retrying...');
+    log('Retry fetch...');
+    clearTimeout(timeout);
+    startFetch();
+  }
+
+  function startFetch() {
+    var t2 = setTimeout(function() {
+      log('Retry timed out');
+      setStatus('Cloud timed out');
+      document.getElementById('compLoading').classList.remove('show');
+      document.getElementById('createCompBtn').style.display = '';
+    }, 5000);
+
+    fetch(DB + '/ff/companies.json')
+      .then(function(r) {
+        clearTimeout(t2);
+        log('HTTP status: ' + r.status);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        clearTimeout(t2);
+        var raw = JSON.stringify(data);
+        log('Response: ' + raw.substring(0, 300));
+
+        if (!data || typeof data !== 'object') {
+          log('Cloud is empty');
+          setStatus('Cloud connected - no companies yet');
+          document.getElementById('compLoading').classList.remove('show');
+          document.getElementById('createCompBtn').style.display = '';
+          return;
+        }
+
+        var keys = Object.keys(data);
+        var comps = [];
+        for (var i = 0; i < keys.length; i++) {
+          comps.push({
+            id: keys[i],
+            name: data[keys[i]].name,
+            createdAt: data[keys[i]].createdAt || Date.now()
+          });
+        }
+        log('Found ' + comps.length + ' company(ies)');
+
+        // Save to localStorage so the main app can pick them up
+        localStorage.setItem('ff_companies', JSON.stringify(comps));
+        // Signal that cloud REST works
+        localStorage.setItem('ff_rest_ok', '1');
+
+        // Render company cards DIRECTLY to DOM
+        var listEl = document.getElementById('compList');
+        if (listEl && comps.length > 0) {
+          var colors = ['#e8a832','#3cc68a','#5ab8e8','#e06888','#b87ae8','#e8883c','#3ce8c0','#e8d83c'];
+          var icons = ['fa-fish','fa-anchor','fa-ship','fa-water','fa-shrimp','fa-otter','fa-sailboat','fa-fish-fins'];
+          var html = '';
+          for (var i = 0; i < comps.length; i++) {
+            var c = comps[i];
+            var cl = colors[i % colors.length];
+            var ic = icons[i % icons.length];
+            var ds = new Date(c.createdAt).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+            html += '<div class="comp-card" data-comp-id="' + c.id + '">'
+              + '<div class="comp-card-icon" style="background:' + cl + '18;color:' + cl + '">'
+              + '<i class="fa-solid ' + ic + '"></i></div>'
+              + '<div class="comp-card-info"><span class="comp-card-name">' + safe(c.name) + '</span>'
+              + '<span class="comp-card-meta">' + ds + '</span></div>'
+              + '<div class="comp-card-actions">'
+              + '<button class="comp-edit-btn" data-edit-comp="' + c.id + '" title="Rename">'
+              + '<i class="fa-solid fa-pen"></i></button>'
+              + '<i class="fa-solid fa-chevron-right comp-card-arrow"></i></div></div>';
+          }
+          listEl.innerHTML = html;
+          document.getElementById('companySub').textContent = 'Select your company';
+          setStatus('Cloud OK - ' + comps.length + ' company(ies) loaded', 'var(--success)');
+          log('Companies rendered to screen');
+        }
+
+        // Hide spinner, show create button
+        document.getElementById('compLoading').classList.remove('show');
+        document.getElementById('createCompBtn').style.display = '';
+      })
+      .catch(function(e) {
+        clearTimeout(t2);
+        log('FETCH ERROR: ' + e.message);
+        setStatus('Cloud error: ' + e.message);
+        var btn = document.getElementById('retryCloudBtn');
+        if (btn) { btn.style.display = ''; btn.onclick = doFetch; }
+        document.getElementById('compLoading').classList.remove('show');
+        document.getElementById('createCompBtn').style.display = '';
+      });
+  }
+
+  startFetch();
+})();
+
+// ====================================================================
+// Fish Factor - Refactored Cloud Sync
+// Key fixes:
+//   1. Firebase config is hardcoded (no setup modal blocking)
+//   2. Connection timeout prevents infinite "Syncing..." hang
+//   3. .info/connected listener tracks real connection state
+//   4. All cloud writes have error handling with user feedback
+//   5. Write debouncing prevents flooding Firebase on rapid saves
+//   6. Race condition fixed in auto-login path
+// ====================================================================
+
+// --- Hardcoded Firebase configuration ---
+// The user's production config is embedded so the app connects
+// immediately without requiring a manual paste on every new device.
+var DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD-ol_PADmrvnUNcS_ZJnsmOost1pAOM9w",
+  authDomain: "fishfactor-32aed.firebaseapp.com",
+  databaseURL: "https://fishfactor-32aed-default-rtdb.firebaseio.com",
+  projectId: "fishfactor-32aed",
+  storageBucket: "fishfactor-32aed.firebasestorage.app",
+  messagingSenderId: "987587568403",
+  appId: "1:987587568403:web:1ee6d0e590d36d865d30e6",
+  measurementId: "G-8R9262JD20"
+};
+
+// --- Timeout for cloud sync operations (milliseconds) ---
+var SYNC_TIMEOUT_MS = 6000;
+
+// --- Debounce delay for cloud writes (milliseconds) ---
+var WRITE_DEBOUNCE_MS = 400;
+
+// --- Load Firebase SDK asynchronously so it never blocks the UI ---
+var firebaseReady = false;
+var pendingCloudConnect = false;
+
+(function loadFirebaseSDK() {
+  var s1 = document.createElement('script');
+  s1.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js';
+  s1.onload = function() {
+    var s2 = document.createElement('script');
+    s2.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js';
+    s2.onload = function() {
+      firebaseReady = true;
+      dbg('Firebase SDK loaded successfully');
+      // If the app was waiting for the SDK, connect now
+      if (pendingCloudConnect) {
+        pendingCloudConnect = false;
+        connectToFirebase();
+      }
+    };
+    s2.onerror = function() {
+      dbg('Firebase database SDK failed to load — REST mode active');
+      // Don't call handleSyncTimeout — REST is the primary loader
+      pendingCloudConnect = false;
+    };
+    document.head.appendChild(s2);
+  };
+  s1.onerror = function() {
+    dbg('Firebase app SDK failed to load — REST mode active');
+    // Don't call handleSyncTimeout — REST is the primary loader
+    pendingCloudConnect = false;
+  };
+  document.head.appendChild(s1);
+})();
+
+// ====================================================================
+// Global application state
+// ====================================================================
+var companies = [];
+var activeCompanyId = null;
+var activeCompany = null;
+var fishTypes = [];
+var suppliers = [];
+var buyers = [];
+var records = [];
+var appUsers = [];
+var currentUserId = null;
+var loginMode = 'setup';
+var editingId = null;
+var filterDate = null;
+
+// Temporary targets for modal delete/edit operations
+var delTarget = null;
+var delFishTarget = null;
+var delSupTarget = null;
+var delUserTarget = null;
+var delBuyerTarget = null;
+var editCompTarget = null;
+
+// Cloud sync state
+var db = null;
+var useCloud = false;
+var useCloudREST = false;  // true when REST API is confirmed working
+var companyListenerOn = false;
+var dataListenerOn = false;
+var companyListenerFired = false;
+var connectionListenerOn = false;
+var isActuallyConnected = false;
+
+// Write debounce timer reference
+var cloudWriteTimer = null;
+var companyWriteTimer = null;
+
+// Flag: true from the moment we start trying to connect, until we get a result
+var attemptingCloudConnect = false;
+
+// Connection timeout timer reference
+var syncTimeoutTimer = null;
+
+// REST fetch controller for aborting timed-out requests
+var restAbortController = null;
+
+// Debug log helper - writes to both console and on-screen debug panel
+function dbg(msg) {
+  console.log('[FishFactor] ' + msg);
+  var el = document.getElementById('debugLog');
+  if (el) {
+    var bar = document.getElementById('cloudStatusBar');
+    if (bar) bar.style.display = '';
+    var t = new Date().toLocaleTimeString();
+    el.innerHTML += '<div>' + t + ' ' + esc(msg) + '</div>';
+    el.scrollTop = el.scrollHeight;
+  }
+}
+
+// Update the cloud status text shown in the status bar
+function setCloudStatus(text, color) {
+  var el = document.getElementById('cloudStatusText');
+  if (el) {
+    el.textContent = text;
+    el.style.color = color || 'var(--fg-muted)';
+  }
+}
+
+// Show the retry button
+function showRetryButton() {
+  var btn = document.getElementById('retryCloudBtn');
+  if (btn) btn.style.display = '';
+}
+
+// PWA deferred prompt
+var deferredPrompt = null;
+
+// Color palettes for visual variety
+var COMP_COLORS = ['#e8a832','#3cc68a','#5ab8e8','#e06888','#b87ae8','#e8883c','#3ce8c0','#e8d83c'];
+var COMP_ICONS  = ['fa-fish','fa-anchor','fa-ship','fa-water','fa-shrimp','fa-otter','fa-sailboat','fa-fish-fins'];
+var FISH_COLORS = ['#e8a832','#3cc68a','#5ab8e8','#e06888','#b87ae8','#e8883c','#3ce8c0','#e8d83c','#7ab8e8','#e83c6e'];
+var SUP_COLORS  = ['#3cc68a','#5ab8e8','#e8a832','#e06888','#b87ae8','#e8883c'];
+
+// ====================================================================
+// Utility functions
+// ====================================================================
+
+// Build a localStorage key scoped to the active company
+function ck(key) {
+  return 'ff_' + activeCompanyId + '_' + key;
+}
+
+// Simple string hash for deterministic color assignment
+function hashStr(s) {
+  var h = 0;
+  for (var i = 0; i < s.length; i++) {
+    h = s.charCodeAt(i) + ((h << 5) - h);
+  }
+  return Math.abs(h);
+}
+
+function fishColor(n) { return FISH_COLORS[hashStr(n) % FISH_COLORS.length]; }
+function supColor(n)  { return SUP_COLORS[hashStr(n) % SUP_COLORS.length]; }
+function fmtN(v) { return Number(v).toFixed(2); }
+
+function fmtDate(d) {
+  try {
+    return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', {
+      day: '2-digit', month: 'short', year: '2-digit'
+    });
+  } catch(e) { return d; }
+}
+
+// Escape HTML to prevent XSS when inserting user data into innerHTML
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// Escape for use inside HTML attribute values
+function escA(s) {
+  return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// Find the current logged-in user object
+function curUser() {
+  for (var i = 0; i < appUsers.length; i++) {
+    if (appUsers[i].id === currentUserId) return appUsers[i];
+  }
+  return null;
+}
+
+function isAdmin() {
+  var u = curUser();
+  return u && u.role === 'admin';
+}
+
+// Display a temporary toast notification
+function toast(msg, type) {
+  type = type || 'success';
+  var c = document.getElementById('toastContainer');
+  var d = document.createElement('div');
+  d.className = 'toast ' + type;
+  var icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+  d.innerHTML = '<i class="fa-solid ' + (icons[type] || icons.info) + '"></i> ' + msg;
+  c.appendChild(d);
+  setTimeout(function() {
+    d.classList.add('out');
+    setTimeout(function() { if (d.parentNode) d.remove(); }, 300);
+  }, 2600);
+}
+
+// Modal open/close helpers
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// Close modal when clicking the overlay background
+document.querySelectorAll('.modal-overlay').forEach(function(o) {
+  o.addEventListener('click', function(e) {
+    if (e.target === o) o.classList.remove('active');
+  });
+});
+
+// Close modals on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(function(m) {
+      m.classList.remove('active');
+    });
+  }
+});
+
+// Close buttons with data-close attribute
+document.querySelectorAll('[data-close]').forEach(function(btn) {
+  btn.addEventListener('click', function() { closeModal(this.getAttribute('data-close')); });
+});
+
+// Toggle management card open/closed state
+function toggleMgmt(cardId, toggleId) {
+  document.getElementById(cardId).classList.toggle('open');
+  document.getElementById(toggleId).classList.toggle('open');
+}
+
+// ====================================================================
+// Company management - local storage layer
+// ====================================================================
+
+function loadCompanies() {
+  try {
+    companies = JSON.parse(localStorage.getItem('ff_companies') || '[]');
+  } catch(e) {
+    companies = [];
+  }
+}
+
+function saveCompaniesLocal() {
+  localStorage.setItem('ff_companies', JSON.stringify(companies));
+}
+
+// Push the full company list to cloud via SDK
+function saveCompaniesCloudSDK() {
+  if (!useCloud || !db) return;
+  var obj = {};
+  for (var i = 0; i < companies.length; i++) {
+    obj[companies[i].id] = { name: companies[i].name, createdAt: companies[i].createdAt };
+  }
+  db.ref('ff/companies').set(obj)
+    .then(function() {
+      dbg('Companies saved to cloud (SDK)');
+    })
+    .catch(function(err) {
+      dbg('SDK company save failed: ' + err.message + ' — trying REST');
+      saveCompaniesViaREST();
+    });
+}
+
+// Push the full company list to cloud via REST API (fallback when SDK unavailable)
+function saveCompaniesViaREST() {
+  var config = getCloudConfig();
+  if (!config || !config.databaseURL) return;
+  var obj = {};
+  for (var i = 0; i < companies.length; i++) {
+    obj[companies[i].id] = { name: companies[i].name, createdAt: companies[i].createdAt };
+  }
+  fetch(config.databaseURL + '/ff/companies.json', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(obj)
+  }).then(function(r) {
+    if (r.ok) dbg('Companies saved to cloud (REST)');
+    else dbg('REST company save failed: HTTP ' + r.status);
+  }).catch(function(e) {
+    dbg('REST company save error: ' + e.message);
+  });
+}
+
+// Push companies to cloud — tries SDK first, REST as fallback
+function saveCompaniesCloud() {
+  // Always try REST first (no flag checks)
+  saveCompaniesViaREST();
+  // Also try SDK if available
+  if (useCloud && db) {
+    saveCompaniesCloudSDK();
+  }
+}
+
+// Save companies to both local and cloud
+function saveCompanies() {
+  saveCompaniesLocal();
+  // Debounce cloud writes to avoid flooding
+  clearTimeout(companyWriteTimer);
+  companyWriteTimer = setTimeout(function() {
+    saveCompaniesCloud();
+  }, WRITE_DEBOUNCE_MS);
+}
+
+// Push active company data to cloud via REST API
+function pushCloudViaREST() {
+  if (!activeCompanyId) { dbg('pushCloudViaREST SKIP: no activeCompanyId'); return; }
+  var config = getCloudConfig();
+  if (!config || !config.databaseURL) { dbg('pushCloudViaREST SKIP: no config'); return; }
+  var url = config.databaseURL + '/ff/data/' + activeCompanyId + '.json';
+  var payload = {
+    fishTypes: fishTypes,
+    suppliers: suppliers,
+    buyers: buyers,
+    records: records,
+    users: appUsers
+  };
+  dbg('REST PUT: ' + url + ' (users=' + appUsers.length + ', records=' + records.length + ')');
+  fetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(function(r) {
+    if (r.ok) dbg('Data synced to cloud (REST) OK');
+    else dbg('REST data push FAILED: HTTP ' + r.status);
+  }).catch(function(e) {
+    dbg('REST data push ERROR: ' + e.message);
+  });
+}
+
+// Render the company selection list
+function renderCompList() {
+  document.getElementById('companySub').textContent = companies.length
+    ? 'Select your company'
+    : 'No companies yet';
+  var el = document.getElementById('compList');
+  if (!companies.length) {
+    el.innerHTML = '<div class="empty-comp">No companies created yet.<br>Tap the button below to create one.</div>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < companies.length; i++) {
+    var c = companies[i];
+    var cl = COMP_COLORS[i % COMP_COLORS.length];
+    var ic = COMP_ICONS[i % COMP_ICONS.length];
+    var ds = new Date(c.createdAt).toLocaleDateString('en-GB', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    });
+    html += '<div class="comp-card" data-comp-id="' + c.id + '">'
+      + '<div class="comp-card-icon" style="background:' + cl + '18;color:' + cl + '">'
+      + '<i class="fa-solid ' + ic + '"></i></div>'
+      + '<div class="comp-card-info"><span class="comp-card-name">' + esc(c.name) + '</span>'
+      + '<span class="comp-card-meta">' + ds + '</span></div>'
+      + '<div class="comp-card-actions">'
+      + '<button class="comp-edit-btn" data-edit-comp="' + c.id + '" title="Rename">'
+      + '<i class="fa-solid fa-pen"></i></button>'
+      + '<i class="fa-solid fa-chevron-right comp-card-arrow"></i></div></div>';
+  }
+  el.innerHTML = html;
+}
+
+// Show the company list view (hide create form)
+function showCompList() {
+  document.getElementById('compListView').style.display = '';
+  document.getElementById('createCompBox').style.display = 'none';
+  document.getElementById('newCompName').value = '';
+  document.getElementById('compMsg').textContent = '';
+  renderCompList();
+
+  // While waiting for cloud data, show spinner and hide the create button
+  // to prevent users from creating a duplicate company
+  var stillLoading = attemptingCloudConnect && !companyListenerFired;
+  document.getElementById('compLoading').classList.toggle('show', stillLoading);
+  document.getElementById('createCompBtn').style.display = stillLoading ? 'none' : '';
+}
+
+// Switch to the "create company" form
+function showCreateComp() {
+  document.getElementById('compListView').style.display = 'none';
+  document.getElementById('createCompBox').style.display = '';
+  document.getElementById('companySub').textContent = 'Create a new company';
+  setTimeout(function() { document.getElementById('newCompName').focus(); }, 100);
+}
+
+// Create a new company and save to both local and cloud
+function createCompany() {
+  var name = document.getElementById('newCompName').value.trim();
+  var msg = document.getElementById('compMsg');
+  if (!name) { msg.textContent = 'Enter a company name.'; msg.className = 's-msg error'; return; }
+  if (name.length < 2) { msg.textContent = 'Min 2 characters.'; msg.className = 's-msg error'; return; }
+  for (var i = 0; i < companies.length; i++) {
+    if (companies[i].name.toLowerCase() === name.toLowerCase()) {
+      msg.textContent = 'A company with this name already exists.';
+      msg.className = 's-msg error';
+      return;
+    }
+  }
+  var comp = { id: 'comp_' + Date.now(), name: name, createdAt: Date.now() };
+  companies.push(comp);
+  // Safe to push: we CREATED a company, not overwriting existing data
+  saveCompanies();
+  toast('"' + name + '" created!', 'success');
+  selectCompany(comp.id);
+}
+
+// Select a company and enter the login flow
+function selectCompany(id) {
+  activeCompanyId = id;
+  activeCompany = null;
+  for (var i = 0; i < companies.length; i++) {
+    if (companies[i].id === id) { activeCompany = companies[i]; break; }
+  }
+  localStorage.setItem('ff_lastComp', id);
+  document.getElementById('companyScreen').classList.add('hidden');
+  loadCompanyData(); // Load from localStorage first (may be empty on new device)
+
+  // Show login screen with a loading state while we fetch cloud data
+  document.getElementById('loginSub').textContent = 'Loading users from cloud...';
+  document.getElementById('loginBtn').style.display = 'none';
+  document.getElementById('loginScreen').classList.remove('hidden');
+
+  // Always fetch company data via REST first (reliable, fast)
+  // This ensures users list is up-to-date BEFORE showing the login form
+  var config = getCloudConfig();
+  if (config && config.databaseURL) {
+    fetchCompanyDataViaREST(id).then(function() {
+      // Cloud data loaded (or failed) — now show the login form
+      showLoginReady();
+      // NOTE: SDK data listener is DISABLED to prevent race conditions
+      // where it overwrites local changes (e.g. new users) with stale cloud data.
+      // REST is the primary path for both reads and writes.
+    }).catch(function() {
+      // REST failed — proceed with local data anyway
+      showLoginReady();
+    });
+  } else {
+    // No cloud config — show login immediately with local data
+    showLoginReady();
+  }
+}
+
+// Helper: enable the login form after cloud data fetch completes
+function showLoginReady() {
+  initLoginScreen();
+  document.getElementById('loginBtn').style.display = '';
+}
+
+// Go back to the company selection screen
+function backToCompanies() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  disconnectDataListener();
+  currentUserId = null;
+  activeCompanyId = null;
+  activeCompany = null;
+  document.getElementById('companyScreen').classList.remove('hidden');
+  showCompList();
+}
+
+// Open the rename company modal
+function openEditComp(id) {
+  var c = null;
+  for (var i = 0; i < companies.length; i++) {
+    if (companies[i].id === id) { c = companies[i]; break; }
+  }
+  if (!c) return;
+  editCompTarget = id;
+  document.getElementById('editCompName').value = c.name;
+  openModal('editCompModal');
+  setTimeout(function() { document.getElementById('editCompName').focus(); }, 200);
+}
+
+// ====================================================================
+// Company data - load and save
+// ====================================================================
+
+// Load all company-specific data from localStorage
+function loadCompanyData() {
+  try { fishTypes = JSON.parse(localStorage.getItem(ck('ft')) || '[]'); } catch(e) { fishTypes = []; }
+  try { suppliers = JSON.parse(localStorage.getItem(ck('sp')) || '[]'); } catch(e) { suppliers = []; }
+  try { buyers    = JSON.parse(localStorage.getItem(ck('by')) || '[]'); } catch(e) { buyers = []; }
+  try { records   = JSON.parse(localStorage.getItem(ck('rc')) || '[]'); } catch(e) { records   = []; }
+  try { appUsers  = JSON.parse(localStorage.getItem(ck('users')) || '[]'); } catch(e) { appUsers  = []; }
+}
+
+// Save all company data to localStorage
+function saveLocal() {
+  localStorage.setItem(ck('ft'), JSON.stringify(fishTypes));
+  localStorage.setItem(ck('sp'), JSON.stringify(suppliers));
+  localStorage.setItem(ck('by'), JSON.stringify(buyers));
+  localStorage.setItem(ck('rc'), JSON.stringify(records));
+  localStorage.setItem(ck('users'), JSON.stringify(appUsers));
+}
+
+// Push current company data to Firebase with debouncing and error handling
+// REST is the PRIMARY write path — no flag checks, just try it.
+function pushCloud() {
+  if (!activeCompanyId) return;
+  // Debounce: cancel any pending write and schedule a new one
+  clearTimeout(cloudWriteTimer);
+  cloudWriteTimer = setTimeout(function() {
+    // ALWAYS try REST — no flag needed, it checks config internally
+    pushCloudViaREST();
+    // Also try SDK if available (optional bonus for real-time sync)
+    if (useCloud && db) {
+      db.ref('ff/data/' + activeCompanyId).set({
+        fishTypes: fishTypes,
+        suppliers: suppliers,
+        buyers: buyers,
+        records: records,
+        users: appUsers
+      })
+      .then(function() {
+        dbg('Data synced to cloud (SDK) for: ' + activeCompanyId);
+      })
+      .catch(function(err) {
+        dbg('SDK push failed (REST already sent): ' + err.message);
+      });
+    }
+  }, WRITE_DEBOUNCE_MS);
+}
+
+// Save to both localStorage (instant) and cloud (debounced)
+function save() {
+  saveLocal();
+  pushCloud();
+}
+
+// ====================================================================
+// Cloud sync - Firebase Realtime Database
+// Strategy: Cloud is the source of truth for existing items.
+// Listeners PULL from cloud; writes PUSH to cloud on user actions only.
+// ====================================================================
+
+// Retrieve the active Firebase config (hardcoded by default)
+function getCloudConfig() {
+  // User can override via the setup modal, but hardcoded config is primary
+  return DEFAULT_FIREBASE_CONFIG;
+}
+
+// Initialize Firebase app and set up real-time listeners
+function initFirebase(config) {
+  if (typeof firebase === 'undefined') {
+    dbg('Firebase SDK not loaded');
+    return false;
+  }
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(config);
+    }
+    db = firebase.database();
+    useCloud = true;
+    dbg('Firebase SDK initialized — real-time sync enabled');
+
+    // Start monitoring actual connection state
+    setupConnectionListener();
+
+    // Listen for company list changes from the cloud
+    setupCompanyListener();
+
+    // SDK data listener disabled — REST is primary (prevents race conditions)
+    // if (activeCompanyId) { setupDataListener(); }
+
+    updateSyncDot();
+    return true;
+  } catch(e) {
+    dbg('Firebase init error: ' + e.message);
+    useCloud = false;
+    return false;
+  }
+}
+
+// Monitor the real-time connection state via .info/connected
+// This tells us whether we are ACTUALLY reachable by the server,
+// not just whether we initialized the SDK.
+function setupConnectionListener() {
+  if (!db || connectionListenerOn) return;
+  connectionListenerOn = true;
+
+  db.ref('.info/connected').on('value', function(snap) {
+    isActuallyConnected = snap.val() === true;
+    updateSyncDot();
+
+    if (!isActuallyConnected) {
+      console.warn('[FishFactor] Firebase connection lost');
+    } else {
+      console.log('[FishFactor] Firebase connected');
+    }
+  });
+}
+
+// Update the sync indicator dot based on actual state
+function updateSyncDot() {
+  var el = document.getElementById('syncIndicator');
+  if (!el) return;
+
+  if (useCloud && isActuallyConnected) {
+    el.className = 'sync-dot online';
+    el.title = 'Cloud synced (real-time)';
+  } else if (useCloudREST) {
+    el.className = 'sync-dot online';
+    el.title = 'Cloud synced (REST)';
+  } else if (!useCloud && !useCloudREST) {
+    el.className = 'sync-dot local';
+    el.title = 'Local mode';
+  } else if (attemptingCloudConnect) {
+    el.className = 'sync-dot connecting';
+    el.title = 'Connecting...';
+  } else {
+    el.className = 'sync-dot offline';
+    el.title = 'Disconnected';
+  }
+}
+
+// Listen to the global company list (ff/companies)
+// Merges cloud companies INTO local list, preserving any local-only entries
+// Note: This is now a SECONDARY loader — REST is primary.
+function setupCompanyListener() {
+  if (!db || companyListenerOn) return;
+  companyListenerOn = true;
+  dbg('SDK company listener registered');
+
+  // Set a safety timeout: if the listener doesn't fire within SYNC_TIMEOUT_MS,
+  // stop showing the loading spinner (REST may have already loaded companies)
+  syncTimeoutTimer = setTimeout(function() {
+    if (!companyListenerFired) {
+      dbg('SDK listener timeout — REST already loaded=' + useCloudREST);
+      handleSyncTimeout();
+    }
+  }, SYNC_TIMEOUT_MS);
+
+  db.ref('ff/companies').on('value', function(snap) {
+    // Clear the timeout since we got a response
+    clearTimeout(syncTimeoutTimer);
+    companyListenerFired = true;
+    dbg('SDK company listener fired');
+
+    // Hide the loading spinner and show the create button again
+    document.getElementById('compLoading').classList.remove('show');
+    document.getElementById('createCompBtn').style.display = '';
+    updateSyncDot();
+
+    var d = snap.val();
+    var cloudComps = [];
+    if (d) {
+      var keys = Object.keys(d);
+      for (var i = 0; i < keys.length; i++) {
+        cloudComps.push({
+          id: keys[i],
+          name: d[keys[i]].name,
+          createdAt: d[keys[i]].createdAt || Date.now()
+        });
+      }
+      dbg('SDK received ' + cloudComps.length + ' companies');
+    }
+
+    // Merge: start with cloud companies, add any local-only ones
+    var merged = [];
+    var seenIds = {};
+
+    // Add all cloud companies first (cloud is source of truth)
+    for (var i = 0; i < cloudComps.length; i++) {
+      merged.push(cloudComps[i]);
+      seenIds[cloudComps[i].id] = true;
+    }
+
+    // Append local companies that don't exist in cloud (created offline)
+    var hasLocalOnly = false;
+    for (var i = 0; i < companies.length; i++) {
+      if (!seenIds[companies[i].id]) {
+        merged.push(companies[i]);
+        hasLocalOnly = true;
+      }
+    }
+
+    // Only update if something actually changed
+    if (JSON.stringify(merged) !== JSON.stringify(companies)) {
+      companies = merged;
+      saveCompaniesLocal();
+
+      // If there are local-only companies, push merged list back to cloud
+      if (hasLocalOnly) {
+        saveCompaniesCloud();
+      }
+
+      // Re-render company list if it's currently visible
+      if (!document.getElementById('companyScreen').classList.contains('hidden')) {
+        renderCompList();
+      }
+    }
+
+    // After companies load, check if we should auto-select one
+    tryAutoSelectAfterSync();
+  }, function(err) {
+    // Listener error (e.g., permission denied)
+    dbg('SDK company listener error: ' + err.message);
+    clearTimeout(syncTimeoutTimer);
+    if (!useCloudREST) handleSyncTimeout();
+    // If REST already loaded companies, no need to show timeout error
+  });
+}
+
+// After companies load (via REST or SDK), try to auto-select the remembered company
+// Also fetches the company's data via REST if SDK isn't ready yet
+function tryAutoSelectAfterSync() {
+  var lastCompId = localStorage.getItem('ff_lastComp');
+  if (!lastCompId) return;
+
+  // Find the company in the merged list
+  var found = null;
+  for (var i = 0; i < companies.length; i++) {
+    if (companies[i].id === lastCompId) { found = companies[i]; break; }
+  }
+  if (!found) return;
+
+  // Auto-select if we're still on the company screen (user hasn't tapped anything)
+  if (!document.getElementById('companyScreen').classList.contains('hidden')) {
+    activeCompanyId = found.id;
+    activeCompany = found;
+    loadCompanyData();
+
+    // If SDK is not ready yet, fetch company data via REST too
+    // so the login screen has the correct users list
+    // Always use REST for fetching company data (reliable, no race conditions)
+    fetchCompanyDataViaREST(found.id);
+
+    // Try auto-login with remembered user
+    var lastUserId = localStorage.getItem('ff_lastUser');
+    if (lastUserId) {
+      var userExists = false;
+      for (var i = 0; i < appUsers.length; i++) {
+        if (appUsers[i].id === lastUserId) { userExists = true; break; }
+      }
+      if (userExists) {
+        currentUserId = lastUserId;
+        document.getElementById('companyScreen').classList.add('hidden');
+        refreshUI();
+        toast('Welcome back, ' + curUser().username + '!', 'success');
+        return;
+      }
+    }
+
+    // Company found but no auto-login - go to login screen
+    document.getElementById('companyScreen').classList.add('hidden');
+    initLoginScreen();
+    document.getElementById('loginScreen').classList.remove('hidden');
+  }
+}
+
+// Fetch a specific company's data via REST (used when SDK isn't loaded yet)
+function fetchCompanyDataViaREST(compId) {
+  var config = getCloudConfig();
+  if (!config || !config.databaseURL) return Promise.resolve();
+  var url = config.databaseURL + '/ff/data/' + compId + '.json';
+  dbg('Fetching company data: ' + url);
+
+  return fetch(url)
+    .then(function(r) {
+      dbg('Company data HTTP status: ' + r.status);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(d) {
+      dbg('Company data response: ' + (d ? JSON.stringify(d).substring(0, 120) : 'null'));
+      if (!d) { dbg('No cloud data for company: ' + compId); return; }
+      // Apply cloud data to local state (same as the SDK data listener)
+      if (d.fishTypes) { fishTypes = d.fishTypes; localStorage.setItem(ck('ft'), JSON.stringify(fishTypes)); }
+      if (d.suppliers) { suppliers = d.suppliers; localStorage.setItem(ck('sp'), JSON.stringify(suppliers)); }
+      if (d.buyers)    { buyers = d.buyers;        localStorage.setItem(ck('by'), JSON.stringify(buyers)); }
+      if (d.records)   { records = d.records;      localStorage.setItem(ck('rc'), JSON.stringify(records)); }
+      if (d.users) {
+        appUsers = d.users;
+        localStorage.setItem(ck('users'), JSON.stringify(appUsers));
+        dbg('Loaded ' + appUsers.length + ' user(s) from cloud');
+      }
+
+      // Re-check for auto-login now that we have users
+      var lastUserId = localStorage.getItem('ff_lastUser');
+      if (lastUserId) {
+        for (var i = 0; i < appUsers.length; i++) {
+          if (appUsers[i].id === lastUserId) {
+            currentUserId = lastUserId;
+            document.getElementById('loginScreen').classList.add('hidden');
+            refreshUI();
+            toast('Welcome back, ' + curUser().username + '!', 'success');
+            return;
+          }
+        }
+      }
+    })
+    .catch(function(err) {
+      dbg('REST company data fetch failed: ' + err.message);
+      console.warn('[FishFactor] REST company data fetch failed:', err.message);
+    });
+}
+
+// Fallback when sync times out or fails
+// Hides the loading spinner and proceeds with local data
+function handleSyncTimeout() {
+  companyListenerFired = true; // Prevent further timeout triggers
+  attemptingCloudConnect = false;
+  document.getElementById('compLoading').classList.remove('show');
+  document.getElementById('createCompBtn').style.display = '';
+  updateSyncDot();
+  dbg('Sync timeout. REST=' + useCloudREST + ' SDK=' + (db ? 'yes' : 'no'));
+  if (!useCloud && !useCloudREST) {
+    toast('Using local storage (cloud unavailable).', 'info');
+  }
+}
+
+// Listen to the active company's data (fishTypes, suppliers, records, users)
+// Cloud data is accepted as source of truth for existing items
+function setupDataListener() {
+  if (!db || !activeCompanyId || dataListenerOn) return;
+  dataListenerOn = true;
+
+  db.ref('ff/data/' + activeCompanyId).on('value', function(snap) {
+    var d = snap.val();
+    if (!d) return;
+    var changed = false;
+
+    // Accept cloud data for each category if it differs from local
+    if (d.fishTypes && JSON.stringify(d.fishTypes) !== JSON.stringify(fishTypes)) {
+      fishTypes = d.fishTypes;
+      localStorage.setItem(ck('ft'), JSON.stringify(fishTypes));
+      changed = true;
+    }
+    if (d.suppliers && JSON.stringify(d.suppliers) !== JSON.stringify(suppliers)) {
+      suppliers = d.suppliers;
+      localStorage.setItem(ck('sp'), JSON.stringify(suppliers));
+      changed = true;
+    }
+    if (d.records && JSON.stringify(d.records) !== JSON.stringify(records)) {
+      records = d.records;
+      localStorage.setItem(ck('rc'), JSON.stringify(records));
+      changed = true;
+    }
+    if (d.users && JSON.stringify(d.users) !== JSON.stringify(appUsers)) {
+      appUsers = d.users;
+      localStorage.setItem(ck('users'), JSON.stringify(appUsers));
+      changed = true;
+    }
+
+    if (!changed) return;
+
+    // Determine which screen is currently active and update accordingly
+    var onLoginScreen = !document.getElementById('loginScreen').classList.contains('hidden');
+    var inApp = document.getElementById('appHeader').style.display !== 'none';
+
+    if (onLoginScreen) {
+      // Try auto-login with the remembered user ID
+      var lastUid = localStorage.getItem('ff_lastUser');
+      if (lastUid) {
+        for (var k = 0; k < appUsers.length; k++) {
+          if (appUsers[k].id === lastUid) {
+            currentUserId = lastUid;
+            document.getElementById('loginScreen').classList.add('hidden');
+            refreshUI();
+            toast('Welcome back, ' + curUser().username + '!', 'success');
+            return;
+          }
+        }
+      }
+      // No auto-login possible, re-initialize the login screen
+      initLoginScreen();
+    } else if (inApp) {
+      refreshUI();
+    }
+  }, function(err) {
+    console.error('[FishFactor] Data listener error:', err);
+  });
+}
+
+// Detach the active company data listener
+function disconnectDataListener() {
+  if (db && dataListenerOn && activeCompanyId) {
+    db.ref('ff/data/' + activeCompanyId).off();
+  }
+  dataListenerOn = false;
+}
+
+// Attempt cloud connection using the hardcoded config
+// This starts the SDK loading process (SDK is optional — REST is primary)
+function connectToFirebase() {
+  var config = getCloudConfig();
+  if (!config || !config.apiKey || !config.databaseURL) {
+    dbg('No valid Firebase config');
+    return;
+  }
+
+  dbg('Starting Firebase SDK connection...');
+
+  if (firebaseReady) {
+    if (initFirebase(config)) {
+      dbg('Firebase initialized successfully (SDK)');
+    }
+  } else {
+    // SDK not loaded yet - set a flag to connect when it's ready
+    pendingCloudConnect = true;
+    var dot = document.getElementById('syncIndicator');
+    if (dot) {
+      dot.className = 'sync-dot connecting';
+      dot.title = 'Connecting...';
+    }
+    // No timeout here — REST handles the primary load.
+    // SDK will connect in background when ready.
+  }
+}
+
+// Open the cloud setup modal (for users who want to change the config)
+function openSetupModal() {
+  var config = getCloudConfig();
+  document.getElementById('firebaseConfigInput').value = config ? JSON.stringify(config, null, 2) : '';
+  openModal('setupModal');
+}
+
+// User chose to use local-only mode
+function skipCloudSetup() {
+  useCloud = false;
+  localStorage.setItem('ff_setup_shown', '1');
+  handleSyncTimeout();
+  closeModal('setupModal');
+  toast('Using local storage only.', 'info');
+}
+
+// User pasted a new config and wants to connect
+function connectCloud() {
+  var raw = document.getElementById('firebaseConfigInput').value.trim();
+  if (!raw) { toast('Paste your Firebase config JSON.', 'error'); return; }
+  var config;
+  try { config = JSON.parse(raw); } catch(e) { toast('Invalid JSON format.', 'error'); return; }
+  if (!config.apiKey || !config.databaseURL) {
+    toast('Missing apiKey or databaseURL.', 'error');
+    return;
+  }
+
+  // Store the custom config as the new default
+  DEFAULT_FIREBASE_CONFIG = config;
+  localStorage.setItem('ff_fb_cfg', raw);
+  localStorage.setItem('ff_setup_shown', '1');
+
+  if (firebaseReady) {
+    // Clean up old listeners before re-initializing
+    if (companyListenerOn && db) {
+      db.ref('ff/companies').off();
+      companyListenerOn = false;
+      companyListenerFired = false;
+    }
+    disconnectDataListener();
+    if (connectionListenerOn && db) {
+      db.ref('.info/connected').off();
+      connectionListenerOn = false;
+    }
+
+    if (initFirebase(config)) {
+      closeModal('setupModal');
+      toast('Connected to cloud!', 'success');
+      if (!document.getElementById('companyScreen').classList.contains('hidden')) {
+        document.getElementById('compLoading').classList.add('show');
+      }
+    }
+  } else {
+    pendingCloudConnect = true;
+    closeModal('setupModal');
+    toast('Connecting once SDK loads...', 'info');
+    var dot = document.getElementById('syncIndicator');
+    if (dot) {
+      dot.className = 'sync-dot connecting';
+      dot.title = 'Connecting...';
+    }
+  }
+}
+
+// ====================================================================
+// Authentication (local username/password, not Firebase Auth)
+// ====================================================================
+
+function initLoginScreen() {
+  document.getElementById('loginCompName').textContent = activeCompany ? activeCompany.name : 'Company';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginPassConfirm').value = '';
+  document.getElementById('loginMsg').textContent = '';
+
+  if (appUsers.length === 0) {
+    // First time: show account creation form
+    loginMode = 'setup';
+    document.getElementById('loginSub').textContent = 'Create your first admin account';
+    document.getElementById('confirmPassField').style.display = '';
+    document.getElementById('loginBtnText').textContent = 'Create Admin Account';
+    document.getElementById('loginBtn').querySelector('i').className = 'fa-solid fa-user-plus';
+  } else {
+    // Existing users: show login form
+    loginMode = 'login';
+    document.getElementById('loginSub').textContent = 'Sign in to continue';
+    document.getElementById('confirmPassField').style.display = 'none';
+    document.getElementById('loginBtnText').textContent = 'Sign In';
+    document.getElementById('loginBtn').querySelector('i').className = 'fa-solid fa-right-to-bracket';
+  }
+  setTimeout(function() { document.getElementById('loginUser').focus(); }, 250);
+}
+
+function handleLogin() {
+  var user = document.getElementById('loginUser').value.trim();
+  var pass = document.getElementById('loginPass').value;
+  var msg = document.getElementById('loginMsg');
+
+  if (!user) { msg.textContent = 'Enter a username.'; msg.className = 's-msg error'; return; }
+  if (!pass) { msg.textContent = 'Enter a password.'; msg.className = 's-msg error'; return; }
+  if (pass.length < 4) { msg.textContent = 'Password must be at least 4 characters.'; msg.className = 's-msg error'; return; }
+
+  if (loginMode === 'setup') {
+    // Create the first admin account
+    var confirm = document.getElementById('loginPassConfirm').value;
+    if (pass !== confirm) {
+      msg.textContent = 'Passwords do not match.';
+      msg.className = 's-msg error';
+      return;
+    }
+    var newUser = {
+      id: 'u_' + Date.now(),
+      username: user,
+      password: pass,
+      role: 'admin',
+      createdAt: Date.now()
+    };
+    appUsers.push(newUser);
+    currentUserId = newUser.id;
+    save();
+    enterApp();
+  } else {
+    // Authenticate against existing users
+    var found = null;
+    for (var i = 0; i < appUsers.length; i++) {
+      if (appUsers[i].username === user) { found = appUsers[i]; break; }
+    }
+    if (!found) {
+      msg.textContent = 'User "' + user + '" not found.';
+      msg.className = 's-msg error';
+      return;
+    }
+    if (found.password !== pass) {
+      msg.textContent = 'Wrong password.';
+      msg.className = 's-msg error';
+      return;
+    }
+    currentUserId = found.id;
+    enterApp();
+  }
+}
+
+// Enter the main app after successful login
+function enterApp() {
+  localStorage.setItem('ff_lastUser', currentUserId);
+  document.getElementById('loginScreen').classList.add('hidden');
+  // SDK data listener disabled — REST is primary (prevents race conditions)
+  refreshUI();
+  toast('Welcome, ' + curUser().username + '!', 'success');
+}
+
+// Log out and return to the login screen
+function logout() {
+  localStorage.removeItem('ff_lastUser');
+  currentUserId = null;
+  editingId = null;
+  filterDate = null;
+  disconnectDataListener();
+  document.getElementById('appHeader').style.display = 'none';
+  document.getElementById('appMain').style.display = 'none';
+  initLoginScreen();
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+// ====================================================================
+// Main UI refresh - updates all visible components
+// ====================================================================
+
+function refreshUI() {
+  document.getElementById('appHeader').style.display = '';
+  document.getElementById('appMain').style.display = '';
+  document.getElementById('headerCompName').textContent = activeCompany ? activeCompany.name : '-';
+  var cu = curUser();
+  document.getElementById('currentUserDisplay').textContent = cu ? cu.username : '-';
+  var badge = document.getElementById('roleBadge');
+  badge.textContent = cu ? (cu.role === 'admin' ? 'Admin' : 'User') : '-';
+  badge.className = 'role-badge ' + (cu ? cu.role : 'user');
+  updateSyncDot();
+  renderUsers();
+  renderFishTypes();
+  renderSuppliers();
+  renderBuyers();
+  populateFormSelects();
+  populateFilterSelects();
+  renderTable();
+  renderStats();
+  setTodayDate();
+  cancelEdit();
+  document.getElementById('usersCard').style.display = isAdmin() ? '' : 'none';
+  document.getElementById('buyerCard').style.display = isAdmin() ? '' : 'none';
+  document.getElementById('clearAllBtn').style.display = isAdmin() ? '' : 'none';
+}
+
+function setTodayDate() {
+  var today = new Date().toISOString().split('T')[0];
+  if (!document.getElementById('entryDate').value) {
+    document.getElementById('entryDate').value = today;
+  }
+  var needsRender = false;
+  if (!filterDate) {
+    filterDate = today;
+    needsRender = true;
+  }
+  document.getElementById('dateBadge').textContent = fmtDate(filterDate);
+  document.getElementById('showAllBtn').style.display = filterDate ? 'flex' : 'none';
+  // Re-render stats and table if filterDate was just set
+  if (needsRender) {
+    renderTable();
+    renderStats();
+  }
+}
+
+function showAllDates() {
+  filterDate = null;
+  document.getElementById('dateBadge').textContent = 'All Dates';
+  document.getElementById('showAllBtn').style.display = 'none';
+  renderTable();
+  renderStats();
+}
+
+// ====================================================================
+// User management
+// ====================================================================
+
+function renderUsers() {
+  document.getElementById('usersCount').textContent = appUsers.length;
+  document.getElementById('usersHint').textContent = appUsers.length
+    ? appUsers.length + ' user(s)'
+    : 'Manage access';
+  var el = document.getElementById('usersList');
+  if (!appUsers.length) { el.innerHTML = ''; return; }
+  var html = '';
+  for (var i = 0; i < appUsers.length; i++) {
+    var u = appUsers[i];
+    var canDel = u.id !== currentUserId && isAdmin();
+    html += '<div class="mgmt-item">'
+      + '<div class="mgmt-item-info">'
+      + '<span class="mgmt-item-name">' + esc(u.username) + '</span>'
+      + '<div class="mgmt-item-meta">'
+      + '<span class="mgmt-item-role ' + u.role + '">' + u.role + '</span>'
+      + '<span>' + new Date(u.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + '</span>'
+      + '</div></div>'
+      + '<button class="mgmt-item-del' + (canDel ? '' : ' off') + '" data-del-user="' + u.id + '">'
+      + '<i class="fa-solid fa-trash"></i></button></div>';
+  }
+  el.innerHTML = html;
+}
+
+function addUser() {
+  if (!isAdmin()) { toast('Admin only.', 'error'); return; }
+  var name = document.getElementById('newUserName').value.trim();
+  var pass = document.getElementById('newUserPass').value;
+  var role = document.getElementById('newUserRole').value;
+  if (!name) { toast('Enter username.', 'error'); return; }
+  if (!pass || pass.length < 4) { toast('Password min 4 characters.', 'error'); return; }
+  for (var i = 0; i < appUsers.length; i++) {
+    if (appUsers[i].username.toLowerCase() === name.toLowerCase()) {
+      toast('Username already taken.', 'error');
+      return;
+    }
+  }
+  appUsers.push({
+    id: 'u_' + Date.now(), username: name, password: pass,
+    role: role, createdAt: Date.now()
+  });
+  document.getElementById('newUserName').value = '';
+  document.getElementById('newUserPass').value = '';
+  saveLocal(); // Save to localStorage immediately
+  renderUsers();
+  toast('User "' + name + '" added.', 'success');
+  // Push to cloud IMMEDIATELY (no debounce, no flag checks)
+  dbg('Saving user to cloud. Company: ' + activeCompanyId);
+  pushCloudViaREST();
+}
+
+function deleteUser(id) {
+  if (!isAdmin() || id === currentUserId) return;
+  var u = null;
+  for (var i = 0; i < appUsers.length; i++) {
+    if (appUsers[i].id === id) { u = appUsers[i]; break; }
+  }
+  if (!u) return;
+  delUserTarget = id;
+  document.getElementById('deleteUserMsg').textContent = 'Remove user "' + u.username + '"? This cannot be undone.';
+  openModal('deleteUserModal');
+}
+
+// ====================================================================
+// Buyer management (same pattern as fish types / suppliers)
+// ====================================================================
+
+function renderBuyers() {
+  document.getElementById('buyerCount').textContent = buyers.length;
+  document.getElementById('buyerHint').textContent = buyers.length
+    ? buyers.length + ' buyer(s)'
+    : 'Tap to manage';
+  var el = document.getElementById('buyerList');
+  if (!buyers.length) { el.innerHTML = ''; return; }
+  var html = '';
+  for (var i = 0; i < buyers.length; i++) {
+    var cnt = 0;
+    for (var j = 0; j < records.length; j++) {
+      if (records[j].buyer === buyers[i]) cnt++;
+    }
+    html += '<div class="mgmt-item">'
+      + '<div class="mgmt-item-info">'
+      + '<span class="mgmt-item-name" style="color:var(--info)">' + esc(buyers[i]) + '</span>'
+      + '<span class="mgmt-item-meta">' + cnt + ' record' + (cnt !== 1 ? 's' : '') + '</span>'
+      + '</div>'
+      + '<button class="mgmt-item-del" data-del-buyer="' + escA(buyers[i]) + '">'
+      + '<i class="fa-solid fa-trash"></i></button></div>';
+  }
+  el.innerHTML = html;
+}
+
+function addBuyer() {
+  var name = document.getElementById('newBuyer').value.trim();
+  if (!name) { toast('Enter buyer name.', 'error'); return; }
+  for (var i = 0; i < buyers.length; i++) {
+    if (buyers[i].toLowerCase() === name.toLowerCase()) {
+      toast('Buyer already exists.', 'error'); return;
+    }
+  }
+  buyers.push(name);
+  document.getElementById('newBuyer').value = '';
+  save();
+  renderBuyers();
+  populateFormSelects();
+  toast('Buyer "' + name + '" added.', 'success');
+}
+
+function deleteBuyer(name) {
+  delBuyerTarget = name;
+  document.getElementById('deleteBuyerMsg').textContent = 'Remove buyer "' + name + '"? This cannot be undone.';
+  openModal('deleteBuyerModal');
+}
+
+// Quick Entry: multi-buyer batch entry with rate/amount/weight per buyer
+var qeRowCounter = 0;
+
+function openQuickEntry() {
+  var sup = document.getElementById('supplier').value;
+  if (!sup) { toast('Select a supplier first.', 'error'); return; }
+  var selectedFish = document.getElementById('fishType').value;
+
+  // Populate fish type dropdown in modal — show supplier's fish first
+  var sel = document.getElementById('qeFishSelect');
+  var supplierFish = [];
+  var otherFish = [];
+  for (var i = 0; i < fishTypes.length; i++) {
+    var found = false;
+    for (var j = 0; j < records.length; j++) {
+      if (records[j].supplier === sup && records[j].fish === fishTypes[i]) { found = true; break; }
+    }
+    if (found) supplierFish.push(fishTypes[i]); else otherFish.push(fishTypes[i]);
+  }
+  var html = '<option value="">Select fish type</option>';
+  for (var i = 0; i < supplierFish.length; i++) {
+    html += '<option value="' + escA(supplierFish[i]) + '"' + (supplierFish[i] === selectedFish ? ' selected' : '') + '>' + esc(supplierFish[i]) + '</option>';
+  }
+  if (otherFish.length && supplierFish.length) html += '<option disabled>─────────</option>';
+  for (var i = 0; i < otherFish.length; i++) {
+    html += '<option value="' + escA(otherFish[i]) + '"' + (otherFish[i] === selectedFish ? ' selected' : '') + '>' + esc(otherFish[i]) + '</option>';
+  }
+  sel.innerHTML = html;
+
+  // Reset buyer rows
+  qeRowCounter = 0;
+  document.getElementById('qeBuyerRows').innerHTML = '';
+  document.getElementById('qeNewBuyerRow').style.display = 'none';
+  addQEBuyerRow();
+
+  openModal('quickEntryModal');
+}
+
+// Add a buyer row in the quick entry modal
+function addQEBuyerRow(presetBuyer) {
+  qeRowCounter++;
+  var num = qeRowCounter;
+  var container = document.getElementById('qeBuyerRows');
+  var row = document.createElement('div');
+  row.className = 'qe-row';
+  row.setAttribute('data-qe-row', num);
+
+  // Build buyer options
+  var opts = '<option value="">Buyer</option>';
+  for (var i = 0; i < buyers.length; i++) {
+    opts += '<option value="' + escA(buyers[i]) + '"' + (presetBuyer === buyers[i] ? ' selected' : '') + '>' + esc(buyers[i]) + '</option>';
+  }
+  row.innerHTML = '<span class="qe-row-num">' + num + '</span>'
+    + '<select class="qe-buyer-sel">' + opts + '</select>'
+    + '<input type="text" inputmode="numeric" pattern="[0-9.]*" class="qe-rate" placeholder="Rate">'
+    + '<input type="text" inputmode="numeric" pattern="[0-9.]*" class="qe-amt" placeholder="Amt">'
+    + '<span class="qe-wt">-</span>'
+    + '<button type="button" class="qe-del-row" title="Remove row"><i class="fa-solid fa-xmark"></i></button>';
+  container.appendChild(row);
+
+  // Wire rate/amount inputs to calc weight for this row
+  var rateInput = row.querySelector('.qe-rate');
+  var amtInput = row.querySelector('.qe-amt');
+  var wtSpan = row.querySelector('.qe-wt');
+  function calcRowWeight() {
+    var r = parseFloat(rateInput.value) || 0;
+    var a = parseFloat(amtInput.value) || 0;
+    wtSpan.textContent = r > 0 ? (a / r).toFixed(2) : '-';
+  }
+  rateInput.addEventListener('input', calcRowWeight);
+  amtInput.addEventListener('input', calcRowWeight);
+  // Jump to amount when rate is entered (on Enter or when value looks complete)
+  rateInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      amtInput.focus();
+      amtInput.select();
+    }
+  });
+  amtInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // Add a new row and focus its rate
+      addQEBuyerRow();
+    }
+  });
+
+  // Wire delete button
+  row.querySelector('.qe-del-row').addEventListener('click', function() {
+    row.remove();
+    renumberQERows();
+  });
+
+  // Focus rate if this is the first row, otherwise focus buyer
+  if (num === 1) { rateInput.focus(); }
+  else { row.querySelector('.qe-buyer-sel').focus(); }
+}
+
+// Renumber buyer rows after deletion
+function renumberQERows() {
+  var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].querySelector('.qe-row-num').textContent = (i + 1);
+  }
+}
+
+// Submit all buyer rows as records
+function submitAllQE() {
+  var date = document.getElementById('entryDate').value;
+  var sup = document.getElementById('supplier').value;
+  var fish = document.getElementById('qeFishSelect').value;
+  if (!date) { toast('Select a date first.', 'error'); return; }
+  if (!sup) { toast('Select a supplier first.', 'error'); return; }
+  if (!fish) { toast('Select a fish type.', 'error'); return; }
+
+  var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
+  var added = 0;
+  for (var i = 0; i < rows.length; i++) {
+    var buyer = rows[i].querySelector('.qe-buyer-sel').value;
+    var rate = parseFloat(rows[i].querySelector('.qe-rate').value);
+    var amt = parseFloat(rows[i].querySelector('.qe-amt').value);
+    if (!buyer || isNaN(rate) || isNaN(amt) || rate <= 0 || amt <= 0) continue;
+    var wt = amt / rate;
+    records.push({
+      id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      date: date, fish: fish, supplier: sup, buyer: buyer,
+      rate: rate, amount: amt, weight: wt, createdAt: Date.now()
+    });
+    added++;
+  }
+  if (added === 0) { toast('Fill at least one buyer row with buyer, rate & amount.', 'error'); return; }
+
+  save();
+  closeModal('quickEntryModal');
+  // Sync fish type back to main form
+  document.getElementById('fishType').value = fish;
+  renderTable();
+  renderStats();
+  renderFishTypes();
+  renderSuppliers();
+  toast(added + ' record' + (added > 1 ? 's' : '') + ' added for ' + fish + '.', 'success');
+  // Scroll table to top and highlight
+  var scroll = document.querySelector('.table-scroll');
+  if (scroll) scroll.scrollTop = 0;
+  var firstRow = document.querySelector('#tableBody tr');
+  if (firstRow) {
+    firstRow.style.background = 'rgba(60,198,138,0.15)';
+    setTimeout(function() { firstRow.style.background = ''; }, 1200);
+  }
+}
+
+// ====================================================================
+// Fish type management
+// ====================================================================
+
+function renderFishTypes() {
+  document.getElementById('fishTypeCount').textContent = fishTypes.length;
+  document.getElementById('fishHint').textContent = fishTypes.length
+    ? fishTypes.length + ' types'
+    : 'Add fish types';
+  var el = document.getElementById('fishTypeList');
+  if (!fishTypes.length) { el.innerHTML = ''; return; }
+  var html = '';
+  for (var i = 0; i < fishTypes.length; i++) {
+    var f = fishTypes[i];
+    var cl = fishColor(f);
+    var cnt = 0;
+    for (var j = 0; j < records.length; j++) {
+      if (records[j].fish === f) cnt++;
+    }
+    html += '<div class="mgmt-item">'
+      + '<div class="mgmt-item-info">'
+      + '<span class="mgmt-item-name" style="color:' + cl + '">' + esc(f) + '</span>'
+      + '<span class="mgmt-item-meta">' + cnt + ' record' + (cnt !== 1 ? 's' : '') + '</span>'
+      + '</div>'
+      + '<button class="mgmt-item-del" data-del-fish="' + escA(f) + '">'
+      + '<i class="fa-solid fa-trash"></i></button></div>';
+  }
+  el.innerHTML = html;
+}
+
+function addFishType() {
+  var input = document.getElementById('newFishType');
+  var name = input.value.trim();
+  if (!name) return;
+  for (var i = 0; i < fishTypes.length; i++) {
+    if (fishTypes[i].toLowerCase() === name.toLowerCase()) {
+      toast('Already exists.', 'error');
+      return;
+    }
+  }
+  fishTypes.push(name);
+  input.value = '';
+  save();
+  renderFishTypes();
+  populateFormSelects();
+  populateFilterSelects();
+  toast('"' + name + '" added.', 'success');
+}
+
+function deleteFishType(name) {
+  var used = false;
+  for (var i = 0; i < records.length; i++) {
+    if (records[i].fish === name) { used = true; break; }
+  }
+  delFishTarget = name;
+  document.getElementById('deleteFishMsg').textContent = used
+    ? '"' + name + '" has associated records. Remove anyway?'
+    : 'Remove "' + name + '" from fish types?';
+  openModal('deleteFishModal');
+}
+
+// Bulk upload fish types from a text/CSV file
+function uploadFishTypes(input) {
+  if (!input.files.length) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var lines = e.target.result.split(/[\r\n,]+/)
+      .map(function(s) { return s.trim(); }).filter(Boolean);
+    var added = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var exists = false;
+      for (var j = 0; j < fishTypes.length; j++) {
+        if (fishTypes[j].toLowerCase() === lines[i].toLowerCase()) { exists = true; break; }
+      }
+      if (!exists) { fishTypes.push(lines[i]); added++; }
+    }
+    save();
+    renderFishTypes();
+    populateFormSelects();
+    populateFilterSelects();
+    toast(added + ' fish type(s) added.', 'success');
+  };
+  reader.readAsText(input.files[0]);
+  input.value = '';
+}
+
+// ====================================================================
+// Supplier management
+// ====================================================================
+
+function renderSuppliers() {
+  document.getElementById('supplierCount').textContent = suppliers.length;
+  document.getElementById('supplierHint').textContent = suppliers.length
+    ? suppliers.length + ' supplier(s)'
+    : 'Add suppliers';
+  var el = document.getElementById('supplierList');
+  if (!suppliers.length) { el.innerHTML = ''; return; }
+  var html = '';
+  for (var i = 0; i < suppliers.length; i++) {
+    var s = suppliers[i];
+    var cl = supColor(s);
+    var cnt = 0;
+    for (var j = 0; j < records.length; j++) {
+      if (records[j].supplier === s) cnt++;
+    }
+    html += '<div class="mgmt-item">'
+      + '<div class="mgmt-item-info">'
+      + '<span class="mgmt-item-name" style="color:' + cl + '">' + esc(s) + '</span>'
+      + '<span class="mgmt-item-meta">' + cnt + ' record' + (cnt !== 1 ? 's' : '') + '</span>'
+      + '</div>'
+      + '<button class="mgmt-item-del" data-del-sup="' + escA(s) + '">'
+      + '<i class="fa-solid fa-trash"></i></button></div>';
+  }
+  el.innerHTML = html;
+}
+
+function addSupplier() {
+  var input = document.getElementById('newSupplier');
+  var name = input.value.trim();
+  if (!name) return;
+  for (var i = 0; i < suppliers.length; i++) {
+    if (suppliers[i].toLowerCase() === name.toLowerCase()) {
+      toast('Already exists.', 'error');
+      return;
+    }
+  }
+  suppliers.push(name);
+  input.value = '';
+  save();
+  renderSuppliers();
+  populateFormSelects();
+  populateFilterSelects();
+  toast('"' + name + '" added.', 'success');
+}
+
+function deleteSupplier(name) {
+  var used = false;
+  for (var i = 0; i < records.length; i++) {
+    if (records[i].supplier === name) { used = true; break; }
+  }
+  delSupTarget = name;
+  document.getElementById('deleteSupplierMsg').textContent = used
+    ? '"' + name + '" has associated records. Remove anyway?'
+    : 'Remove "' + name + '" from suppliers?';
+  openModal('deleteSupplierModal');
+}
+
+// Bulk upload suppliers from a text/CSV file
+function uploadSuppliers(input) {
+  if (!input.files.length) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var lines = e.target.result.split(/[\r\n,]+/)
+      .map(function(s) { return s.trim(); }).filter(Boolean);
+    var added = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var exists = false;
+      for (var j = 0; j < suppliers.length; j++) {
+        if (suppliers[j].toLowerCase() === lines[i].toLowerCase()) { exists = true; break; }
+      }
+      if (!exists) { suppliers.push(lines[i]); added++; }
+    }
+    save();
+    renderSuppliers();
+    populateFormSelects();
+    populateFilterSelects();
+    toast(added + ' supplier(s) added.', 'success');
+  };
+  reader.readAsText(input.files[0]);
+  input.value = '';
+}
+
+function uploadBuyers(input) {
+  if (!input.files.length) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var lines = e.target.result.split(/[\r\n,]+/)
+      .map(function(s) { return s.trim(); }).filter(Boolean);
+    var added = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var exists = false;
+      for (var j = 0; j < buyers.length; j++) {
+        if (buyers[j].toLowerCase() === lines[i].toLowerCase()) { exists = true; break; }
+      }
+      if (!exists) { buyers.push(lines[i]); added++; }
+    }
+    save();
+    renderBuyers();
+    populateFormSelects();
+    toast(added + ' buyer(s) added.', 'success');
+  };
+  reader.readAsText(input.files[0]);
+  input.value = '';
+}
+
+// ====================================================================
+// Form select population
+// ====================================================================
+
+function populateFormSelects() {
+  var ss = document.getElementById('supplier');
+  var fs = document.getElementById('fishType');
+  var sv = ss.value, fv = fs.value;
+  ss.innerHTML = '<option value="">Select supplier</option>';
+  fs.innerHTML = '<option value="">Select fish type</option>';
+  for (var i = 0; i < suppliers.length; i++) {
+    ss.innerHTML += '<option value="' + escA(suppliers[i]) + '">' + esc(suppliers[i]) + '</option>';
+  }
+  for (var i = 0; i < fishTypes.length; i++) {
+    fs.innerHTML += '<option value="' + escA(fishTypes[i]) + '">' + esc(fishTypes[i]) + '</option>';
+  }
+  ss.value = sv;
+  fs.value = fv;
+}
+
+function populateFilterSelects() {
+  var ff = document.getElementById('filterFish');
+  var fs = document.getElementById('filterSupplier');
+  var ffv = ff.value, fsv = fs.value;
+  ff.innerHTML = '<option value="">All Fish</option>';
+  fs.innerHTML = '<option value="">All Suppliers</option>';
+  for (var i = 0; i < fishTypes.length; i++) {
+    ff.innerHTML += '<option value="' + escA(fishTypes[i]) + '">' + esc(fishTypes[i]) + '</option>';
+  }
+  for (var i = 0; i < suppliers.length; i++) {
+    fs.innerHTML += '<option value="' + escA(suppliers[i]) + '">' + esc(suppliers[i]) + '</option>';
+  }
+  ff.value = ffv;
+  fs.value = fsv;
+}
+
+// ====================================================================
+// Form handling - entries are now added via Quick Entry popup
+// ====================================================================
+
+function clearForm() {
+  var savedSupplier = document.getElementById('supplier').value;
+  var savedFish = document.getElementById('fishType').value;
+  var savedDate = document.getElementById('entryDate').value;
+  editingId = null;
+  document.getElementById('fishForm').reset();
+  document.getElementById('supplier').value = savedSupplier;
+  document.getElementById('fishType').value = savedFish;
+  if (savedDate) document.getElementById('entryDate').value = savedDate;
+  document.getElementById('editBar').classList.remove('active');
+  document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> New Entry';
+  setTodayDate();
+  populateFormSelects();
+}
+
+function cancelEdit() { clearForm(); }
+
+// Populate the form with existing record data for editing
+function editRecord(id) {
+  var r = null;
+  for (var i = 0; i < records.length; i++) {
+    if (records[i].id === id) { r = records[i]; break; }
+  }
+  if (!r) return;
+  editingId = id;
+  document.getElementById('entryDate').value = r.date;
+  populateFormSelects();
+  document.getElementById('supplier').value = r.supplier;
+  document.getElementById('fishType').value = r.fish;
+  // Open quick entry pre-filled for editing
+  openQuickEntry();
+  // Pre-fill the fish select in modal
+  document.getElementById('qeFishSelect').value = r.fish;
+  // Clear default row and add one pre-filled row
+  document.getElementById('qeBuyerRows').innerHTML = '';
+  qeRowCounter = 0;
+  addQEBuyerRow(r.buyer);
+  var lastRow = document.querySelector('#qeBuyerRows .qe-row:last-child');
+  if (lastRow) {
+    lastRow.querySelector('.qe-rate').value = r.rate;
+    lastRow.querySelector('.qe-amt').value = r.amount;
+    // Trigger weight calc
+    var rateInput = lastRow.querySelector('.qe-rate');
+    var amtInput = lastRow.querySelector('.qe-amt');
+    var r2 = parseFloat(rateInput.value) || 0;
+    var a2 = parseFloat(amtInput.value) || 0;
+    lastRow.querySelector('.qe-wt').textContent = r2 > 0 ? (a2 / r2).toFixed(2) : '-';
+  }
+  document.getElementById('editBar').classList.add('active');
+  document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen"></i> Edit Entry';
+  // Override submit to update instead of create
+  var submitBtn = document.getElementById('qeSubmitAll');
+  submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Update Entry';
+  submitBtn.onclick = function() {
+    var date = document.getElementById('entryDate').value;
+    var sup = document.getElementById('supplier').value;
+    var fish = document.getElementById('qeFishSelect').value;
+    if (!date || !sup || !fish) { toast('Fill date, supplier and fish.', 'error'); return; }
+    var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
+    // Update the first valid row to the editing record
+    for (var i = 0; i < rows.length; i++) {
+      var buyer = rows[i].querySelector('.qe-buyer-sel').value;
+      var rate = parseFloat(rows[i].querySelector('.qe-rate').value);
+      var amt = parseFloat(rows[i].querySelector('.qe-amt').value);
+      if (!buyer || isNaN(rate) || isNaN(amt) || rate <= 0 || amt <= 0) continue;
+      for (var j = 0; j < records.length; j++) {
+        if (records[j].id === editingId) {
+          records[j].date = date;
+          records[j].fish = fish;
+          records[j].supplier = sup;
+          records[j].buyer = buyer;
+          records[j].rate = rate;
+          records[j].amount = amt;
+          records[j].weight = amt / rate;
+          break;
+        }
+      }
+      // Any additional rows become new records
+      if (i > 0) {
+        records.push({
+          id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          date: date, fish: fish, supplier: sup, buyer: buyer,
+          rate: rate, amount: amt, weight: amt / rate, createdAt: Date.now()
+        });
+      }
+    }
+    editingId = null;
+    save();
+    closeModal('quickEntryModal');
+    document.getElementById('fishType').value = fish;
+    document.getElementById('editBar').classList.remove('active');
+    document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> New Entry';
+    submitBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> Submit All';
+    submitBtn.onclick = submitAllQE; // restore default
+    renderTable();
+    renderStats();
+    renderFishTypes();
+    renderSuppliers();
+    toast('Record updated.', 'success');
+  };
+}
+
+function deleteRecord(id) {
+  delTarget = id;
+  openModal('deleteModal');
+}
+
+// ====================================================================
+// Table rendering and filtering
+// ====================================================================
+
+// Get records filtered by date, fish type, supplier, and search text
+function getFilteredRecords() {
+  var search = (document.getElementById('searchInput').value || '').toLowerCase();
+  var fFish = document.getElementById('filterFish').value;
+  var fSup = document.getElementById('filterSupplier').value;
+  var result = [];
+  for (var i = 0; i < records.length; i++) {
+    var r = records[i];
+    if (filterDate && r.date !== filterDate) continue;
+    if (fFish && r.fish !== fFish) continue;
+    if (fSup && r.supplier !== fSup) continue;
+    if (search) {
+      var txt = (r.fish + ' ' + r.supplier + ' ' + r.date + ' ' + r.amount + ' ' + r.rate).toLowerCase();
+      if (txt.indexOf(search) === -1) continue;
+    }
+    result.push(r);
+  }
+  // Sort by date descending, then by creation time
+  result.sort(function(a, b) {
+    if (a.date !== b.date) return b.date.localeCompare(a.date);
+    return (b.createdAt || 0) - (a.createdAt || 0);
+  });
+  return result;
+}
+
+// Render the records table with filtered data
+function renderTable() {
+  var filtered = getFilteredRecords();
+  var tbody = document.getElementById('tableBody');
+  var empty = document.getElementById('emptyState');
+  var footer = document.getElementById('tableFooter');
+  document.getElementById('recordCount').textContent = filtered.length;
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    footer.style.display = 'none';
+    document.getElementById('emptyMsg').textContent = records.length
+      ? 'No records match your filters.'
+      : 'Add entries or import CSV.';
+    return;
+  }
+
+  empty.style.display = 'none';
+  footer.style.display = '';
+  var totalAmt = 0;
+  var html = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var r = filtered[i];
+    totalAmt += r.amount;
+    var fc = fishColor(r.fish);
+    var sc = supColor(r.supplier);
+    html += '<tr class="row-enter">'
+      + '<td>' + (i + 1) + '</td>'
+      + '<td class="date-cell">' + fmtDate(r.date) + '</td>'
+      + '<td><span class="fish-badge" style="background:' + fc + '15;color:' + fc + '">' + esc(r.fish) + '</span></td>'
+      + '<td><span class="supplier-badge" style="background:' + sc + '15;color:' + sc + '">' + esc(r.supplier) + '</span></td>'
+      + '<td style="font-size:12px;color:var(--info)">' + esc(r.buyer || '-') + '</td>'
+      + '<td class="price-cell">' + fmtN(r.rate) + '</td>'
+      + '<td class="price-cell">' + fmtN(r.amount) + '</td>'
+      + '<td class="weight-cell">' + fmtN(r.weight) + '</td>'
+      + '<td><div class="row-actions">'
+      + '<button class="row-btn" data-edit-rec="' + r.id + '"><i class="fa-solid fa-pen"></i></button>'
+      + '<button class="row-btn delete" data-del-rec="' + r.id + '"><i class="fa-solid fa-trash"></i></button>'
+      + '</div></td></tr>';
+  }
+  tbody.innerHTML = html;
+  document.getElementById('filteredTotal').textContent = fmtN(totalAmt);
+  document.getElementById('showAllBtn').style.display = filterDate ? 'flex' : 'none';
+}
+
+// Render the summary statistics cards
+function renderStats() {
+  var filtered = getFilteredRecords();
+  var wt = 0, amt = 0;
+  for (var i = 0; i < filtered.length; i++) {
+    wt += filtered[i].weight;
+    amt += filtered[i].amount;
+  }
+  var avg = wt > 0 ? amt / wt : 0;
+  document.getElementById('statEntries').textContent = filtered.length;
+  document.getElementById('statWeight').innerHTML = wt.toFixed(1) + ' <span class="stat-unit">Kg</span>';
+  document.getElementById('statValue').textContent = fmtN(amt);
+  document.getElementById('statAvg').textContent = fmtN(avg);
+}
+
+// ====================================================================
+// Search, filter, and date handlers
+// ====================================================================
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  renderTable(); renderStats();
+});
+document.getElementById('filterFish').addEventListener('change', function() {
+  renderTable(); renderStats();
+});
+document.getElementById('filterSupplier').addEventListener('change', function() {
+  renderTable(); renderStats();
+});
+// Date filter: use both 'input' and 'change' for maximum compatibility
+// ('input' fires on every pick on mobile; 'change' fires on desktop)
+function applyDateFilter() {
+  filterDate = document.getElementById('entryDate').value || null;
+  document.getElementById('dateBadge').textContent = filterDate
+    ? fmtDate(filterDate)
+    : 'All Dates';
+  document.getElementById('showAllBtn').style.display = filterDate ? 'flex' : 'none';
+  renderTable();
+  renderStats();
+}
+document.getElementById('entryDate').addEventListener('input', applyDateFilter);
+document.getElementById('entryDate').addEventListener('change', applyDateFilter);
+
+// ====================================================================
+// CSV Import / Export
+// ====================================================================
+
+document.getElementById('recordImportFile').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var lines = ev.target.result.split('\n')
+      .map(function(l) { return l.trim(); }).filter(Boolean);
+    if (lines.length < 2) {
+      toast('File empty or invalid.', 'error');
+      return;
+    }
+    // Detect header row
+    var first = lines[0].toLowerCase();
+    var start = (first.indexOf('date') >= 0 || first.indexOf('fish') >= 0 || first.indexOf('supplier') >= 0)
+      ? 1 : 0;
+    var imported = 0, newFish = [], newSup = [];
+    for (var i = start; i < lines.length; i++) {
+      var cols = lines[i].split(',').map(function(c) { return c.trim(); });
+      if (cols.length < 5) continue;
+      var date = cols[0], fish = cols[1], sup = cols[2];
+      var rate = parseFloat(cols[3]), amt = parseFloat(cols[4]);
+      var wt = cols.length > 5
+        ? (parseFloat(cols[5]) || 0)
+        : (rate > 0 ? amt / rate : 0);
+      if (!date || !fish || !sup || isNaN(rate) || isNaN(amt) || rate <= 0 || amt <= 0) continue;
+      // Auto-add new fish types and suppliers
+      if (fishTypes.indexOf(fish) === -1) { fishTypes.push(fish); newFish.push(fish); }
+      if (suppliers.indexOf(sup) === -1) { suppliers.push(sup); newSup.push(sup); }
+      records.push({
+        id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5) + '_' + i,
+        date: date, fish: fish, supplier: sup,
+        rate: rate, amount: amt, weight: wt, createdAt: Date.now() + i
+      });
+      imported++;
+    }
+    if (imported > 0) {
+      save();
+      refreshUI();
+      var msg = 'Imported ' + imported + ' record(s).';
+      if (newFish.length) msg += '<br>New fish types: ' + newFish.join(', ') + '.';
+      if (newSup.length) msg += '<br>New suppliers: ' + newSup.join(', ') + '.';
+      document.getElementById('importResultMsg').innerHTML = msg;
+      openModal('importModal');
+    } else {
+      toast('No valid records found in file.', 'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+function exportCSV() {
+  var filtered = getFilteredRecords();
+  if (!filtered.length) { toast('No records to export.', 'error'); return; }
+  var csv = 'Date,Supplier,Fish,Buyer,Rate,Amount,Weight\n';
+  for (var i = 0; i < filtered.length; i++) {
+    var r = filtered[i];
+    csv += r.date + ',"' + (r.supplier || '').replace(/"/g, '""') + '","'
+      + (r.fish || '').replace(/"/g, '""') + '","'
+      + (r.buyer || '').replace(/"/g, '""') + '",'
+      + r.rate.toFixed(2) + ',' + r.amount.toFixed(2) + ',' + r.weight.toFixed(2) + '\n';
+  }
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'fish_factor_' + (activeCompany
+    ? activeCompany.name.replace(/\s+/g, '_')
+    : 'export') + '_' + new Date().toISOString().split('T')[0] + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Exported ' + filtered.length + ' records.', 'success');
+}
+
+function openClearModal() {
+  if (!isAdmin()) { toast('Admin only.', 'error'); return; }
+  if (!records.length) { toast('No records to clear.', 'info'); return; }
+  openModal('clearModal');
+}
+
+// ====================================================================
+// Event delegation for dynamically rendered lists
+// ====================================================================
+
+// Company list clicks (select company or open rename modal)
+document.getElementById('compList').addEventListener('click', function(e) {
+  var editBtn = e.target.closest('[data-edit-comp]');
+  if (editBtn) {
+    e.stopPropagation();
+    openEditComp(editBtn.getAttribute('data-edit-comp'));
+    return;
+  }
+  var card = e.target.closest('.comp-card');
+  if (card) selectCompany(card.getAttribute('data-comp-id'));
+});
+
+// User, fish type, supplier, and record list click handlers
+document.getElementById('usersList').addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-del-user]');
+  if (btn) deleteUser(btn.getAttribute('data-del-user'));
+});
+document.getElementById('fishTypeList').addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-del-fish]');
+  if (btn) deleteFishType(btn.getAttribute('data-del-fish'));
+});
+document.getElementById('supplierList').addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-del-sup]');
+  if (btn) deleteSupplier(btn.getAttribute('data-del-sup'));
+});
+document.getElementById('buyerList').addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-del-buyer]');
+  if (btn) deleteBuyer(btn.getAttribute('data-del-buyer'));
+});
+document.getElementById('qeBuyerRows').addEventListener('click', function(e) {
+  var delBtn = e.target.closest('.qe-del-row');
+  if (delBtn) {
+    var row = delBtn.closest('.qe-row');
+    if (row) { row.remove(); renumberQERows(); }
+  }
+});
+document.getElementById('tableBody').addEventListener('click', function(e) {
+  var editBtn = e.target.closest('[data-edit-rec]');
+  if (editBtn) { editRecord(editBtn.getAttribute('data-edit-rec')); return; }
+  var delBtn = e.target.closest('[data-del-rec]');
+  if (delBtn) deleteRecord(delBtn.getAttribute('data-del-rec'));
+});
+
+// ====================================================================
+// Modal confirmation handlers
+// ====================================================================
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+  if (!delTarget) return;
+  for (var i = 0; i < records.length; i++) {
+    if (records[i].id === delTarget) { records.splice(i, 1); break; }
+  }
+  if (editingId === delTarget) clearForm();
+  delTarget = null;
+  closeModal('deleteModal');
+  save();
+  renderTable();
+  renderStats();
+  renderFishTypes();
+  renderSuppliers();
+  toast('Record deleted.', 'success');
+});
+
+document.getElementById('confirmClearBtn').addEventListener('click', function() {
+  records = [];
+  closeModal('clearModal');
+  clearForm();
+  save();
+  renderTable();
+  renderStats();
+  renderFishTypes();
+  renderSuppliers();
+  toast('All records cleared.', 'success');
+});
+
+document.getElementById('confirmDeleteFishBtn').addEventListener('click', function() {
+  if (!delFishTarget) return;
+  var idx = fishTypes.indexOf(delFishTarget);
+  if (idx >= 0) fishTypes.splice(idx, 1);
+  delFishTarget = null;
+  closeModal('deleteFishModal');
+  save();
+  renderFishTypes();
+  populateFormSelects();
+  populateFilterSelects();
+  toast('Fish type removed.', 'success');
+});
+
+document.getElementById('confirmDeleteSupplierBtn').addEventListener('click', function() {
+  if (!delSupTarget) return;
+  var idx = suppliers.indexOf(delSupTarget);
+  if (idx >= 0) suppliers.splice(idx, 1);
+  delSupTarget = null;
+  closeModal('deleteSupplierModal');
+  save();
+  renderSuppliers();
+  populateFormSelects();
+  populateFilterSelects();
+  toast('Supplier removed.', 'success');
+});
+
+document.getElementById('confirmDeleteBuyerBtn').addEventListener('click', function() {
+  if (!delBuyerTarget) return;
+  var idx = buyers.indexOf(delBuyerTarget);
+  if (idx >= 0) buyers.splice(idx, 1);
+  delBuyerTarget = null;
+  closeModal('deleteBuyerModal');
+  save();
+  renderBuyers();
+  populateFormSelects();
+  toast('Buyer removed.', 'success');
+});
+
+document.getElementById('confirmDeleteUserBtn').addEventListener('click', function() {
+  if (!delUserTarget) return;
+  for (var i = 0; i < appUsers.length; i++) {
+    if (appUsers[i].id === delUserTarget) { appUsers.splice(i, 1); break; }
+  }
+  delUserTarget = null;
+  closeModal('deleteUserModal');
+  saveLocal();
+  renderUsers();
+  toast('User deleted.', 'success');
+  // Push to cloud immediately
+  dbg('Saving user deletion to cloud. Company: ' + activeCompanyId);
+  pushCloudViaREST();
+});
+
+document.getElementById('cpSaveBtn').addEventListener('click', function() {
+  var cur = document.getElementById('cpCurrent').value;
+  var newP = document.getElementById('cpNew').value;
+  var conf = document.getElementById('cpConfirm').value;
+  var u = curUser();
+  if (!u) return;
+  if (cur !== u.password) { toast('Wrong current password.', 'error'); return; }
+  if (newP.length < 4) { toast('Min 4 characters.', 'error'); return; }
+  if (newP !== conf) { toast('Passwords do not match.', 'error'); return; }
+  u.password = newP;
+  save();
+  closeModal('changePassModal');
+  document.getElementById('cpCurrent').value = '';
+  document.getElementById('cpNew').value = '';
+  document.getElementById('cpConfirm').value = '';
+  toast('Password changed.', 'success');
+});
+
+document.getElementById('saveCompNameBtn').addEventListener('click', function() {
+  var name = document.getElementById('editCompName').value.trim();
+  if (!name || name.length < 2) { toast('Min 2 characters.', 'error'); return; }
+  for (var i = 0; i < companies.length; i++) {
+    if (companies[i].id !== editCompTarget && companies[i].name.toLowerCase() === name.toLowerCase()) {
+      toast('Name already exists.', 'error');
+      return;
+    }
+  }
+  var c = null;
+  for (var i = 0; i < companies.length; i++) {
+    if (companies[i].id === editCompTarget) { c = companies[i]; break; }
+  }
+  if (c) {
+    c.name = name;
+    saveCompanies(); // Safe: this is a rename, not an overwrite
+    if (activeCompanyId === editCompTarget) {
+      activeCompany = c;
+      var hcn = document.getElementById('headerCompName');
+      if (hcn) hcn.textContent = name;
+    }
+    renderCompList();
+    toast('Renamed to "' + name + '".', 'success');
+  }
+  closeModal('editCompModal');
+  editCompTarget = null;
+});
+
+document.getElementById('setupLocalBtn').addEventListener('click', skipCloudSetup);
+document.getElementById('setupConnectBtn').addEventListener('click', connectCloud);
+
+// ====================================================================
+// Static button bindings
+// ====================================================================
+
+document.getElementById('createCompBtn').addEventListener('click', showCreateComp);
+document.getElementById('doCreateCompBtn').addEventListener('click', createCompany);
+document.getElementById('backToCompListLink').addEventListener('click', showCompList);
+document.getElementById('loginBtn').addEventListener('click', handleLogin);
+document.getElementById('switchCompLink').addEventListener('click', backToCompanies);
+document.getElementById('cloudBtn').addEventListener('click', openSetupModal);
+document.getElementById('importBtn').addEventListener('click', function() {
+  document.getElementById('recordImportFile').click();
+});
+document.getElementById('exportBtn').addEventListener('click', exportCSV);
+document.getElementById('clearAllBtn').addEventListener('click', openClearModal);
+document.getElementById('lockBtn').addEventListener('click', logout);
+document.getElementById('userTagBtn').addEventListener('click', function() {
+  document.getElementById('cpCurrent').value = '';
+  document.getElementById('cpNew').value = '';
+  document.getElementById('cpConfirm').value = '';
+  openModal('changePassModal');
+});
+document.getElementById('usersToggle').addEventListener('click', function() {
+  toggleMgmt('usersCard', 'usersToggle');
+});
+document.getElementById('fishToggle').addEventListener('click', function() {
+  toggleMgmt('fishCard', 'fishToggle');
+});
+document.getElementById('supplierToggle').addEventListener('click', function() {
+  toggleMgmt('supplierCard', 'supplierToggle');
+});
+document.getElementById('buyerToggle').addEventListener('click', function() {
+  toggleMgmt('buyerCard', 'buyerToggle');
+});
+document.getElementById('addUserBtn').addEventListener('click', addUser);
+document.getElementById('addFishBtn').addEventListener('click', addFishType);
+document.getElementById('addSupBtn').addEventListener('click', addSupplier);
+document.getElementById('addBuyerBtn').addEventListener('click', addBuyer);
+document.getElementById('buyerUpload').addEventListener('change', function() {
+  uploadBuyers(this);
+});
+document.getElementById('quickEntryBtn').addEventListener('click', openQuickEntry);
+document.getElementById('qeAddRowBtn').addEventListener('click', function() { addQEBuyerRow(); });
+document.getElementById('qeSubmitAll').addEventListener('click', submitAllQE);
+document.getElementById('qeNewBuyerToggle').addEventListener('click', function() {
+  var row = document.getElementById('qeNewBuyerRow');
+  row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+  if (row.style.display === 'flex') document.getElementById('qeNewBuyerInput').focus();
+});
+document.getElementById('qeNewBuyerSave').addEventListener('click', function() {
+  var input = document.getElementById('qeNewBuyerInput');
+  var name = input.value.trim();
+  if (!name) return;
+  for (var i = 0; i < buyers.length; i++) {
+    if (buyers[i].toLowerCase() === name.toLowerCase()) { toast('Buyer already exists.', 'error'); return; }
+  }
+  buyers.push(name);
+  input.value = '';
+  document.getElementById('qeNewBuyerRow').style.display = 'none';
+  save();
+  renderBuyers();
+  // Refresh buyer selects in all existing rows
+  var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
+  for (var i = 0; i < rows.length; i++) {
+    var sel = rows[i].querySelector('.qe-buyer-sel');
+    var cur = sel.value;
+    var opts = '<option value="">Buyer</option>';
+    for (var j = 0; j < buyers.length; j++) {
+      opts += '<option value="' + escA(buyers[j]) + '"' + (buyers[j] === cur ? ' selected' : '') + '>' + esc(buyers[j]) + '</option>';
+    }
+    sel.innerHTML = opts;
+  }
+  toast('Buyer "' + name + '" added.', 'success');
+});
+document.getElementById('qeNewBuyerInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('qeNewBuyerSave').click(); }
+});
+document.getElementById('qeBuyerCsvInput').addEventListener('change', function(input) {
+  var file = input.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var lines = e.target.result.split(/\r?\n/);
+    var added = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var name = lines[i].trim().replace(/^["']|["']$/g, '');
+      if (!name) continue;
+      var dup = false;
+      for (var j = 0; j < buyers.length; j++) {
+        if (buyers[j].toLowerCase() === name.toLowerCase()) { dup = true; break; }
+      }
+      if (!dup) { buyers.push(name); added++; }
+    }
+    if (added > 0) {
+      save();
+      renderBuyers();
+      // Refresh buyer selects in all existing rows
+      var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
+      for (var i = 0; i < rows.length; i++) {
+        var sel = rows[i].querySelector('.qe-buyer-sel');
+        var cur = sel.value;
+        var opts = '<option value="">Buyer</option>';
+        for (var j = 0; j < buyers.length; j++) {
+          opts += '<option value="' + escA(buyers[j]) + '"' + (buyers[j] === cur ? ' selected' : '') + '>' + esc(buyers[j]) + '</option>';
+        }
+        sel.innerHTML = opts;
+      }
+      toast(added + ' buyer(s) imported.', 'success');
+    } else {
+      toast('No new buyers found in file.', 'error');
+    }
+  };
+  reader.readAsText(file);
+  input.target.value = '';
+});
+document.getElementById('fishUpload').addEventListener('change', function() {
+  uploadFishTypes(this);
+});
+document.getElementById('supplierUpload').addEventListener('change', function() {
+  uploadSuppliers(this);
+});
+document.getElementById('cancelEditBtn').addEventListener('click', function() {
+  editingId = null;
+  document.getElementById('editBar').classList.remove('active');
+  document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> New Entry';
+  // Restore submit button in case edit was in progress
+  var sub = document.getElementById('qeSubmitAll');
+  sub.innerHTML = '<i class="fa-solid fa-check-double"></i> Submit All';
+  sub.onclick = submitAllQE;
+});
+document.getElementById('showAllBtn').addEventListener('click', showAllDates);
+document.getElementById('installBtn').addEventListener('click', function() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function() {
+    deferredPrompt = null;
+    document.getElementById('installBanner').classList.remove('show');
+  });
+});
+document.getElementById('installDismiss').addEventListener('click', function() {
+  document.getElementById('installBanner').classList.remove('show');
+});
+
+// ====================================================================
+// Keyboard shortcuts
+// ====================================================================
+
+document.getElementById('newCompName').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') createCompany();
+});
+document.getElementById('editCompName').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('saveCompNameBtn').click(); }
+});
+document.getElementById('loginUser').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('loginPass').focus();
+});
+document.getElementById('loginPass').addEventListener('keydown', function(e) {
+  if (loginMode === 'setup') {
+    document.getElementById('loginPassConfirm').focus();
+  } else {
+    handleLogin();
+  }
+});
+document.getElementById('loginPassConfirm').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') handleLogin();
+});
+document.getElementById('newFishType').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') addFishType();
+});
+document.getElementById('newSupplier').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') addSupplier();
+});
+document.getElementById('newUserName').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('newUserPass').focus();
+});
+document.getElementById('newUserPass').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') addUser();
+});
+
+// ====================================================================
+// PWA Manifest and Service Worker
+// ====================================================================
+
+(function() {
+  var m = {
+    name: 'Fish Factor',
+    short_name: 'FishFactor',
+    start_url: '.',
+    display: 'standalone',
+    background_color: '#0f1a1e',
+    theme_color: '#e8a832',
+    icons: [{
+      src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23e8a832'/%3E%3Ctext x='96' y='130' font-size='120' text-anchor='middle'%3E%F0%9F%90%9F%3C/text%3E%3C/svg%3E",
+      sizes: '192x192',
+      type: 'image/svg+xml',
+      purpose: 'any maskable'
+    }]
+  };
+  var link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = URL.createObjectURL(new Blob([JSON.stringify(m)], { type: 'application/json' }));
+  document.head.appendChild(link);
+})();
+
+// Minimal service worker for offline fallback
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register(
+    URL.createObjectURL(new Blob([
+      "self.addEventListener('install',function(e){self.skipWaiting()});",
+      "self.addEventListener('activate',function(e){e.waitUntil(clients.claim())});",
+      "self.addEventListener('fetch',function(e){e.respondWith(fetch(e.request).catch(function(){return new Response('Offline',{status:503})}))});"
+    ].join('\n'), { type: 'application/javascript' }))
+  ).catch(function() {});
+}
+
+// PWA install prompt handler
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+
+// ====================================================================
+// APP INITIALIZATION
+// ====================================================================
+
+// Fetch companies directly via REST API — no Firebase SDK needed.
+// This is the PRIMARY way to load companies on startup because:
+//   - It works instantly (no 400KB SDK to download first)
+//   - It's a single GET request (~500ms vs 2-3s for SDK load)
+//   - We already know the databaseURL from the hardcoded config
+// The Firebase SDK still loads in the background for real-time sync,
+// but this REST call ensures the company list appears immediately.
+// Fetch companies via REST API — this is the PRIMARY loader.
+// It works without the Firebase SDK and is much more reliable.
+function fetchCompaniesViaREST() {
+  var config = getCloudConfig();
+  if (!config || !config.databaseURL) {
+    dbg('ERROR: No databaseURL in config');
+    setCloudStatus('No database URL configured', 'var(--danger)');
+    showRetryButton();
+    return;
+  }
+
+  // Check if fetch API is available
+  if (typeof fetch === 'undefined') {
+    dbg('ERROR: fetch() not supported in this browser!');
+    setCloudStatus('Browser does not support fetch API', 'var(--danger)');
+    showRetryButton();
+    companyListenerFired = true;
+    attemptingCloudConnect = false;
+    document.getElementById('compLoading').classList.remove('show');
+    document.getElementById('createCompBtn').style.display = '';
+    return;
+  }
+
+  var url = config.databaseURL + '/ff/companies.json';
+  setCloudStatus('Fetching from cloud...', 'var(--info)');
+  dbg('REST GET ' + url);
+
+  // Abort if it takes too long (network issues)
+  if (typeof AbortController !== 'undefined') {
+    restAbortController = new AbortController();
+  }
+  var fetchOptions = {};
+  if (restAbortController) fetchOptions.signal = restAbortController.signal;
+
+  // Set a 5-second timeout for the REST call
+  var restTimeout = setTimeout(function() {
+    if (restAbortController) {
+      try { restAbortController.abort(); } catch(e) {}
+    }
+    if (!companyListenerFired) {
+      dbg('REST fetch timed out after 5s');
+      setCloudStatus('Cloud sync timed out', 'var(--danger)');
+      showRetryButton();
+      companyListenerFired = true;
+      attemptingCloudConnect = false;
+      document.getElementById('compLoading').classList.remove('show');
+      document.getElementById('createCompBtn').style.display = '';
+    }
+  }, 5000);
+
+  fetch(url, fetchOptions)
+    .then(function(response) {
+      clearTimeout(restTimeout);
+      dbg('REST response status: ' + response.status);
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.json();
+    })
+    .then(function(data) {
+      clearTimeout(restTimeout);
+      dbg('REST data: ' + JSON.stringify(data).substring(0, 200));
+
+      // Mark REST as working — enable REST-based writes
+      useCloudREST = true;
+
+      if (!data || typeof data !== 'object') {
+        dbg('Cloud is empty (no companies)');
+        setCloudStatus('Connected — no companies yet', 'var(--success)');
+        if (!companyListenerFired) {
+          companyListenerFired = true;
+          attemptingCloudConnect = false;
+          document.getElementById('compLoading').classList.remove('show');
+          document.getElementById('createCompBtn').style.display = '';
+        }
+        return;
+      }
+
+      // Convert the cloud format {comp_xxx: {name, createdAt}} into our array format
+      var cloudComps = [];
+      var keys = Object.keys(data);
+      for (var i = 0; i < keys.length; i++) {
+        cloudComps.push({
+          id: keys[i],
+          name: data[keys[i]].name,
+          createdAt: data[keys[i]].createdAt || Date.now()
+        });
+      }
+      dbg('Parsed ' + cloudComps.length + ' companies from cloud');
+
+      // Merge with local companies
+      var merged = [];
+      var seenIds = {};
+      for (var i = 0; i < cloudComps.length; i++) {
+        merged.push(cloudComps[i]);
+        seenIds[cloudComps[i].id] = true;
+      }
+      var hasLocalOnly = false;
+      for (var i = 0; i < companies.length; i++) {
+        if (!seenIds[companies[i].id]) {
+          merged.push(companies[i]);
+          hasLocalOnly = true;
+        }
+      }
+
+      // Update and save locally
+      if (JSON.stringify(merged) !== JSON.stringify(companies)) {
+        companies = merged;
+        saveCompaniesLocal();
+        if (hasLocalOnly) saveCompaniesCloud();
+      }
+
+      // Mark sync as complete
+      companyListenerFired = true;
+      attemptingCloudConnect = false;
+      document.getElementById('compLoading').classList.remove('show');
+      document.getElementById('createCompBtn').style.display = '';
+      updateSyncDot();
+
+      setCloudStatus('Cloud OK — ' + companies.length + ' company(s) loaded', 'var(--success)');
+      dbg('Companies array now has ' + companies.length + ' items');
+
+      // Re-render if still on company screen
+      if (!document.getElementById('companyScreen').classList.contains('hidden')) {
+        renderCompList();
+      }
+
+      // Try auto-select the remembered company
+      tryAutoSelectAfterSync();
+    })
+    .catch(function(err) {
+      clearTimeout(restTimeout);
+      if (err.name === 'AbortError') return;
+      dbg('REST ERROR: ' + err.message);
+      setCloudStatus('Cloud fetch failed: ' + err.message, 'var(--danger)');
+      showRetryButton();
+    });
+}
+
+// Manual retry — resets state and tries REST again
+function retryCloudSync() {
+  var btn = document.getElementById('retryCloudBtn');
+  if (btn) btn.style.display = 'none';
+  companyListenerFired = false;
+  attemptingCloudConnect = true;
+  useCloudREST = false;
+  document.getElementById('compLoading').classList.add('show');
+  document.getElementById('createCompBtn').style.display = 'none';
+  setCloudStatus('Retrying cloud sync...', 'var(--info)');
+  dbg('Manual retry triggered');
+  fetchCompaniesViaREST();
+  if (db && !companyListenerOn) {
+    setupCompanyListener();
+  }
+}
+
+function initApp() {
+  try {
+    // Hide the main app UI until login
+    document.getElementById('appHeader').style.display = 'none';
+    document.getElementById('appMain').style.display = 'none';
+
+    // Load companies from localStorage (may already have companies from
+    // the direct fetch IIFE that runs at the top of this script)
+    loadCompanies();
+
+    // If the direct fetch already loaded companies, mark REST as working
+    if (localStorage.getItem('ff_rest_ok') === '1') {
+      useCloudREST = true;
+      companyListenerFired = true;
+      attemptingCloudConnect = false;
+    }
+
+    dbg('initApp. Companies: ' + companies.length + ', REST=' + useCloudREST);
+
+    // Wire up the retry button
+    var retryBtn = document.getElementById('retryCloudBtn');
+    if (retryBtn) retryBtn.onclick = retryCloudSync;
+
+    // Only show spinner if companies haven't been loaded yet
+    if (!companyListenerFired) {
+      attemptingCloudConnect = true;
+      fetchCompaniesViaREST();
+    }
+
+    // Start loading Firebase SDK for real-time sync (optional enhancement)
+    connectToFirebase();
+
+    // Show the company list
+    showCompList();
+  } catch(e) {
+    dbg('initApp ERROR: ' + e.message + ' at line ' + (e.lineNumber || '?'));
+    setCloudStatus('App error: ' + e.message, 'var(--danger)');
+    showRetryButton();
+    document.getElementById('compLoading').classList.remove('show');
+    document.getElementById('createCompBtn').style.display = '';
+  }
+}
+
+// Version stamp — helps verify the user is running the latest file
+var _FF_VERSION = 'v8-buyers-quick-entry';
+dbg('Script loaded. Version: ' + _FF_VERSION);
+
+// Run initApp with extra safety
+try {
+  initApp();
+  dbg('initApp() completed');
+} catch(e) {
+  dbg('FATAL initApp error: ' + e.message + ' stack: ' + (e.stack || 'n/a'));
+  // Show error directly on screen
+  var cs = document.getElementById('companySub');
+  if (cs) cs.textContent = 'Error: ' + e.message;
+  var cl = document.getElementById('compLoading');
+  if (cl) cl.classList.remove('show');
+  var cb = document.getElementById('createCompBtn');
+  if (cb) cb.style.display = '';
+}
+</script>
+</body>
+</html>
