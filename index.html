@@ -2047,16 +2047,20 @@ function submitAllQE() {
 
   var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
   var added = 0, skipped = 0;
+  // Track batch-internal duplicates
+  var batchKeys = {};
   for (var i = 0; i < rows.length; i++) {
     var buyer = rows[i].querySelector('.qe-buyer-sel').value;
     var rate = parseFloat(rows[i].querySelector('.qe-rate').value);
     var amt = parseFloat(rows[i].querySelector('.qe-amt').value);
     if (!buyer || isNaN(rate) || isNaN(amt) || rate <= 0 || amt <= 0) continue;
     var wt = amt / rate;
-    if (isDuplicate(date, sup, fish, buyer, rate, amt, wt)) {
-      skipped++;
-      continue;
-    }
+    // Check duplicate within same batch
+    var batchKey = buyer + '|' + rate + '|' + amt;
+    if (batchKeys[batchKey]) { skipped++; continue; }
+    // Check duplicate against existing records
+    if (isDuplicate(date, sup, fish, buyer, rate, amt, wt)) { skipped++; continue; }
+    batchKeys[batchKey] = true;
     records.push({
       id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
       date: date, fish: fish, supplier: sup, buyer: buyer,
