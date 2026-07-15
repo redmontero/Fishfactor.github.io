@@ -2300,13 +2300,15 @@ function uploadBuyers(input) {
 // Form select population
 // ====================================================================
 
-// Shared helper: split fishTypes into supplier's fish vs other fish
+// Shared helper: split fishTypes into supplier's fish vs other fish (for selected date only)
 function getFishGroupsForSupplier(sup) {
+  var selectedDate = document.getElementById('entryDate').value;
   var supplierFish = [], otherFish = [];
   for (var i = 0; i < fishTypes.length; i++) {
     var found = false;
     for (var j = 0; j < records.length; j++) {
-      if (records[j].supplier === sup && records[j].fish === fishTypes[i]) { found = true; break; }
+      if (records[j].supplier === sup && records[j].fish === fishTypes[i]
+        && (!selectedDate || records[j].date === selectedDate)) { found = true; break; }
     }
     if (found) supplierFish.push(fishTypes[i]); else otherFish.push(fishTypes[i]);
   }
@@ -2601,8 +2603,17 @@ function applyDateFilter() {
   renderTable();
   renderStats();
 }
-document.getElementById('entryDate').addEventListener('input', applyDateFilter);
-document.getElementById('entryDate').addEventListener('change', applyDateFilter);
+document.getElementById('entryDate').addEventListener('input', function() {
+  applyDateFilter();
+  // Re-group fish types for selected date
+  var sup = document.getElementById('supplier').value;
+  if (sup) populateFishSelect(sup, document.getElementById('fishType').value);
+});
+document.getElementById('entryDate').addEventListener('change', function() {
+  applyDateFilter();
+  var sup = document.getElementById('supplier').value;
+  if (sup) populateFishSelect(sup, document.getElementById('fishType').value);
+});
 
 // ====================================================================
 // Summary PDF Generation
