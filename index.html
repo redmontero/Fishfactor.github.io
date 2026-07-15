@@ -11,6 +11,7 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23e8a832'/><text x='50' y='72' font-size='55' text-anchor='middle'>&#x1F41F;</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{--bg:#0f1a1e;--bg2:#162228;--card:#1c2e35;--card-hover:#223a43;--border:#2a4650;--fg:#e8f0f2;--fg-muted:#8ba8b4;--accent:#e8a832;--accent-glow:rgba(232,168,50,0.12);--danger:#e05252;--danger-bg:rgba(224,82,82,0.1);--success:#3cc68a;--info:#5ab8e8;--info-bg:rgba(90,184,232,0.1);--radius:14px;--radius-sm:8px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -95,16 +96,42 @@ main{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px;pad
 /* Quick Select button */
 #quickEntryBtn:hover{background:var(--accent);color:#0f1a1e}
 #quickEntryBtn:active{transform:scale(.96)}
-/* Quick Entry modal buyer rows */
-.qe-row{display:flex;gap:5px;align-items:center;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:6px;background:var(--bg2);flex-wrap:nowrap}
+/* Quick Entry modal - table-like layout */
+.qe-header-row{display:flex;gap:5px;align-items:center;padding:6px 8px;border-bottom:1.5px solid var(--border);margin-bottom:6px;font-size:10px;font-weight:700;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.5px}
+.qe-header-row span:nth-child(1){width:22px;flex-shrink:0;text-align:center}
+.qe-header-row span:nth-child(2){flex:1;min-width:80px}
+.qe-header-row span:nth-child(3){width:72px;flex-shrink:0;text-align:right}
+.qe-header-row span:nth-child(4){width:72px;flex-shrink:0;text-align:right}
+.qe-header-row span:nth-child(5){width:50px;flex-shrink:0;text-align:right}
+.qe-header-row span:nth-child(6){width:22px;flex-shrink:0}
+.qe-row{display:flex;gap:5px;align-items:center;padding:7px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:5px;background:var(--bg2);flex-wrap:nowrap;transition:background .15s}
+.qe-row:hover{background:var(--card-hover)}
+.qe-row.cash-row{border-left:2.5px solid var(--accent)}
+.qe-row.credit-row{border-left:2.5px solid var(--info)}
 .qe-row-num{width:22px;height:22px;border-radius:50%;background:var(--accent-glow);color:var(--accent);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Space Grotesk',sans-serif}
-.qe-buyer-sel{padding:7px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--fg);font-size:12px;font-family:inherit;min-width:90px;outline:none;flex-shrink:0}
+.qe-buyer-sel{padding:7px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--fg);font-size:12px;font-family:inherit;flex:1;min-width:80px;outline:none;flex-shrink:0;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%238ba8b4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 5px center;padding-right:18px}
 .qe-buyer-sel:focus{border-color:var(--accent)}
 .qe-rate,.qe-amt{padding:7px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--fg);font-size:12px;font-family:inherit;outline:none;width:72px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums}
 .qe-rate:focus,.qe-amt:focus{border-color:var(--accent)}
-.qe-wt{padding:7px 6px;border-radius:var(--radius-sm);border:1px solid transparent;background:transparent;color:var(--success);font-size:11px;font-weight:700;width:56px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif}
-.qe-del-row{width:26px;height:26px;border-radius:6px;border:none;background:transparent;color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.qe-wt{padding:7px 6px;border:1px solid transparent;background:transparent;color:var(--success);font-size:11px;font-weight:700;width:50px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif}
+.qe-del-row{width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+/* Date input icon visibility on dark theme */
+input[type="date"]{color-scheme:dark}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer;opacity:1;width:24px;height:24px;outline:1px solid rgba(255,255,255,0.3);border-radius:4px}
+input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:.8}
 .qe-del-row:active{color:var(--danger);background:var(--danger-bg)}
+/* Quick Entry total row */
+.qe-total-row{display:flex;align-items:center;justify-content:flex-end;padding:8px 8px 4px;border-top:1.5px solid var(--border);margin-top:4px;gap:5px}
+.qe-total-label{font-size:12px;font-weight:700;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.5px}
+.qe-total-amount{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+/* Summary PDF button */
+.summary-pdf-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;margin-top:10px;flex-wrap:wrap}
+.summary-pdf-btn{display:flex;align-items:center;gap:7px;padding:10px 20px;border-radius:var(--radius-sm);border:1.5px solid var(--accent);background:var(--accent-glow);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
+.summary-pdf-btn:active{transform:scale(.97);background:rgba(232,168,50,0.2)}
+.summary-pdf-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.summary-pdf-btn i{font-size:14px}
+.qe-sup-info{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--accent-glow);border-radius:var(--radius-sm);margin-bottom:8px;font-size:11px;color:var(--accent);font-weight:600}
+.qe-sup-info i{font-size:12px}
 .mgmt-info{flex:1;min-width:0}
 .mgmt-name{font-size:13px;font-weight:700;display:block}
 .mgmt-hint{font-size:11px;color:var(--fg-muted);display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -137,6 +164,9 @@ main{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px;pad
 .mgmt-item-del{width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .15s}
 .mgmt-item-del:active{color:var(--danger);background:var(--danger-bg)}
 .mgmt-item-del.off{opacity:.3;pointer-events:none}
+.mgmt-item-edit{width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .15s}
+.mgmt-item-edit:active{color:var(--accent);background:var(--accent-glow)}
+.qe-draft-hint{font-size:10px;color:var(--accent);text-align:center;margin-top:4px;opacity:.8}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 10px;text-align:center}
 .stat-label{font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
@@ -308,7 +338,13 @@ tbody td{padding:9px 10px;font-size:12px;vertical-align:middle}
 <!-- Rename company modal -->
 <div class="modal-overlay" id="editCompModal"><div class="modal" style="max-width:340px"><h3><i class="fa-solid fa-pen" style="color:var(--accent);margin-right:6px"></i>Rename Company</h3><p>Enter the new company name.</p><input class="modal-input" type="text" id="editCompName" placeholder="New company name"><div class="modal-actions"><button class="modal-btn" data-close="editCompModal">Cancel</button><button class="modal-btn" id="saveCompNameBtn" style="background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">Save</button></div></div></div>
   <div class="modal-overlay" id="deleteBuyerModal"><div class="modal"><h3><i class="fa-solid fa-cart-shopping" style="color:var(--danger);margin-right:6px"></i>Remove Buyer</h3><p id="deleteBuyerMsg"></p><div class="modal-actions"><button class="modal-btn" data-close="deleteBuyerModal">Cancel</button><button class="modal-btn danger" id="confirmDeleteBuyerBtn">Remove</button></div></div></div>
-  <div class="modal-overlay" id="quickEntryModal"><div class="modal" style="max-width:520px;max-height:85vh;display:flex;flex-direction:column"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h3 style="margin-bottom:0"><i class="fa-solid fa-bolt" style="color:var(--accent);margin-right:6px"></i>Quick Entry</h3><button class="modal-btn" data-close="quickEntryModal" style="padding:6px 10px;border:none;background:transparent;color:var(--fg-muted);font-size:16px;cursor:pointer"><i class="fa-solid fa-xmark"></i></button></div><p style="margin-bottom:10px;font-size:12px;color:var(--fg-muted)">Select fish type, then add buyers with rate &amp; amount.</p><!-- Fish type selector row --><div style="display:flex;gap:6px;margin-bottom:10px;align-items:center"><label style="font-size:11px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">Fish</label><select id="qeFishSelect" style="flex:1;padding:9px 10px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:13px;font-family:inherit;outline:none"></select></div><!-- Buyer rows container --><div id="qeBuyerRows" style="flex:1;overflow-y:auto;max-height:50vh;min-height:60px"></div><!-- Add buyer row + manage buyers --><div style="display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap"><button type="button" id="qeAddRowBtn" style="padding:7px 14px;border-radius:var(--radius-sm);border:1.5px dashed var(--border);background:transparent;color:var(--fg-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-plus"></i> Add Buyer</button><div style="flex:1"></div><button type="button" id="qeNewBuyerToggle" style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit"><i class="fa-solid fa-user-plus" style="margin-right:3px"></i> New Buyer</button><label style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px"><i class="fa-solid fa-file-arrow-up"></i> Import CSV<input type="file" id="qeBuyerCsvInput" accept=".csv,.txt" style="display:none"></label></div><!-- Inline new buyer input (hidden by default) --><div id="qeNewBuyerRow" style="display:none;margin-top:6px;gap:6px;align-items:center"><input type="text" id="qeNewBuyerInput" placeholder="Buyer name" style="flex:1;padding:8px 10px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:12px;font-family:inherit;outline:none"><button type="button" id="qeNewBuyerSave" style="padding:8px 14px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#0f1a1e;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Add</button></div><!-- Submit --><div class="modal-actions" style="margin-top:12px;justify-content:stretch;gap:8px"><button type="button" id="qeSubmitAll" style="flex:1;height:44px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-check-double"></i> Submit All</button></div></div></div>
+<!-- Rename fish type modal -->
+<div class="modal-overlay" id="renameFishModal"><div class="modal" style="max-width:340px"><h3><i class="fa-solid fa-fish-fins" style="color:var(--accent);margin-right:6px"></i>Rename Fish Type</h3><p>Change name — all records will be updated.</p><input class="modal-input" type="text" id="renameFishInput" placeholder="New name"><div class="modal-actions"><button class="modal-btn" data-close="renameFishModal">Cancel</button><button class="modal-btn" id="confirmRenameFishBtn" style="background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">Rename</button></div></div></div>
+<!-- Rename supplier modal -->
+<div class="modal-overlay" id="renameSupplierModal"><div class="modal" style="max-width:340px"><h3><i class="fa-solid fa-truck-field" style="color:var(--accent);margin-right:6px"></i>Rename Supplier</h3><p>Change name — all records will be updated.</p><input class="modal-input" type="text" id="renameSupplierInput" placeholder="New name"><div class="modal-actions"><button class="modal-btn" data-close="renameSupplierModal">Cancel</button><button class="modal-btn" id="confirmRenameSupplierBtn" style="background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">Rename</button></div></div></div>
+<!-- Rename buyer modal -->
+<div class="modal-overlay" id="renameBuyerModal"><div class="modal" style="max-width:340px"><h3><i class="fa-solid fa-cart-shopping" style="color:var(--accent);margin-right:6px"></i>Rename Buyer</h3><p>Change name — all records will be updated.</p><input class="modal-input" type="text" id="renameBuyerInput" placeholder="New name"><div class="modal-actions"><button class="modal-btn" data-close="renameBuyerModal">Cancel</button><button class="modal-btn" id="confirmRenameBuyerBtn" style="background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">Rename</button></div></div></div>
+  <div class="modal-overlay" id="quickEntryModal"><div class="modal" style="max-width:520px;max-height:88vh;display:flex;flex-direction:column"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><h3 style="margin-bottom:0"><i class="fa-solid fa-bolt" style="color:var(--accent);margin-right:6px"></i>Quick Entry</h3><button class="modal-btn" data-close="quickEntryModal" style="padding:6px 10px;border:none;background:transparent;color:var(--fg-muted);font-size:16px;cursor:pointer"><i class="fa-solid fa-xmark"></i></button></div><!-- Supplier + Fish info bar --><div class="qe-sup-info" id="qeSupInfo"><i class="fa-solid fa-truck-field"></i><span id="qeSupName">-</span><span style="margin:0 4px;opacity:.5">|</span><i class="fa-solid fa-fish-fins"></i><select id="qeFishSelect" style="flex:1;padding:4px 22px 4px 6px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--accent);font-size:12px;font-family:inherit;outline:none;font-weight:700;-webkit-appearance:none;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23e8a832'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 4px center"></select></div><p style="margin-bottom:8px;font-size:11px;color:var(--fg-muted)"><i class="fa-solid fa-circle-info" style="margin-right:3px"></i>Select <b>Cash</b> for cash sale, or pick a buyer for credit sale.</p><!-- Column headers --><div class="qe-header-row"><span>#</span><span>Buyer</span><span>Rate</span><span>Amount</span><span>Wt</span><span></span></div><!-- Buyer rows container --><div id="qeBuyerRows" style="flex:1;overflow-y:auto;max-height:52vh;min-height:60px"></div><!-- Total row --><div class="qe-total-row"><span class="qe-total-label">Total</span><span class="qe-total-amount" id="qeGrandTotal">0.00</span></div><!-- Add buyer row + manage buyers --><div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap"><button type="button" id="qeAddRowBtn" style="padding:7px 14px;border-radius:var(--radius-sm);border:1.5px dashed var(--border);background:transparent;color:var(--fg-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-plus"></i> Add Row</button><div style="flex:1"></div><button type="button" id="qeNewBuyerToggle" style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit"><i class="fa-solid fa-user-plus" style="margin-right:3px"></i> New Buyer</button><label style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px"><i class="fa-solid fa-file-arrow-up"></i> Import CSV<input type="file" id="qeBuyerCsvInput" accept=".csv,.txt" style="display:none"></label></div><!-- Inline new buyer input (hidden by default) --><div id="qeNewBuyerRow" style="display:none;margin-top:6px;gap:6px;align-items:center"><input type="text" id="qeNewBuyerInput" placeholder="Buyer name" style="flex:1;padding:8px 10px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:12px;font-family:inherit;outline:none"><button type="button" id="qeNewBuyerSave" style="padding:8px 14px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#0f1a1e;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Add</button></div><!-- Submit --><div class="modal-actions" style="margin-top:10px;justify-content:stretch;gap:8px"><button type="button" id="qeSubmitAll" style="flex:1;height:44px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-check-double"></i> Submit All</button></div></div></div>
 <!-- Cloud sync setup modal -->
 <div class="modal-overlay" id="setupModal"><div class="modal" style="max-width:430px"><div style="text-align:center;margin-bottom:14px"><div style="width:52px;height:52px;background:var(--accent-glow);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:22px;color:var(--accent);margin-bottom:8px"><i class="fa-solid fa-cloud-arrow-up"></i></div><h3>Cloud Sync Setup</h3></div><p style="text-align:center;margin-bottom:14px">Connect to Firebase Realtime Database for cross-device sync.</p><div class="setup-steps"><strong>Quick Setup:</strong><ol><li>Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li><li>Create a project, then Realtime Database, start in test mode</li><li>Settings > Project settings > Add web app, copy config JSON</li><li>Paste the full JSON below</li></ol></div><textarea class="setup-textarea" id="firebaseConfigInput" placeholder='Paste Firebase config JSON here:
 {
@@ -334,15 +370,21 @@ tbody td{padding:9px 10px;font-size:12px;vertical-align:middle}
 
 <!-- Main app content -->
 <main id="appMain" style="display:none">
-  <div class="mgmt-card" id="usersCard"><div class="mgmt-row"><div class="mgmt-icon usr"><i class="fa-solid fa-users-gear"></i></div><div class="mgmt-info"><span class="mgmt-name">Users</span><span class="mgmt-hint" id="usersHint">Manage access</span></div><span class="mgmt-count" id="usersCount">0</span><button class="mgmt-toggle" id="usersToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input class="ni" type="text" id="newUserName" placeholder="Username"><input class="pi" type="password" id="newUserPass" placeholder="Password"><select class="ri" id="newUserRole"><option value="user">User</option><option value="admin">Admin</option></select><button class="mgmt-add-btn" id="addUserBtn"><i class="fa-solid fa-plus"></i> Add</button></div><div class="mgmt-list" id="usersList"></div></div></div>
-  <div class="mgmt-card" id="fishCard"><div class="mgmt-row"><div class="mgmt-icon fish"><i class="fa-solid fa-fish-fins"></i></div><div class="mgmt-info"><span class="mgmt-name">Fish Types</span><span class="mgmt-hint" id="fishHint">Tap to manage</span></div><span class="mgmt-count" id="fishTypeCount">0</span><button class="mgmt-toggle" id="fishToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input type="text" id="newFishType" placeholder="Type name, tap +"><button class="mgmt-add-btn" id="addFishBtn"><i class="fa-solid fa-plus"></i></button></div><div class="mgmt-upload"><label class="mgmt-upload-label" for="fishUpload"><i class="fa-solid fa-file-arrow-up"></i> Upload names list</label><input type="file" id="fishUpload" accept=".csv,.txt" style="display:none"></div><div class="mgmt-list" id="fishTypeList"></div></div></div>
-  <div class="mgmt-card" id="supplierCard"><div class="mgmt-row"><div class="mgmt-icon sup"><i class="fa-solid fa-truck-field"></i></div><div class="mgmt-info"><span class="mgmt-name">Suppliers</span><span class="mgmt-hint" id="supplierHint">Tap to manage</span></div><span class="mgmt-count" id="supplierCount">0</span><button class="mgmt-toggle" id="supplierToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input type="text" id="newSupplier" placeholder="Type name, tap +"><button class="mgmt-add-btn" id="addSupBtn"><i class="fa-solid fa-plus"></i></button></div><div class="mgmt-upload"><label class="mgmt-upload-label" for="supplierUpload"><i class="fa-solid fa-file-arrow-up"></i> Upload names list</label><input type="file" id="supplierUpload" accept=".csv,.txt" style="display:none"></div><div class="mgmt-list" id="supplierList"></div></div></div>
-  <div class="mgmt-card" id="buyerCard"><div class="mgmt-row"><div class="mgmt-icon buyr"><i class="fa-solid fa-cart-shopping"></i></div><div class="mgmt-info"><span class="mgmt-name">Buyers</span><span class="mgmt-hint" id="buyerHint">Tap to manage</span></div><span class="mgmt-count" id="buyerCount">0</span><button class="mgmt-toggle" id="buyerToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input type="text" id="newBuyer" placeholder="Type name, tap +"><button class="mgmt-add-btn" id="addBuyerBtn"><i class="fa-solid fa-plus"></i></button></div><div class="mgmt-upload"><label class="mgmt-upload-label" for="buyerUpload"><i class="fa-solid fa-file-arrow-up"></i> Upload names list</label><input type="file" id="buyerUpload" accept=".csv,.txt" style="display:none"></div><div class="mgmt-list" id="buyerList"></div></div></div>
-  <div class="stats-row"><div class="stat-card"><div class="stat-label">Entries</div><div class="stat-value" id="statEntries">0</div></div><div class="stat-card"><div class="stat-label">Weight</div><div class="stat-value success" id="statWeight">0 <span class="stat-unit">Kg</span></div></div><div class="stat-card"><div class="stat-label">Amount</div><div class="stat-value accent" id="statValue">0</div></div><div class="stat-card"><div class="stat-label">Avg/Kg</div><div class="stat-value" id="statAvg" style="color:var(--info)">0</div></div></div>
   <div class="form-card"><div class="edit-bar" id="editBar"><i class="fa-solid fa-pen"></i><span>Editing record</span><button class="cancel-edit" id="cancelEditBtn">Cancel</button></div><div class="form-title" id="formTitle"><i class="fa-solid fa-pen-to-square"></i> New Entry</div><form id="fishForm" autocomplete="off"><div class="form-grid"><div class="form-group"><label>Date</label><input type="date" id="entryDate" required></div><div class="form-group"><label>Supplier</label><select id="supplier" required></select></div><div class="form-group"><label>Fish Type</label><select id="fishType" required></select></div><div class="form-group" style="display:flex;align-items:flex-end"><button type="button" id="quickEntryBtn" style="width:100%;height:46px;border-radius:var(--radius-sm);border:1.5px solid var(--accent);background:var(--accent-glow);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-bolt"></i> Quick Entry</button></div></div></form></div>
   <div class="date-filter-bar"><div class="date-filter-label"><i class="fa-solid fa-calendar-day" style="color:var(--accent)"></i> Showing: <span class="date-badge" id="dateBadge">--</span></div><button class="show-all-btn" id="showAllBtn"><i class="fa-solid fa-layer-group" style="font-size:10px"></i> All Dates</button></div>
   <div class="table-area"><div class="table-title"><i class="fa-solid fa-table-list" style="color:var(--accent)"></i> Records <span class="record-count" id="recordCount">0</span></div><div class="table-filters"><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="searchInput" placeholder="Search..."></div><select class="filter-select" id="filterFish"><option value="">All Fish</option></select><select class="filter-select" id="filterSupplier"><option value="">All Suppliers</option></select></div></div>
   <div class="table-container"><div class="table-scroll"><table><thead><tr><th>#</th><th>Date</th><th>Fish</th><th>Supplier</th><th>Buyer</th><th>Rate</th><th>Amount</th><th>Weight</th><th></th></tr></thead><tbody id="tableBody"></tbody></table><div class="empty-state" id="emptyState"><div class="empty-icon"><i class="fa-solid fa-fish-fins"></i></div><h3>No Records</h3><p id="emptyMsg">Add entries or import CSV.</p></div></div><div class="table-footer" id="tableFooter" style="display:none"><span class="total-label">Total</span><span class="total-amount" id="filteredTotal">0.00</span></div></div>
+  <div class="summary-pdf-bar">
+    <button type="button" class="summary-pdf-btn" id="summaryPdfBtn"><i class="fa-solid fa-file-pdf"></i> Summary PDF</button>
+    <button type="button" class="summary-pdf-btn" id="fishSummaryPdfBtn"><i class="fa-solid fa-fish-fins"></i> Fish Summary PDF</button>
+    <button type="button" class="summary-pdf-btn" id="cashSummaryPdfBtn" style="border-color:#3cc68a;color:#3cc68a;background:rgba(60,198,138,0.08)"><i class="fa-solid fa-coins"></i> Cash Summary</button>
+    <button type="button" class="summary-pdf-btn" id="nonCashSummaryPdfBtn" style="border-color:#e05252;color:#e05252;background:rgba(224,82,82,0.08)"><i class="fa-solid fa-handshake"></i> Non-Cash Summary</button>
+  </div>
+  <div class="stats-row"><div class="stat-card"><div class="stat-label">Entries</div><div class="stat-value" id="statEntries">0</div></div><div class="stat-card"><div class="stat-label">Weight</div><div class="stat-value success" id="statWeight">0 <span class="stat-unit">Kg</span></div></div><div class="stat-card"><div class="stat-label">Amount</div><div class="stat-value accent" id="statValue">0</div></div><div class="stat-card"><div class="stat-label">Avg/Kg</div><div class="stat-value" id="statAvg" style="color:var(--info)">0</div></div></div>
+  <div class="mgmt-card" id="usersCard"><div class="mgmt-row"><div class="mgmt-icon usr"><i class="fa-solid fa-users-gear"></i></div><div class="mgmt-info"><span class="mgmt-name">Users</span><span class="mgmt-hint" id="usersHint">Manage access</span></div><span class="mgmt-count" id="usersCount">0</span><button class="mgmt-toggle" id="usersToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input class="ni" type="text" id="newUserName" placeholder="Username"><input class="pi" type="password" id="newUserPass" placeholder="Password"><select class="ri" id="newUserRole"><option value="user">User</option><option value="admin">Admin</option></select><button class="mgmt-add-btn" id="addUserBtn"><i class="fa-solid fa-plus"></i> Add</button></div><div class="mgmt-list" id="usersList"></div></div></div>
+  <div class="mgmt-card" id="fishCard"><div class="mgmt-row"><div class="mgmt-icon fish"><i class="fa-solid fa-fish-fins"></i></div><div class="mgmt-info"><span class="mgmt-name">Fish Types</span><span class="mgmt-hint" id="fishHint">Tap to manage</span></div><span class="mgmt-count" id="fishTypeCount">0</span><button class="mgmt-toggle" id="fishToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input type="text" id="newFishType" placeholder="Type name, tap +"><button class="mgmt-add-btn" id="addFishBtn"><i class="fa-solid fa-plus"></i></button></div><div class="mgmt-upload"><label class="mgmt-upload-label" for="fishUpload"><i class="fa-solid fa-file-arrow-up"></i> Upload names list</label><input type="file" id="fishUpload" accept=".csv,.txt" style="display:none"></div><div class="mgmt-list" id="fishTypeList"></div></div></div>
+  <div class="mgmt-card" id="supplierCard"><div class="mgmt-row"><div class="mgmt-icon sup"><i class="fa-solid fa-truck-field"></i></div><div class="mgmt-info"><span class="mgmt-name">Suppliers</span><span class="mgmt-hint" id="supplierHint">Tap to manage</span></div><span class="mgmt-count" id="supplierCount">0</span><button class="mgmt-toggle" id="supplierToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input type="text" id="newSupplier" placeholder="Type name, tap +"><button class="mgmt-add-btn" id="addSupBtn"><i class="fa-solid fa-plus"></i></button></div><div class="mgmt-upload"><label class="mgmt-upload-label" for="supplierUpload"><i class="fa-solid fa-file-arrow-up"></i> Upload names list</label><input type="file" id="supplierUpload" accept=".csv,.txt" style="display:none"></div><div class="mgmt-list" id="supplierList"></div></div></div>
+  <div class="mgmt-card" id="buyerCard"><div class="mgmt-row"><div class="mgmt-icon buyr"><i class="fa-solid fa-cart-shopping"></i></div><div class="mgmt-info"><span class="mgmt-name">Buyers</span><span class="mgmt-hint" id="buyerHint">Tap to manage</span></div><span class="mgmt-count" id="buyerCount">0</span><button class="mgmt-toggle" id="buyerToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input type="text" id="newBuyer" placeholder="Type name, tap +"><button class="mgmt-add-btn" id="addBuyerBtn"><i class="fa-solid fa-plus"></i></button></div><div class="mgmt-upload"><label class="mgmt-upload-label" for="buyerUpload"><i class="fa-solid fa-file-arrow-up"></i> Upload names list</label><input type="file" id="buyerUpload" accept=".csv,.txt" style="display:none"></div><div class="mgmt-list" id="buyerList"></div></div></div>
 </main>
 
 <script>
@@ -587,6 +629,9 @@ var delSupTarget = null;
 var delUserTarget = null;
 var delBuyerTarget = null;
 var editCompTarget = null;
+var renameFishTarget = null;
+var renameSupplierTarget = null;
+var renameBuyerTarget = null;
 
 // Cloud sync state
 var db = null;
@@ -993,6 +1038,16 @@ function openEditComp(id) {
 // Company data - load and save
 // ====================================================================
 
+// Deduplicate an array case-insensitively, keeping first occurrence
+function dedupArr(arr) {
+  var seen = {}, out = [];
+  for (var i = 0; i < arr.length; i++) {
+    var key = arr[i].toLowerCase();
+    if (!seen[key]) { seen[key] = true; out.push(arr[i]); }
+  }
+  return out;
+}
+
 // Load all company-specific data from localStorage
 function loadCompanyData() {
   try { fishTypes = JSON.parse(localStorage.getItem(ck('ft')) || '[]'); } catch(e) { fishTypes = []; }
@@ -1000,6 +1055,14 @@ function loadCompanyData() {
   try { buyers    = JSON.parse(localStorage.getItem(ck('by')) || '[]'); } catch(e) { buyers = []; }
   try { records   = JSON.parse(localStorage.getItem(ck('rc')) || '[]'); } catch(e) { records   = []; }
   try { appUsers  = JSON.parse(localStorage.getItem(ck('users')) || '[]'); } catch(e) { appUsers  = []; }
+  // Auto-dedup fish types, suppliers, buyers on load to fix past duplicates
+  var ftBefore = fishTypes.length, spBefore = suppliers.length, byBefore = buyers.length;
+  fishTypes = dedupArr(fishTypes);
+  suppliers = dedupArr(suppliers);
+  buyers = dedupArr(buyers);
+  if (fishTypes.length < ftBefore || suppliers.length < spBefore || buyers.length < byBefore) {
+    saveLocal();
+  }
 }
 
 // Save all company data to localStorage
@@ -1243,23 +1306,8 @@ function tryAutoSelectAfterSync() {
     // Always use REST for fetching company data (reliable, no race conditions)
     fetchCompanyDataViaREST(found.id);
 
-    // Try auto-login with remembered user
-    var lastUserId = localStorage.getItem('ff_lastUser');
-    if (lastUserId) {
-      var userExists = false;
-      for (var i = 0; i < appUsers.length; i++) {
-        if (appUsers[i].id === lastUserId) { userExists = true; break; }
-      }
-      if (userExists) {
-        currentUserId = lastUserId;
-        document.getElementById('companyScreen').classList.add('hidden');
-        refreshUI();
-        toast('Welcome back, ' + curUser().username + '!', 'success');
-        return;
-      }
-    }
-
-    // Company found but no auto-login - go to login screen
+    // Always go to login screen - no auto-login
+    // Company found - go to login screen
     document.getElementById('companyScreen').classList.add('hidden');
     initLoginScreen();
     document.getElementById('loginScreen').classList.remove('hidden');
@@ -1293,19 +1341,7 @@ function fetchCompanyDataViaREST(compId) {
         dbg('Loaded ' + appUsers.length + ' user(s) from cloud');
       }
 
-      // Re-check for auto-login now that we have users
-      var lastUserId = localStorage.getItem('ff_lastUser');
-      if (lastUserId) {
-        for (var i = 0; i < appUsers.length; i++) {
-          if (appUsers[i].id === lastUserId) {
-            currentUserId = lastUserId;
-            document.getElementById('loginScreen').classList.add('hidden');
-            refreshUI();
-            toast('Welcome back, ' + curUser().username + '!', 'success');
-            return;
-          }
-        }
-      }
+      // No auto-login - user must sign in each time
     })
     .catch(function(err) {
       dbg('REST company data fetch failed: ' + err.message);
@@ -1367,21 +1403,9 @@ function setupDataListener() {
     var inApp = document.getElementById('appHeader').style.display !== 'none';
 
     if (onLoginScreen) {
-      // Try auto-login with the remembered user ID
-      var lastUid = localStorage.getItem('ff_lastUser');
-      if (lastUid) {
-        for (var k = 0; k < appUsers.length; k++) {
-          if (appUsers[k].id === lastUid) {
-            currentUserId = lastUid;
-            document.getElementById('loginScreen').classList.add('hidden');
-            refreshUI();
-            toast('Welcome back, ' + curUser().username + '!', 'success');
-            return;
-          }
-        }
-      }
-      // No auto-login possible, re-initialize the login screen
+      // No auto-login - just re-init the login screen with updated users
       initLoginScreen();
+      return;
     } else if (inApp) {
       refreshUI();
     }
@@ -1496,7 +1520,8 @@ function connectCloud() {
 
 function initLoginScreen() {
   document.getElementById('loginCompName').textContent = activeCompany ? activeCompany.name : 'Company';
-  document.getElementById('loginUser').value = '';
+  var lastUsername = localStorage.getItem('ff_lastUsername') || '';
+  document.getElementById('loginUser').value = lastUsername;
   document.getElementById('loginPass').value = '';
   document.getElementById('loginPassConfirm').value = '';
   document.getElementById('loginMsg').textContent = '';
@@ -1570,6 +1595,8 @@ function handleLogin() {
 
 // Enter the main app after successful login
 function enterApp() {
+  var u = curUser();
+  if (u) localStorage.setItem('ff_lastUsername', u.username);
   localStorage.setItem('ff_lastUser', currentUserId);
   document.getElementById('loginScreen').classList.add('hidden');
   // SDK data listener disabled — REST is primary (prevents race conditions)
@@ -1615,7 +1642,6 @@ function refreshUI() {
   setTodayDate();
   cancelEdit();
   document.getElementById('usersCard').style.display = isAdmin() ? '' : 'none';
-  document.getElementById('buyerCard').style.display = isAdmin() ? '' : 'none';
   document.getElementById('clearAllBtn').style.display = isAdmin() ? '' : 'none';
 }
 
@@ -1724,18 +1750,22 @@ function renderBuyers() {
     : 'Tap to manage';
   var el = document.getElementById('buyerList');
   if (!buyers.length) { el.innerHTML = ''; return; }
+  // Sort alphabetically for display
+  var sorted = buyers.slice().sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
   var html = '';
-  for (var i = 0; i < buyers.length; i++) {
+  for (var i = 0; i < sorted.length; i++) {
     var cnt = 0;
     for (var j = 0; j < records.length; j++) {
-      if (records[j].buyer === buyers[i]) cnt++;
+      if (records[j].buyer === sorted[i]) cnt++;
     }
     html += '<div class="mgmt-item">'
       + '<div class="mgmt-item-info">'
-      + '<span class="mgmt-item-name" style="color:var(--info)">' + esc(buyers[i]) + '</span>'
+      + '<span class="mgmt-item-name" style="color:var(--info)">' + esc(sorted[i]) + '</span>'
       + '<span class="mgmt-item-meta">' + cnt + ' record' + (cnt !== 1 ? 's' : '') + '</span>'
       + '</div>'
-      + '<button class="mgmt-item-del" data-del-buyer="' + escA(buyers[i]) + '">'
+      + '<button class="mgmt-item-edit" data-rename-buyer="' + escA(sorted[i]) + '" title="Rename">'
+      + '<i class="fa-solid fa-pen"></i></button>'
+      + '<button class="mgmt-item-del" data-del-buyer="' + escA(sorted[i]) + '">'
       + '<i class="fa-solid fa-trash"></i></button></div>';
   }
   el.innerHTML = html;
@@ -1763,6 +1793,43 @@ function deleteBuyer(name) {
   openModal('deleteBuyerModal');
 }
 
+// Quick Entry: auto-save draft so entries survive accidental close
+function saveQEDraft() {
+  var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
+  var draft = {
+    date: document.getElementById('entryDate').value,
+    supplier: document.getElementById('supplier').value,
+    fish: document.getElementById('qeFishSelect').value,
+    rows: []
+  };
+  for (var i = 0; i < rows.length; i++) {
+    var r = parseFloat(rows[i].querySelector('.qe-rate').value) || 0;
+    var a = parseFloat(rows[i].querySelector('.qe-amt').value) || 0;
+    if (r > 0 || a > 0) { // Only save rows that have some data
+      draft.rows.push({
+        buyer: rows[i].querySelector('.qe-buyer-sel').value,
+        rate: rows[i].querySelector('.qe-rate').value,
+        amount: rows[i].querySelector('.qe-amt').value
+      });
+    }
+  }
+  localStorage.setItem(ck('qe_draft'), JSON.stringify(draft));
+}
+
+function clearQEDraft() {
+  localStorage.removeItem(ck('qe_draft'));
+}
+
+function hasQEDraft() {
+  return !!localStorage.getItem(ck('qe_draft'));
+}
+
+function loadQEDraft() {
+  try {
+    return JSON.parse(localStorage.getItem(ck('qe_draft')));
+  } catch(e) { return null; }
+}
+
 // Quick Entry: multi-buyer batch entry with rate/amount/weight per buyer
 var qeRowCounter = 0;
 
@@ -1771,33 +1838,74 @@ function openQuickEntry() {
   if (!sup) { toast('Select a supplier first.', 'error'); return; }
   var selectedFish = document.getElementById('fishType').value;
 
+  // Show supplier name in info bar
+  document.getElementById('qeSupName').textContent = sup;
+
   // Populate fish type dropdown in modal — show supplier's fish first
   var sel = document.getElementById('qeFishSelect');
-  var supplierFish = [];
-  var otherFish = [];
-  for (var i = 0; i < fishTypes.length; i++) {
-    var found = false;
-    for (var j = 0; j < records.length; j++) {
-      if (records[j].supplier === sup && records[j].fish === fishTypes[i]) { found = true; break; }
-    }
-    if (found) supplierFish.push(fishTypes[i]); else otherFish.push(fishTypes[i]);
-  }
+  var groups = getFishGroupsForSupplier(sup);
   var html = '<option value="">Select fish type</option>';
-  for (var i = 0; i < supplierFish.length; i++) {
-    html += '<option value="' + escA(supplierFish[i]) + '"' + (supplierFish[i] === selectedFish ? ' selected' : '') + '>' + esc(supplierFish[i]) + '</option>';
+  for (var i = 0; i < groups.supplierFish.length; i++) {
+    html += '<option value="' + escA(groups.supplierFish[i]) + '"' + (groups.supplierFish[i] === selectedFish ? ' selected' : '') + '>' + esc(groups.supplierFish[i]) + '</option>';
   }
-  if (otherFish.length && supplierFish.length) html += '<option disabled>─────────</option>';
-  for (var i = 0; i < otherFish.length; i++) {
-    html += '<option value="' + escA(otherFish[i]) + '"' + (otherFish[i] === selectedFish ? ' selected' : '') + '>' + esc(otherFish[i]) + '</option>';
+  if (groups.otherFish.length && groups.supplierFish.length) html += '<option disabled>─────────</option>';
+  for (var i = 0; i < groups.otherFish.length; i++) {
+    html += '<option value="' + escA(groups.otherFish[i]) + '"' + (groups.otherFish[i] === selectedFish ? ' selected' : '') + '>' + esc(groups.otherFish[i]) + '</option>';
   }
   sel.innerHTML = html;
+
+  // Load saved buyer details for this date + supplier + fish type
+  var selectedDate = document.getElementById('entryDate').value;
+  var savedRows = [];
+
+  // Determine the active fish type from the QE select (already set above)
+  var activeFish = sel.value; // the fish currently selected in QE modal
+
+  // 1. Check for auto-saved draft — only use if context matches exactly
+  var draft = loadQEDraft();
+  var usedDraft = false;
+  if (draft && draft.rows && draft.rows.length > 0
+      && draft.date === selectedDate
+      && draft.supplier === sup
+      && draft.fish === activeFish) {
+    savedRows = draft.rows;
+    usedDraft = true;
+  }
+
+  // 2. If no matching draft, load existing records for this exact combo
+  if (!usedDraft && activeFish && selectedDate && sup) {
+    for (var i = 0; i < records.length; i++) {
+      if (records[i].date === selectedDate && records[i].supplier === sup && records[i].fish === activeFish) {
+        savedRows.push(records[i]);
+      }
+    }
+  }
 
   // Reset buyer rows
   qeRowCounter = 0;
   document.getElementById('qeBuyerRows').innerHTML = '';
   document.getElementById('qeNewBuyerRow').style.display = 'none';
-  addQEBuyerRow();
 
+  // If we have saved records/draft, pre-populate rows
+  if (savedRows.length > 0) {
+    for (var i = 0; i < savedRows.length; i++) {
+      var rowBuyer = savedRows[i].buyer || 'Cash';
+      var rowRate = savedRows[i].rate || '';
+      var rowAmt = savedRows[i].amount || '';
+      addQEBuyerRow(rowBuyer);
+      var lastRow = document.querySelector('#qeBuyerRows .qe-row:last-child');
+      if (lastRow) {
+        var rateInput = lastRow.querySelector('.qe-rate');
+        var amtInput = lastRow.querySelector('.qe-amt');
+        if (rateInput && rowRate) { rateInput.value = rowRate; rateInput.dispatchEvent(new Event('input')); }
+        if (amtInput && rowAmt) { amtInput.value = rowAmt; amtInput.dispatchEvent(new Event('input')); }
+      }
+    }
+  } else {
+    addQEBuyerRow('Cash'); // First row defaults to Cash
+  }
+
+  updateQETotal();
   openModal('quickEntryModal');
 }
 
@@ -1807,17 +1915,28 @@ function addQEBuyerRow(presetBuyer) {
   var num = qeRowCounter;
   var container = document.getElementById('qeBuyerRows');
   var row = document.createElement('div');
-  row.className = 'qe-row';
+  var isCash = !presetBuyer || presetBuyer === 'Cash';
+  row.className = 'qe-row' + (isCash ? ' cash-row' : ' credit-row');
   row.setAttribute('data-qe-row', num);
 
-  // Build buyer options
-  var opts = '<option value="">Buyer</option>';
+  // Carry forward rate from the previous row (rate sticks until changed)
+  var prevRate = '';
+  var prevRows = container.querySelectorAll('.qe-row');
+  if (prevRows.length > 0) {
+    var lastRateVal = prevRows[prevRows.length - 1].querySelector('.qe-rate').value;
+    if (lastRateVal && !isNaN(parseFloat(lastRateVal)) && parseFloat(lastRateVal) > 0) {
+      prevRate = lastRateVal;
+    }
+  }
+
+  // Build buyer options — "Cash" is always first
+  var opts = '<option value="Cash"' + (isCash ? ' selected' : '') + '>Cash</option>';
   for (var i = 0; i < buyers.length; i++) {
     opts += '<option value="' + escA(buyers[i]) + '"' + (presetBuyer === buyers[i] ? ' selected' : '') + '>' + esc(buyers[i]) + '</option>';
   }
   row.innerHTML = '<span class="qe-row-num">' + num + '</span>'
     + '<select class="qe-buyer-sel">' + opts + '</select>'
-    + '<input type="text" inputmode="numeric" pattern="[0-9.]*" class="qe-rate" placeholder="Rate">'
+    + '<input type="text" inputmode="numeric" pattern="[0-9.]*" class="qe-rate" placeholder="Rate" value="' + prevRate + '">'
     + '<input type="text" inputmode="numeric" pattern="[0-9.]*" class="qe-amt" placeholder="Amt">'
     + '<span class="qe-wt">-</span>'
     + '<button type="button" class="qe-del-row" title="Remove row"><i class="fa-solid fa-xmark"></i></button>';
@@ -1831,10 +1950,28 @@ function addQEBuyerRow(presetBuyer) {
     var r = parseFloat(rateInput.value) || 0;
     var a = parseFloat(amtInput.value) || 0;
     wtSpan.textContent = r > 0 ? (a / r).toFixed(2) : '-';
+    updateQETotal();
+    saveQEDraft();
   }
   rateInput.addEventListener('input', calcRowWeight);
   amtInput.addEventListener('input', calcRowWeight);
-  // Jump to amount when rate is entered (on Enter or when value looks complete)
+
+  // Toggle row style when buyer changes (cash vs credit)
+  var buyerSel = row.querySelector('.qe-buyer-sel');
+  buyerSel.addEventListener('change', function() {
+    if (buyerSel.value === 'Cash') {
+      row.classList.add('cash-row');
+      row.classList.remove('credit-row');
+    } else if (buyerSel.value) {
+      row.classList.remove('cash-row');
+      row.classList.add('credit-row');
+    } else {
+      row.classList.remove('cash-row', 'credit-row');
+    }
+    saveQEDraft();
+  });
+
+  // Jump to amount when rate is entered
   rateInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
@@ -1845,8 +1982,7 @@ function addQEBuyerRow(presetBuyer) {
   amtInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
-      // Add a new row and focus its rate
-      addQEBuyerRow();
+      addQEBuyerRow('Cash');
     }
   });
 
@@ -1854,11 +1990,28 @@ function addQEBuyerRow(presetBuyer) {
   row.querySelector('.qe-del-row').addEventListener('click', function() {
     row.remove();
     renumberQERows();
+    updateQETotal();
+    saveQEDraft();
   });
 
-  // Focus rate if this is the first row, otherwise focus buyer
-  if (num === 1) { rateInput.focus(); }
-  else { row.querySelector('.qe-buyer-sel').focus(); }
+  // If rate was auto-filled from previous row, skip to amount field
+  // Otherwise focus rate for first entry
+  if (prevRate) {
+    amtInput.focus();
+  } else {
+    rateInput.focus();
+  }
+}
+
+// Calculate and display the grand total of all amounts in quick entry
+function updateQETotal() {
+  var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
+  var total = 0;
+  for (var i = 0; i < rows.length; i++) {
+    var amt = parseFloat(rows[i].querySelector('.qe-amt').value) || 0;
+    total += amt;
+  }
+  document.getElementById('qeGrandTotal').textContent = fmtN(total);
 }
 
 // Renumber buyer rows after deletion
@@ -1870,6 +2023,20 @@ function renumberQERows() {
 }
 
 // Submit all buyer rows as records
+// Check for duplicate record (date + supplier + fish + buyer + rate + amount + weight)
+function isDuplicate(date, supplier, fish, buyer, rate, amount, weight) {
+  for (var i = 0; i < records.length; i++) {
+    var r = records[i];
+    if (r.date === date && r.supplier === supplier && r.fish === fish
+      && r.buyer === buyer && r.rate === rate
+      && Math.abs(r.amount - amount) < 0.01
+      && Math.abs(r.weight - weight) < 0.001) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function submitAllQE() {
   var date = document.getElementById('entryDate').value;
   var sup = document.getElementById('supplier').value;
@@ -1879,13 +2046,17 @@ function submitAllQE() {
   if (!fish) { toast('Select a fish type.', 'error'); return; }
 
   var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
-  var added = 0;
+  var added = 0, skipped = 0;
   for (var i = 0; i < rows.length; i++) {
     var buyer = rows[i].querySelector('.qe-buyer-sel').value;
     var rate = parseFloat(rows[i].querySelector('.qe-rate').value);
     var amt = parseFloat(rows[i].querySelector('.qe-amt').value);
     if (!buyer || isNaN(rate) || isNaN(amt) || rate <= 0 || amt <= 0) continue;
     var wt = amt / rate;
+    if (isDuplicate(date, sup, fish, buyer, rate, amt, wt)) {
+      skipped++;
+      continue;
+    }
     records.push({
       id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
       date: date, fish: fish, supplier: sup, buyer: buyer,
@@ -1893,8 +2064,10 @@ function submitAllQE() {
     });
     added++;
   }
-  if (added === 0) { toast('Fill at least one buyer row with buyer, rate & amount.', 'error'); return; }
+  if (added === 0 && skipped > 0) { toast('All ' + skipped + ' row(s) are duplicates. No new records added.', 'error'); return; }
+  if (added === 0) { toast('Fill at least one row with rate & amount.', 'error'); return; }
 
+  clearQEDraft();
   save();
   closeModal('quickEntryModal');
   // Sync fish type back to main form
@@ -1903,7 +2076,9 @@ function submitAllQE() {
   renderStats();
   renderFishTypes();
   renderSuppliers();
-  toast(added + ' record' + (added > 1 ? 's' : '') + ' added for ' + fish + '.', 'success');
+  var msg = added + ' record' + (added > 1 ? 's' : '') + ' added for ' + fish + '.';
+  if (skipped > 0) msg += ' (' + skipped + ' duplicate' + (skipped > 1 ? 's' : '') + ' skipped)';
+  toast(msg, skipped > 0 ? 'info' : 'success');
   // Scroll table to top and highlight
   var scroll = document.querySelector('.table-scroll');
   if (scroll) scroll.scrollTop = 0;
@@ -1925,9 +2100,11 @@ function renderFishTypes() {
     : 'Add fish types';
   var el = document.getElementById('fishTypeList');
   if (!fishTypes.length) { el.innerHTML = ''; return; }
+  // Sort alphabetically for display
+  var sorted = fishTypes.slice().sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
   var html = '';
-  for (var i = 0; i < fishTypes.length; i++) {
-    var f = fishTypes[i];
+  for (var i = 0; i < sorted.length; i++) {
+    var f = sorted[i];
     var cl = fishColor(f);
     var cnt = 0;
     for (var j = 0; j < records.length; j++) {
@@ -1938,6 +2115,8 @@ function renderFishTypes() {
       + '<span class="mgmt-item-name" style="color:' + cl + '">' + esc(f) + '</span>'
       + '<span class="mgmt-item-meta">' + cnt + ' record' + (cnt !== 1 ? 's' : '') + '</span>'
       + '</div>'
+      + '<button class="mgmt-item-edit" data-rename-fish="' + escA(f) + '" title="Rename">'
+      + '<i class="fa-solid fa-pen"></i></button>'
       + '<button class="mgmt-item-del" data-del-fish="' + escA(f) + '">'
       + '<i class="fa-solid fa-trash"></i></button></div>';
   }
@@ -2011,9 +2190,11 @@ function renderSuppliers() {
     : 'Add suppliers';
   var el = document.getElementById('supplierList');
   if (!suppliers.length) { el.innerHTML = ''; return; }
+  // Sort alphabetically for display
+  var sorted = suppliers.slice().sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
   var html = '';
-  for (var i = 0; i < suppliers.length; i++) {
-    var s = suppliers[i];
+  for (var i = 0; i < sorted.length; i++) {
+    var s = sorted[i];
     var cl = supColor(s);
     var cnt = 0;
     for (var j = 0; j < records.length; j++) {
@@ -2024,6 +2205,8 @@ function renderSuppliers() {
       + '<span class="mgmt-item-name" style="color:' + cl + '">' + esc(s) + '</span>'
       + '<span class="mgmt-item-meta">' + cnt + ' record' + (cnt !== 1 ? 's' : '') + '</span>'
       + '</div>'
+      + '<button class="mgmt-item-edit" data-rename-sup="' + escA(s) + '" title="Rename">'
+      + '<i class="fa-solid fa-pen"></i></button>'
       + '<button class="mgmt-item-del" data-del-sup="' + escA(s) + '">'
       + '<i class="fa-solid fa-trash"></i></button></div>';
   }
@@ -2113,20 +2296,55 @@ function uploadBuyers(input) {
 // Form select population
 // ====================================================================
 
+// Shared helper: split fishTypes into supplier's fish vs other fish
+function getFishGroupsForSupplier(sup) {
+  var supplierFish = [], otherFish = [];
+  for (var i = 0; i < fishTypes.length; i++) {
+    var found = false;
+    for (var j = 0; j < records.length; j++) {
+      if (records[j].supplier === sup && records[j].fish === fishTypes[i]) { found = true; break; }
+    }
+    if (found) supplierFish.push(fishTypes[i]); else otherFish.push(fishTypes[i]);
+  }
+  supplierFish.sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+  otherFish.sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+  return { supplierFish: supplierFish, otherFish: otherFish };
+}
+
 function populateFormSelects() {
   var ss = document.getElementById('supplier');
   var fs = document.getElementById('fishType');
   var sv = ss.value, fv = fs.value;
   ss.innerHTML = '<option value="">Select supplier</option>';
-  fs.innerHTML = '<option value="">Select fish type</option>';
-  for (var i = 0; i < suppliers.length; i++) {
-    ss.innerHTML += '<option value="' + escA(suppliers[i]) + '">' + esc(suppliers[i]) + '</option>';
-  }
-  for (var i = 0; i < fishTypes.length; i++) {
-    fs.innerHTML += '<option value="' + escA(fishTypes[i]) + '">' + esc(fishTypes[i]) + '</option>';
+  var sortedSup = suppliers.slice().sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+  for (var i = 0; i < sortedSup.length; i++) {
+    ss.innerHTML += '<option value="' + escA(sortedSup[i]) + '">' + esc(sortedSup[i]) + '</option>';
   }
   ss.value = sv;
-  fs.value = fv;
+  // Populate fish type with supplier grouping
+  populateFishSelect(sv, fv);
+}
+
+function populateFishSelect(sup, selectedVal) {
+  var fs = document.getElementById('fishType');
+  var html = '<option value="">Select fish type</option>';
+  if (sup) {
+    var groups = getFishGroupsForSupplier(sup);
+    for (var i = 0; i < groups.supplierFish.length; i++) {
+      html += '<option value="' + escA(groups.supplierFish[i]) + '">' + esc(groups.supplierFish[i]) + '</option>';
+    }
+    if (groups.otherFish.length && groups.supplierFish.length) html += '<option disabled>─────────</option>';
+    for (var i = 0; i < groups.otherFish.length; i++) {
+      html += '<option value="' + escA(groups.otherFish[i]) + '">' + esc(groups.otherFish[i]) + '</option>';
+    }
+  } else {
+    var sortedFish = fishTypes.slice().sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+    for (var i = 0; i < sortedFish.length; i++) {
+      html += '<option value="' + escA(sortedFish[i]) + '">' + esc(sortedFish[i]) + '</option>';
+    }
+  }
+  fs.innerHTML = html;
+  fs.value = selectedVal || '';
 }
 
 function populateFilterSelects() {
@@ -2135,11 +2353,13 @@ function populateFilterSelects() {
   var ffv = ff.value, fsv = fs.value;
   ff.innerHTML = '<option value="">All Fish</option>';
   fs.innerHTML = '<option value="">All Suppliers</option>';
-  for (var i = 0; i < fishTypes.length; i++) {
-    ff.innerHTML += '<option value="' + escA(fishTypes[i]) + '">' + esc(fishTypes[i]) + '</option>';
+  var sortedFish = fishTypes.slice().sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+  var sortedSup = suppliers.slice().sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+  for (var i = 0; i < sortedFish.length; i++) {
+    ff.innerHTML += '<option value="' + escA(sortedFish[i]) + '">' + esc(sortedFish[i]) + '</option>';
   }
-  for (var i = 0; i < suppliers.length; i++) {
-    fs.innerHTML += '<option value="' + escA(suppliers[i]) + '">' + esc(suppliers[i]) + '</option>';
+  for (var i = 0; i < sortedSup.length; i++) {
+    fs.innerHTML += '<option value="' + escA(sortedSup[i]) + '">' + esc(sortedSup[i]) + '</option>';
   }
   ff.value = ffv;
   fs.value = fsv;
@@ -2185,7 +2405,7 @@ function editRecord(id) {
   // Clear default row and add one pre-filled row
   document.getElementById('qeBuyerRows').innerHTML = '';
   qeRowCounter = 0;
-  addQEBuyerRow(r.buyer);
+  addQEBuyerRow(r.buyer || 'Cash');
   var lastRow = document.querySelector('#qeBuyerRows .qe-row:last-child');
   if (lastRow) {
     lastRow.querySelector('.qe-rate').value = r.rate;
@@ -2196,6 +2416,7 @@ function editRecord(id) {
     var r2 = parseFloat(rateInput.value) || 0;
     var a2 = parseFloat(amtInput.value) || 0;
     lastRow.querySelector('.qe-wt').textContent = r2 > 0 ? (a2 / r2).toFixed(2) : '-';
+    updateQETotal();
   }
   document.getElementById('editBar').classList.add('active');
   document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen"></i> Edit Entry';
@@ -2312,12 +2533,18 @@ function renderTable() {
     totalAmt += r.amount;
     var fc = fishColor(r.fish);
     var sc = supColor(r.supplier);
+    var buyerCell = '';
+    if (r.buyer === 'Cash') {
+      buyerCell = '<td style="font-size:12px"><span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:var(--accent-glow);color:var(--accent)"><i class="fa-solid fa-coins" style="margin-right:3px;font-size:9px"></i>Cash</span></td>';
+    } else {
+      buyerCell = '<td style="font-size:12px;color:var(--info)">' + esc(r.buyer || '-') + '</td>';
+    }
     html += '<tr class="row-enter">'
       + '<td>' + (i + 1) + '</td>'
       + '<td class="date-cell">' + fmtDate(r.date) + '</td>'
       + '<td><span class="fish-badge" style="background:' + fc + '15;color:' + fc + '">' + esc(r.fish) + '</span></td>'
       + '<td><span class="supplier-badge" style="background:' + sc + '15;color:' + sc + '">' + esc(r.supplier) + '</span></td>'
-      + '<td style="font-size:12px;color:var(--info)">' + esc(r.buyer || '-') + '</td>'
+      + buyerCell
       + '<td class="price-cell">' + fmtN(r.rate) + '</td>'
       + '<td class="price-cell">' + fmtN(r.amount) + '</td>'
       + '<td class="weight-cell">' + fmtN(r.weight) + '</td>'
@@ -2374,6 +2601,962 @@ document.getElementById('entryDate').addEventListener('input', applyDateFilter);
 document.getElementById('entryDate').addEventListener('change', applyDateFilter);
 
 // ====================================================================
+// Summary PDF Generation
+// ====================================================================
+
+document.getElementById('summaryPdfBtn').addEventListener('click', generateSummaryPDF);
+
+function generateSummaryPDF() {
+  var dateVal = document.getElementById('entryDate').value;
+  var supVal = document.getElementById('supplier').value;
+  var fishVal = document.getElementById('fishType').value;
+
+  if (!dateVal && !supVal && !fishVal) {
+    toast('Select a date, supplier, or fish type first.', 'error');
+    return;
+  }
+
+  // Filter records by selected date, supplier, and fish type
+  var filtered = [];
+  for (var i = 0; i < records.length; i++) {
+    var r = records[i];
+    if (dateVal && r.date !== dateVal) continue;
+    if (supVal && r.supplier !== supVal) continue;
+    if (fishVal && r.fish !== fishVal) continue;
+    filtered.push(r);
+  }
+
+  if (filtered.length === 0) {
+    toast('No records found for the selected filters.', 'error');
+    return;
+  }
+
+  var btn = document.getElementById('summaryPdfBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+  setTimeout(function() {
+    try {
+      var jsPDF = window.jspdf.jsPDF;
+      var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      var pw = doc.internal.pageSize.getWidth();
+      var lm = 14; // left margin
+      var rm = 14; // right margin
+      var cw = pw - lm - rm; // content width
+
+      // Compute summary totals
+      var totalWt = 0, totalAmt = 0;
+      for (var i = 0; i < filtered.length; i++) {
+        totalWt += filtered[i].weight;
+        totalAmt += filtered[i].amount;
+      }
+      var avgKg = totalWt > 0 ? totalAmt / totalWt : 0;
+
+      // ---- Header ----
+      doc.setFillColor(40, 60, 70);
+      doc.rect(0, 0, pw, 38, 'F');
+      doc.setTextColor(232, 168, 50);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Fish Factor', lm, 16);
+      doc.setTextColor(200, 220, 230);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      var compName = document.getElementById('headerCompName') ? document.getElementById('headerCompName').textContent : '';
+      if (compName && compName !== '-') doc.text(compName, lm, 23);
+
+      // Summary label top-right
+      doc.setTextColor(232, 168, 50);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('SUMMARY', pw - rm, 16, { align: 'right' });
+      doc.setTextColor(200, 220, 230);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      var genTime = new Date();
+      doc.text('Generated: ' + genTime.toLocaleDateString() + ' ' + genTime.toLocaleTimeString(), pw - rm, 22, { align: 'right' });
+
+      // ---- Filter criteria ----
+      var y = 46;
+      doc.setFillColor(245, 245, 245);
+      doc.roundedRect(lm, y - 5, cw, 18, 2, 2, 'F');
+      doc.setTextColor(100, 100, 100);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      var filterParts = [];
+      if (dateVal) filterParts.push('Date: ' + formatDateStr(dateVal));
+      if (supVal) filterParts.push('Supplier: ' + supVal);
+      if (fishVal) filterParts.push('Fish: ' + fishVal);
+      doc.text(filterParts.join('   |   '), lm + 4, y + 3);
+
+      // ---- Summary cards ----
+      y = 74;
+      var cardW = (cw - 12) / 4;
+      var cardH = 22;
+      var cards = [
+        { label: 'Entries', value: '' + filtered.length, color: [90, 184, 232] },
+        { label: 'Total Weight', value: totalWt.toFixed(1) + ' Kg', color: [60, 198, 138] },
+        { label: 'Total Amount', value: formatPdfNum(totalAmt), color: [232, 168, 50] },
+        { label: 'Avg/Kg', value: formatPdfNum(avgKg), color: [90, 184, 232] }
+      ];
+      for (var c = 0; c < cards.length; c++) {
+        var cx = lm + c * (cardW + 4);
+        doc.setFillColor(cards[c].color[0], cards[c].color[1], cards[c].color[2]);
+        doc.roundedRect(cx, y, cardW, 3, 1, 1, 'F');
+        doc.setTextColor(60, 60, 60);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.text(cards[c].label, cx + 2, y + 10);
+        doc.setTextColor(30, 30, 30);
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text(cards[c].value, cx + 2, y + 18);
+      }
+
+      // ---- Detail table ----
+      y = y + cardH + 12;
+      var cols = [8, 22, 28, 28, 28, 22, 28, 22]; // #, Date, Fish, Supplier, Buyer, Rate, Amount, Weight
+      var totalColW = 0;
+      for (var ci = 0; ci < cols.length; ci++) totalColW += cols[ci];
+
+      // Table header
+      doc.setFillColor(40, 60, 70);
+      doc.rect(lm, y, totalColW, 8, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'bold');
+      var headers = ['#', 'Date', 'Fish', 'Supplier', 'Buyer', 'Rate', 'Amount', 'Weight'];
+      var tx = lm + 2;
+      for (var h = 0; h < headers.length; h++) {
+        doc.text(headers[h], tx, y + 5.5);
+        tx += cols[h];
+      }
+      y += 8;
+
+      // Table rows
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      for (var i = 0; i < filtered.length; i++) {
+        var r = filtered[i];
+        // Alternate row background
+        if (i % 2 === 0) {
+          doc.setFillColor(248, 248, 248);
+          doc.rect(lm, y, totalColW, 7, 'F');
+        }
+
+        // Check page break
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+          // Repeat header
+          doc.setFillColor(40, 60, 70);
+          doc.rect(lm, y, totalColW, 8, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(7);
+          doc.setFont('helvetica', 'bold');
+          tx = lm + 2;
+          for (var h2 = 0; h2 < headers.length; h2++) {
+            doc.text(headers[h2], tx, y + 5.5);
+            tx += cols[h2];
+          }
+          y += 8;
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7.5);
+        }
+
+        doc.setTextColor(50, 50, 50);
+        var rx = lm + 2;
+        var rowTexts = [
+          '' + (i + 1),
+          formatDateStr(r.date),
+          r.fish || '-',
+          r.supplier || '-',
+          r.buyer || '-',
+          formatPdfNum(r.rate),
+          formatPdfNum(r.amount),
+          r.weight.toFixed(1) + ' Kg'
+        ];
+        for (var ri = 0; ri < rowTexts.length; ri++) {
+          doc.text(rowTexts[ri], rx, y + 5);
+          rx += cols[ri];
+        }
+        y += 7;
+      }
+
+      // Table footer totals
+      y += 2;
+      doc.setDrawColor(40, 60, 70);
+      doc.setLineWidth(0.5);
+      doc.line(lm, y, lm + totalColW, y);
+      y += 6;
+      doc.setTextColor(40, 60, 70);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('TOTAL', lm + 2, y);
+      doc.text(formatPdfNum(totalAmt), lm + 2 + cols[0] + cols[1] + cols[2] + cols[3] + cols[4] + cols[5], y);
+      y += 5;
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Weight: ' + totalWt.toFixed(1) + ' Kg', lm + 2, y);
+      doc.text('Avg/Kg: ' + formatPdfNum(avgKg), lm + 2 + cols[0] + cols[1] + cols[2] + cols[3] + cols[4] + cols[5], y);
+
+      // ---- Per-buyer sub-summary if multiple buyers ----
+      var buyerMap = {};
+      for (var b = 0; b < filtered.length; b++) {
+        var rb = filtered[b];
+        var bk = rb.buyer || 'Cash';
+        if (!buyerMap[bk]) buyerMap[bk] = { wt: 0, amt: 0, n: 0 };
+        buyerMap[bk].wt += rb.weight;
+        buyerMap[bk].amt += rb.amount;
+        buyerMap[bk].n++;
+      }
+      var buyerKeys = Object.keys(buyerMap);
+      if (buyerKeys.length > 1) {
+        y += 14;
+        doc.setFillColor(40, 60, 70);
+        doc.rect(lm, y, totalColW, 7, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Buyer-wise Breakdown', lm + 2, y + 5);
+        y += 7;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        for (var bi = 0; bi < buyerKeys.length; bi++) {
+          var bname = buyerKeys[bi];
+          var bd = buyerMap[bname];
+          if (bi % 2 === 0) {
+            doc.setFillColor(248, 248, 248);
+            doc.rect(lm, y, totalColW, 6, 'F');
+          }
+          doc.setTextColor(50, 50, 50);
+          doc.text(bname, lm + 2, y + 4.5);
+          doc.text('' + bd.n + ' entries', lm + 2 + 40, y + 4.5);
+          doc.text(bd.wt.toFixed(1) + ' Kg', lm + 2 + 75, y + 4.5);
+          doc.text(formatPdfNum(bd.amt), lm + 2 + 110, y + 4.5);
+          y += 6;
+        }
+      }
+
+      // Save
+      var fileName = 'FishFactor_Summary';
+      if (dateVal) fileName += '_' + dateVal;
+      if (supVal) fileName += '_' + supVal.replace(/[^a-zA-Z0-9]/g, '');
+      if (fishVal) fileName += '_' + fishVal.replace(/[^a-zA-Z0-9]/g, '');
+      fileName += '.pdf';
+
+      doc.save(fileName);
+      toast('Summary PDF downloaded.', 'success');
+    } catch (e) {
+      console.error('PDF generation error:', e);
+      toast('Error generating PDF. Try again.', 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Summary PDF';
+  }, 80);
+}
+
+function formatDateStr(d) {
+  if (!d) return '-';
+  var parts = d.split('-');
+  if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
+  return d;
+}
+
+function formatPdfNum(n) {
+  if (isNaN(n) || n === null || n === undefined) return '0.00';
+  return Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ====================================================================
+// Fish-wise Consolidated Summary PDF (by Date + Supplier)
+// ====================================================================
+
+document.getElementById('fishSummaryPdfBtn').addEventListener('click', generateFishSummaryPDF);
+
+function generateFishSummaryPDF() {
+  var dateVal = document.getElementById('entryDate').value;
+  var supVal = document.getElementById('supplier').value;
+
+  if (!dateVal || !supVal) {
+    toast('Select both a date and a supplier first.', 'error');
+    return;
+  }
+
+  // Filter records by date + supplier only (all fish types)
+  var filtered = [];
+  for (var i = 0; i < records.length; i++) {
+    var r = records[i];
+    if (r.date !== dateVal || r.supplier !== supVal) continue;
+    filtered.push(r);
+  }
+
+  if (filtered.length === 0) {
+    toast('No records found for this date and supplier.', 'error');
+    return;
+  }
+
+  var btn = document.getElementById('fishSummaryPdfBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+  setTimeout(function() {
+    try {
+      var jsPDF = window.jspdf.jsPDF;
+      var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      var pw = doc.internal.pageSize.getWidth();
+      var lm = 14;
+      var rm = 14;
+      var cw = pw - lm - rm;
+
+      // Group records by fish type
+      var fishMap = {};
+      var grandWt = 0, grandAmt = 0;
+      for (var i = 0; i < filtered.length; i++) {
+        var r = filtered[i];
+        var fk = r.fish || 'Unknown';
+        if (!fishMap[fk]) fishMap[fk] = { entries: [], wt: 0, amt: 0, n: 0 };
+        fishMap[fk].entries.push(r);
+        fishMap[fk].wt += r.weight;
+        fishMap[fk].amt += r.amount;
+        fishMap[fk].n++;
+        grandWt += r.weight;
+        grandAmt += r.amount;
+      }
+      var grandAvg = grandWt > 0 ? grandAmt / grandWt : 0;
+      var fishKeys = Object.keys(fishMap).sort(function(a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+      });
+
+      // ---- Header ----
+      doc.setFillColor(40, 60, 70);
+      doc.rect(0, 0, pw, 38, 'F');
+      doc.setTextColor(232, 168, 50);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Fish Factor', lm, 16);
+      doc.setTextColor(200, 220, 230);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      var compName = document.getElementById('headerCompName') ? document.getElementById('headerCompName').textContent : '';
+      if (compName && compName !== '-') doc.text(compName, lm, 23);
+
+      doc.setTextColor(232, 168, 50);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('FISH-WISE SUMMARY', pw - rm, 16, { align: 'right' });
+      doc.setTextColor(200, 220, 230);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      var genTime = new Date();
+      doc.text('Generated: ' + genTime.toLocaleDateString() + ' ' + genTime.toLocaleTimeString(), pw - rm, 22, { align: 'right' });
+
+      // ---- Filter criteria ----
+      var y = 46;
+      doc.setFillColor(245, 245, 245);
+      doc.roundedRect(lm, y - 5, cw, 18, 2, 2, 'F');
+      doc.setTextColor(100, 100, 100);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Date: ' + formatDateStr(dateVal) + '   |   Supplier: ' + supVal, lm + 4, y + 3);
+
+      // ---- Grand summary cards ----
+      y = 74;
+      var cardW = (cw - 12) / 4;
+      var cardH = 22;
+      var cards = [
+        { label: 'Total Entries', value: '' + filtered.length, color: [90, 184, 232] },
+        { label: 'Total Weight', value: grandWt.toFixed(1) + ' Kg', color: [60, 198, 138] },
+        { label: 'Total Amount', value: formatPdfNum(grandAmt), color: [232, 168, 50] },
+        { label: 'Avg/Kg', value: formatPdfNum(grandAvg), color: [90, 184, 232] }
+      ];
+      for (var c = 0; c < cards.length; c++) {
+        var cx = lm + c * (cardW + 4);
+        doc.setFillColor(cards[c].color[0], cards[c].color[1], cards[c].color[2]);
+        doc.roundedRect(cx, y, cardW, 3, 1, 1, 'F');
+        doc.setTextColor(60, 60, 60);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.text(cards[c].label, cx + 2, y + 10);
+        doc.setTextColor(30, 30, 30);
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text(cards[c].value, cx + 2, y + 18);
+      }
+
+      // ---- Per-fish-type consolidated table ----
+      y = y + cardH + 14;
+
+      // Section title
+      doc.setTextColor(40, 60, 70);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Consolidated by Fish Type (' + fishKeys.length + ' types)', lm, y);
+      y += 6;
+
+      var fcols = [10, 42, 22, 22, 30, 22, 24]; // #, Fish, Entries, Weight, Amount, Avg/Kg, Avg Rate
+      var ftotalColW = 0;
+      for (var fi = 0; fi < fcols.length; fi++) ftotalColW += fcols[fi];
+
+      // Table header
+      doc.setFillColor(40, 60, 70);
+      doc.rect(lm, y, ftotalColW, 8, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'bold');
+      var fheaders = ['#', 'Fish Type', 'Entries', 'Weight', 'Amount', 'Avg/Kg', 'Avg Rate'];
+      var ftx = lm + 2;
+      for (var fh = 0; fh < fheaders.length; fh++) {
+        doc.text(fheaders[fh], ftx, y + 5.5);
+        ftx += fcols[fh];
+      }
+      y += 8;
+
+      // Fish rows
+      doc.setFont('helvetica', 'normal');
+      for (var fi2 = 0; fi2 < fishKeys.length; fi2++) {
+        var fname = fishKeys[fi2];
+        var fd = fishMap[fname];
+        var fAvg = fd.wt > 0 ? fd.amt / fd.wt : 0;
+
+        // Calculate weighted avg rate
+        var totalRateWt = 0;
+        for (var er = 0; er < fd.entries.length; er++) {
+          totalRateWt += (fd.entries[er].rate * fd.entries[er].weight);
+        }
+        var avgRate = fd.wt > 0 ? totalRateWt / fd.wt : 0;
+
+        if (fi2 % 2 === 0) {
+          doc.setFillColor(248, 248, 248);
+          doc.rect(lm, y, ftotalColW, 8, 'F');
+        }
+
+        doc.setTextColor(50, 50, 50);
+        doc.setFontSize(8);
+        var frx = lm + 2;
+        var frowTexts = [
+          '' + (fi2 + 1),
+          fname,
+          '' + fd.n,
+          fd.wt.toFixed(1) + ' Kg',
+          formatPdfNum(fd.amt),
+          formatPdfNum(fAvg),
+          formatPdfNum(avgRate)
+        ];
+        for (var fri = 0; fri < frowTexts.length; fri++) {
+          doc.text(frowTexts[fri], frx, y + 5.5);
+          frx += fcols[fri];
+        }
+        y += 8;
+      }
+
+      // Grand total row
+      y += 1;
+      doc.setDrawColor(40, 60, 70);
+      doc.setLineWidth(0.5);
+      doc.line(lm, y, lm + ftotalColW, y);
+      y += 7;
+      doc.setFillColor(232, 168, 50, 30);
+      doc.rect(lm, y - 4, ftotalColW, 9, 'F');
+      doc.setTextColor(40, 60, 70);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('GRAND TOTAL', lm + 2, y + 1.5);
+      doc.text('' + filtered.length, lm + 2 + fcols[0] + fcols[1] - 6, y + 1.5);
+      doc.text(grandWt.toFixed(1) + ' Kg', lm + 2 + fcols[0] + fcols[1] + fcols[2] - 4, y + 1.5);
+      doc.text(formatPdfNum(grandAmt), lm + 2 + fcols[0] + fcols[1] + fcols[2] + fcols[3] - 4, y + 1.5);
+      doc.text(formatPdfNum(grandAvg), lm + 2 + fcols[0] + fcols[1] + fcols[2] + fcols[3] + fcols[4] - 4, y + 1.5);
+
+      // ---- Per-fish detail breakdown (each fish type, its buyer rows) ----
+      y += 18;
+      doc.addPage(); y = 20;
+      doc.setTextColor(40, 60, 70);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Detailed Breakdown by Fish Type', lm, y);
+      y += 8;
+
+      var dcols = [10, 40, 36, 28, 22, 28, 22]; // #, Fish, Buyer, Rate, Amount, Weight, Avg/Kg
+      var dtotalColW = 0;
+      for (var di = 0; di < dcols.length; di++) dtotalColW += dcols[di];
+
+      for (var fk3 = 0; fk3 < fishKeys.length; fk3++) {
+        var fishName = fishKeys[fk3];
+        var fishData = fishMap[fishName];
+
+        // Check if we need a new page
+        if (y > 245) {
+          doc.addPage();
+          y = 20;
+        }
+
+        // Fish type sub-header
+        doc.setFillColor(60, 198, 138);
+        doc.roundedRect(lm, y, dtotalColW, 7, 1, 1, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.text(fishName + '  (' + fishData.n + ' entries, ' + fishData.wt.toFixed(1) + ' Kg, ' + formatPdfNum(fishData.amt) + ')', lm + 3, y + 5);
+        y += 7;
+
+        // Detail table header
+        doc.setFillColor(220, 230, 235);
+        doc.rect(lm, y, dtotalColW, 7, 'F');
+        doc.setTextColor(60, 60, 60);
+        doc.setFontSize(6.5);
+        doc.setFont('helvetica', 'bold');
+        var dheaders = ['#', 'Buyer', 'Entries', 'Rate', 'Amount', 'Weight', 'Avg/Kg'];
+        var dtx = lm + 2;
+        for (var dh = 0; dh < dheaders.length; dh++) {
+          doc.text(dheaders[dh], dtx, y + 5);
+          dtx += dcols[dh];
+        }
+        y += 7;
+
+        // Group by buyer within this fish type
+        var bMap = {};
+        for (var bi2 = 0; bi2 < fishData.entries.length; bi2++) {
+          var entry = fishData.entries[bi2];
+          var bk2 = entry.buyer || 'Cash';
+          if (!bMap[bk2]) bMap[bk2] = { wt: 0, amt: 0, n: 0, rates: [] };
+          bMap[bk2].wt += entry.weight;
+          bMap[bk2].amt += entry.amount;
+          bMap[bk2].n++;
+          bMap[bk2].rates.push(entry.rate);
+        }
+        var bKeys = Object.keys(bMap).sort(function(a, b) {
+          return a.toLowerCase().localeCompare(b.toLowerCase());
+        });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        for (var bk3 = 0; bk3 < bKeys.length; bk3++) {
+          if (y > 275) {
+            doc.addPage();
+            y = 20;
+          }
+
+          var buyerName = bKeys[bk3];
+          var bd2 = bMap[buyerName];
+          var bAvg = bd2.wt > 0 ? bd2.amt / bd2.wt : 0;
+          // Simple avg rate
+          var bAvgRate = 0;
+          for (var rr = 0; rr < bd2.rates.length; rr++) bAvgRate += bd2.rates[rr];
+          bAvgRate = bd2.rates.length > 0 ? bAvgRate / bd2.rates.length : 0;
+
+          if (bk3 % 2 === 0) {
+            doc.setFillColor(252, 252, 252);
+            doc.rect(lm, y, dtotalColW, 6, 'F');
+          }
+
+          doc.setTextColor(50, 50, 50);
+          var drx = lm + 2;
+          var drowTexts = [
+            '' + (bk3 + 1),
+            buyerName,
+            '' + bd2.n,
+            formatPdfNum(bAvgRate),
+            formatPdfNum(bd2.amt),
+            bd2.wt.toFixed(1) + ' Kg',
+            formatPdfNum(bAvg)
+          ];
+          for (var dri = 0; dri < drowTexts.length; dri++) {
+            doc.text(drowTexts[dri], drx, y + 4.5);
+            drx += dcols[dri];
+          }
+          y += 6;
+        }
+
+        // Subtotal for this fish
+        doc.setDrawColor(180, 190, 195);
+        doc.setLineWidth(0.3);
+        doc.line(lm, y + 1, lm + dtotalColW, y + 1);
+        y += 4;
+        doc.setTextColor(60, 60, 60);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Subtotal: ' + fishData.n + ' entries  |  ' + fishData.wt.toFixed(1) + ' Kg  |  ' + formatPdfNum(fishData.amt), lm + 2, y + 2);
+        y += 10;
+      }
+
+      // Save
+      var fileName = 'FishFactor_FishSummary_' + dateVal + '_' + supVal.replace(/[^a-zA-Z0-9]/g, '') + '.pdf';
+      doc.save(fileName);
+      toast('Fish summary PDF downloaded.', 'success');
+    } catch (e) {
+      console.error('Fish PDF generation error:', e);
+      toast('Error generating PDF. Try again.', 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-fish-fins"></i> Fish Summary PDF';
+  }, 80);
+}
+
+// ====================================================================
+// Cash Summary PDF — records where buyer === 'Cash'
+// ====================================================================
+
+document.getElementById('cashSummaryPdfBtn').addEventListener('click', generateCashSummaryPDF);
+
+function generateCashSummaryPDF() {
+  var filtered = getFilteredRecords();
+  var cashRecs = [];
+  for (var i = 0; i < filtered.length; i++) {
+    if (filtered[i].buyer === 'Cash') cashRecs.push(filtered[i]);
+  }
+  if (cashRecs.length === 0) { toast('No cash records for the current filter.', 'error'); return; }
+
+  var btn = document.getElementById('cashSummaryPdfBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+  setTimeout(function() {
+    try {
+      var jsPDF = window.jspdf.jsPDF;
+      var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      var pw = doc.internal.pageSize.getWidth();
+      var lm = 14, rm = 14, cw = pw - lm - rm;
+      var compName = document.getElementById('headerCompName') ? document.getElementById('headerCompName').textContent : '';
+
+      var totalWt = 0, totalAmt = 0;
+      for (var i = 0; i < cashRecs.length; i++) { totalWt += cashRecs[i].weight; totalAmt += cashRecs[i].amount; }
+      var fishSet = {}, supSet = {};
+      for (var i = 0; i < cashRecs.length; i++) { fishSet[cashRecs[i].fish] = 1; supSet[cashRecs[i].supplier] = 1; }
+      var fishCount = Object.keys(fishSet).length, supCount = Object.keys(supSet).length;
+
+      // Header
+      doc.setFillColor(30, 80, 60); doc.rect(0, 0, pw, 38, 'F');
+      doc.setTextColor(60, 198, 138); doc.setFontSize(20); doc.setFont('helvetica', 'bold');
+      doc.text('Cash Transaction Summary', lm, 16);
+      doc.setTextColor(200, 230, 215); doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+      if (compName && compName !== '-') doc.text(compName, lm, 23);
+      doc.setTextColor(60, 198, 138); doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+      doc.text('CASH ONLY', pw - rm, 16, { align: 'right' });
+      doc.setTextColor(200, 230, 215); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+      var gt = new Date();
+      doc.text('Generated: ' + gt.toLocaleDateString() + ' ' + gt.toLocaleTimeString(), pw - rm, 22, { align: 'right' });
+
+      // Filter info bar
+      var y = 46;
+      doc.setFillColor(240, 248, 245); doc.roundedRect(lm, y - 5, cw, 16, 2, 2, 'F');
+      doc.setTextColor(80, 120, 100); doc.setFontSize(8);
+      var fp = [];
+      if (filterDate) fp.push('Date: ' + fmtDate(filterDate)); else fp.push('All Dates');
+      fp.push('Cash transactions only');
+      doc.text(fp.join('   |   '), lm + 4, y + 2);
+
+      // Summary cards
+      y = 72; var cardW = (cw - 12) / 4, cardH = 22;
+      var cards = [
+        { label: 'Total Amount', value: formatPdfNum(totalAmt), color: [44, 123, 162] },
+        { label: 'Total Weight', value: totalWt.toFixed(1) + ' Kg', color: [60, 198, 138] },
+        { label: 'Transactions', value: '' + cashRecs.length, color: [44, 123, 162] },
+        { label: 'Fish Types', value: '' + fishCount, color: [60, 198, 138] }
+      ];
+      for (var c = 0; c < cards.length; c++) {
+        var cx = lm + c * (cardW + 4);
+        doc.setFillColor(cards[c].color[0], cards[c].color[1], cards[c].color[2]);
+        doc.roundedRect(cx, y, cardW, 3, 1, 1, 'F');
+        doc.setTextColor(60, 60, 60); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+        doc.text(cards[c].label, cx + 2, y + 10);
+        doc.setTextColor(30, 30, 30); doc.setFontSize(12); doc.setFont('helvetica', 'bold');
+        doc.text(cards[c].value, cx + 2, y + 18);
+      }
+
+      // Group by fish type then supplier
+      var byFish = {};
+      for (var i = 0; i < cashRecs.length; i++) {
+        var r = cashRecs[i], fk = r.fish || 'Unknown', sk = r.supplier || 'Unknown';
+        if (!byFish[fk]) byFish[fk] = { suppliers: {}, totalAmt: 0, totalWt: 0, count: 0 };
+        if (!byFish[fk].suppliers[sk]) byFish[fk].suppliers[sk] = { amt: 0, wt: 0, n: 0 };
+        byFish[fk].suppliers[sk].amt += r.amount; byFish[fk].suppliers[sk].wt += r.weight; byFish[fk].suppliers[sk].n++;
+        byFish[fk].totalAmt += r.amount; byFish[fk].totalWt += r.weight; byFish[fk].count++;
+      }
+      var sortedFish = Object.keys(byFish).sort(function(a, b) { return byFish[b].totalAmt - byFish[a].totalAmt; });
+
+      y = y + cardH + 14;
+      doc.addPage(); y = 20;
+      doc.setTextColor(30, 80, 60); doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+      doc.text('Detailed Breakdown by Fish Type', lm, y); y += 6;
+
+      var cols = [10, 36, 34, 16, 26, 30, 34];
+      var totalColW = 0; for (var ci = 0; ci < cols.length; ci++) totalColW += cols[ci];
+      doc.setFillColor(40, 60, 70); doc.rect(lm, y, totalColW, 8, 'F');
+      doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold');
+      var headers = ['#', 'Fish Type', 'Supplier', 'Qty', 'Weight (Kg)', 'Amount (Rs.)', ''];
+      var tx = lm + 2; for (var h = 0; h < headers.length; h++) { doc.text(headers[h], tx, y + 5.5); tx += cols[h]; }
+      y += 8; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+
+      var rowNum = 0;
+      for (var fi = 0; fi < sortedFish.length; fi++) {
+        var fname = sortedFish[fi], fd = byFish[fname];
+        var sortedSups = Object.keys(fd.suppliers).sort(function(a, b) { return fd.suppliers[b].amt - fd.suppliers[a].amt; });
+        for (var si = 0; si < sortedSups.length; si++) {
+          var sname = sortedSups[si], sd = fd.suppliers[sname]; rowNum++;
+          if (y > 270) { doc.addPage(); y = 20; doc.setFillColor(40, 60, 70); doc.rect(lm, y, totalColW, 8, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold'); tx = lm + 2; for (var h2 = 0; h2 < headers.length; h2++) { doc.text(headers[h2], tx, y + 5.5); tx += cols[h2]; } y += 8; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); }
+          if (rowNum % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, totalColW, 7, 'F'); }
+          doc.setTextColor(50, 50, 50); var rx = lm + 2;
+          doc.text('' + rowNum, rx, y + 5); rx += cols[0];
+          doc.setFont('helvetica', 'bold'); doc.text(si === 0 ? fname : '', rx, y + 5); rx += cols[1];
+          doc.setFont('helvetica', 'normal'); doc.text(sname, rx, y + 5); rx += cols[2];
+          doc.setTextColor(120, 120, 120); doc.text('' + sd.n, rx, y + 5); rx += cols[3];
+          doc.setTextColor(50, 50, 50); doc.text(sd.wt.toFixed(2), rx, y + 5); rx += cols[4];
+          doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(sd.amt), rx, y + 5);
+          y += 7;
+        }
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.setFillColor(232, 244, 248); doc.rect(lm, y, totalColW, 7, 'F');
+        doc.setDrawColor(44, 123, 162); doc.setLineWidth(0.3); doc.line(lm, y, lm + totalColW, y);
+        doc.setTextColor(44, 123, 162); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
+        rx = lm + 2 + cols[0]; doc.text('Subtotal: ' + fname, rx, y + 5); rx += cols[1];
+        doc.setTextColor(120, 120, 120); doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
+        doc.text('(' + fd.count + ' entries)', rx, y + 5); rx += cols[2] + cols[3];
+        doc.setTextColor(44, 123, 162); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
+        doc.text(fd.totalWt.toFixed(2), rx, y + 5); rx += cols[4]; doc.text(formatPdfNum(fd.totalAmt), rx, y + 5);
+        y += 7;
+      }
+
+      // Grand total bar
+      y += 2;
+      if (y > 265) { doc.addPage(); y = 20; }
+      doc.setFillColor(40, 60, 70); doc.rect(lm, y, totalColW, 9, 'F');
+      doc.setTextColor(255, 255, 255); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+      doc.text('TOTAL SALE', lm + 2, y + 6);
+      doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+      doc.text(cashRecs.length + ' cash transactions', lm + 42, y + 6);
+      doc.text(totalWt.toFixed(2) + ' Kg', lm + totalColW - 60, y + 6);
+      doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(totalAmt), lm + totalColW - 2, y + 6, { align: 'right' });
+      y += 14; // advance past the 9mm bar + 5mm gap
+
+      // Cash - Credit = In Hand
+      var creditTotal = 0;
+      for (var ci = 0; ci < filtered.length; ci++) {
+        if (filtered[ci].buyer && filtered[ci].buyer !== 'Cash') creditTotal += filtered[ci].amount;
+      }
+      var inHand = totalAmt - creditTotal;
+
+      if (y > 258) { doc.addPage(); y = 20; }
+      doc.setFillColor(245, 245, 245); doc.roundedRect(lm, y - 3, totalColW, 18, 3, 3, 'F');
+      doc.setDrawColor(44, 123, 162); doc.setLineWidth(0.5); doc.roundedRect(lm, y - 3, totalColW, 18, 3, 3, 'S');
+
+      doc.setTextColor(30, 30, 30); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+      doc.text('Cash Total', lm + 4, y + 2);
+      doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(totalAmt), lm + totalColW - 4, y + 2, { align: 'right' });
+
+      doc.setTextColor(224, 82, 82); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+      doc.text('(-) Credit Total', lm + 4, y + 8);
+      doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(creditTotal), lm + totalColW - 4, y + 8, { align: 'right' });
+
+      doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2); doc.line(lm + 4, y + 10, lm + totalColW - 4, y + 10);
+
+      doc.setTextColor(30, 80, 60); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+      doc.text('Cash in Hand', lm + 4, y + 14);
+      doc.setTextColor(44, 123, 162); doc.setFontSize(11);
+      doc.text(formatPdfNum(inHand), lm + totalColW - 4, y + 14, { align: 'right' });
+
+      // Footer
+      doc.setFontSize(7); doc.setTextColor(150, 150, 150); doc.setFont('helvetica', 'normal');
+      doc.text('Generated for ' + (compName || 'FishFactor') + ' (Fish Factor)  |  ' + cashRecs.length + ' cash transactions across ' + fishCount + ' fish types from ' + supCount + ' suppliers', pw / 2, 287, { align: 'center' });
+
+      doc.save((compName || 'FishFactor').replace(/\s+/g, '_') + '_Cash_Summary_' + (filterDate || 'all') + '.pdf');
+      toast('Cash summary PDF downloaded (' + cashRecs.length + ' records).', 'success');
+    } catch (e) { console.error('Cash PDF error:', e); toast('Error generating Cash PDF.', 'error'); }
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-coins"></i> Cash Summary';
+  }, 80);
+}
+
+// ====================================================================
+// Non-Cash (Credit) Summary PDF — records where buyer !== 'Cash'
+// ====================================================================
+
+document.getElementById('nonCashSummaryPdfBtn').addEventListener('click', generateNonCashSummaryPDF);
+
+function generateNonCashSummaryPDF() {
+  var filtered = getFilteredRecords();
+  var creditRecs = [];
+  for (var i = 0; i < filtered.length; i++) {
+    if (filtered[i].buyer && filtered[i].buyer !== 'Cash') creditRecs.push(filtered[i]);
+  }
+  if (creditRecs.length === 0) { toast('No non-cash (credit) records for the current filter.', 'error'); return; }
+
+  var btn = document.getElementById('nonCashSummaryPdfBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+  setTimeout(function() {
+    try {
+      var jsPDF = window.jspdf.jsPDF;
+      var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      var pw = doc.internal.pageSize.getWidth();
+      var lm = 14, rm = 14, cw = pw - lm - rm;
+      var compName = document.getElementById('headerCompName') ? document.getElementById('headerCompName').textContent : '';
+
+      var totalWt = 0, totalAmt = 0;
+      for (var i = 0; i < creditRecs.length; i++) { totalWt += creditRecs[i].weight; totalAmt += creditRecs[i].amount; }
+      var buyerSet = {}, fishSet = {};
+      for (var i = 0; i < creditRecs.length; i++) { buyerSet[creditRecs[i].buyer] = 1; fishSet[creditRecs[i].fish] = 1; }
+      var buyerCount = Object.keys(buyerSet).length, fishCount = Object.keys(fishSet).length;
+
+      // Header
+      doc.setFillColor(80, 30, 40); doc.rect(0, 0, pw, 38, 'F');
+      doc.setTextColor(224, 82, 82); doc.setFontSize(20); doc.setFont('helvetica', 'bold');
+      doc.text('Non-Cash (Credit) Summary', lm, 16);
+      doc.setTextColor(230, 200, 205); doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+      if (compName && compName !== '-') doc.text(compName, lm, 23);
+      doc.setTextColor(224, 82, 82); doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+      doc.text('CREDIT ONLY', pw - rm, 16, { align: 'right' });
+      doc.setTextColor(230, 200, 205); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+      var gt = new Date();
+      doc.text('Generated: ' + gt.toLocaleDateString() + ' ' + gt.toLocaleTimeString(), pw - rm, 22, { align: 'right' });
+
+      // Filter info bar
+      var y = 46;
+      doc.setFillColor(252, 242, 244); doc.roundedRect(lm, y - 5, cw, 16, 2, 2, 'F');
+      doc.setTextColor(130, 80, 90); doc.setFontSize(8);
+      var fp = [];
+      if (filterDate) fp.push('Date: ' + fmtDate(filterDate)); else fp.push('All Dates');
+      fp.push('Credit transactions only');
+      doc.text(fp.join('   |   '), lm + 4, y + 2);
+
+      // Summary cards
+      y = 72; var cardW = (cw - 15) / 5, cardH = 22;
+      var cards = [
+        { label: 'Total Credit', value: formatPdfNum(totalAmt), color: [194, 58, 80] },
+        { label: 'Total Weight', value: totalWt.toFixed(1) + ' Kg', color: [224, 82, 82] },
+        { label: 'Transactions', value: '' + creditRecs.length, color: [194, 58, 80] },
+        { label: 'Buyers', value: '' + buyerCount, color: [224, 82, 82] },
+        { label: 'Fish Types', value: '' + fishCount, color: [194, 58, 80] }
+      ];
+      for (var c = 0; c < cards.length; c++) {
+        var cx = lm + c * (cardW + 3.75);
+        doc.setFillColor(cards[c].color[0], cards[c].color[1], cards[c].color[2]);
+        doc.roundedRect(cx, y, cardW, 3, 1, 1, 'F');
+        doc.setTextColor(60, 60, 60); doc.setFontSize(6.5); doc.setFont('helvetica', 'normal');
+        doc.text(cards[c].label, cx + 2, y + 10);
+        doc.setTextColor(30, 30, 30); doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+        doc.text(cards[c].value, cx + 2, y + 18);
+      }
+
+      // Group by buyer
+      var byBuyer = {};
+      for (var i = 0; i < creditRecs.length; i++) {
+        var r = creditRecs[i], bk = r.buyer || 'Unknown', fk = r.fish || 'Unknown';
+        if (!byBuyer[bk]) byBuyer[bk] = { fishTypes: {}, totalAmt: 0, totalWt: 0, count: 0 };
+        if (!byBuyer[bk].fishTypes[fk]) byBuyer[bk].fishTypes[fk] = { amt: 0, wt: 0, n: 0 };
+        byBuyer[bk].fishTypes[fk].amt += r.amount; byBuyer[bk].fishTypes[fk].wt += r.weight; byBuyer[bk].fishTypes[fk].n++;
+        byBuyer[bk].totalAmt += r.amount; byBuyer[bk].totalWt += r.weight; byBuyer[bk].count++;
+      }
+      var sortedBuyers = Object.keys(byBuyer).sort(function(a, b) { return byBuyer[b].totalAmt - byBuyer[a].totalAmt; });
+
+      y = y + cardH + 14;
+      doc.setTextColor(80, 30, 40); doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+      doc.text('Credit Breakdown by Buyer', lm, y); y += 6;
+
+      var bcols = [10, 34, 46, 16, 26, 30];
+      var btotalColW = 0; for (var bi = 0; bi < bcols.length; bi++) btotalColW += bcols[bi];
+      doc.setFillColor(40, 60, 70); doc.rect(lm, y, btotalColW, 8, 'F');
+      doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold');
+      var bheaders = ['#', 'Buyer', 'Fish Type(s)', 'Qty', 'Weight (Kg)', 'Credit Amount (Rs.)'];
+      var btx = lm + 2; for (var bh = 0; bh < bheaders.length; bh++) { doc.text(bheaders[bh], btx, y + 5.5); btx += bcols[bh]; }
+      y += 8; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+
+      for (var bi2 = 0; bi2 < sortedBuyers.length; bi2++) {
+        var bname = sortedBuyers[bi2], bd = byBuyer[bname];
+        var fishNames = Object.keys(bd.fishTypes).sort(function(a, b2) { return bd.fishTypes[b2].amt - bd.fishTypes[a].amt; });
+        var fishStr = fishNames.join(', ');
+        if (fishStr.length > 50) fishStr = fishStr.substring(0, 47) + '...';
+        if (bi2 % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, btotalColW, 7, 'F'); }
+        doc.setTextColor(50, 50, 50); var brx = lm + 2;
+        doc.text('' + (bi2 + 1), brx, y + 5); brx += bcols[0];
+        doc.setFont('helvetica', 'bold'); doc.text(bname, brx, y + 5); brx += bcols[1];
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(120, 120, 120);
+        doc.text(fishStr, brx, y + 5); brx += bcols[2];
+        doc.setFontSize(7.5); doc.text('' + bd.count, brx, y + 5); brx += bcols[3];
+        doc.text(bd.totalWt.toFixed(2), brx, y + 5); brx += bcols[4];
+        doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'bold');
+        doc.text(formatPdfNum(bd.totalAmt), brx, y + 5);
+        y += 7;
+      }
+
+      // Buyer total bar
+      y += 2; doc.setFillColor(40, 60, 70); doc.rect(lm, y, btotalColW, 9, 'F');
+      doc.setTextColor(255, 255, 255); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+      doc.text('TOTAL CREDIT', lm + 2, y + 6);
+      doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+      doc.text(buyerCount + ' buyers, ' + fishCount + ' fish types', lm + 42, y + 6);
+      doc.text('' + creditRecs.length, lm + btotalColW - 60, y + 6);
+      doc.text(totalWt.toFixed(2) + ' Kg', lm + btotalColW - 38, y + 6);
+      doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(totalAmt), lm + btotalColW - 2, y + 6, { align: 'right' });
+
+      // Group by fish type for detailed records
+      var byFish = {};
+      for (var i = 0; i < creditRecs.length; i++) {
+        var r = creditRecs[i], fk = r.fish || 'Unknown', sk = r.supplier || 'Unknown';
+        if (!byFish[fk]) byFish[fk] = { suppliers: {}, totalAmt: 0, totalWt: 0, count: 0 };
+        if (!byFish[fk].suppliers[sk]) byFish[fk].suppliers[sk] = { amt: 0, wt: 0, n: 0, buyer: r.buyer, rates: [] };
+        byFish[fk].suppliers[sk].amt += r.amount; byFish[fk].suppliers[sk].wt += r.weight; byFish[fk].suppliers[sk].n++;
+        byFish[fk].suppliers[sk].rates.push(r.rate); byFish[fk].suppliers[sk].buyer = r.buyer;
+        byFish[fk].totalAmt += r.amount; byFish[fk].totalWt += r.weight; byFish[fk].count++;
+      }
+      var sortedFish = Object.keys(byFish).sort(function(a, b) { return byFish[b].totalAmt - byFish[a].totalAmt; });
+
+      y += 16;
+      doc.addPage(); y = 20;
+      doc.setTextColor(80, 30, 40); doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+      doc.text('Detailed Records by Fish Type', lm, y); y += 6;
+
+      var fcols = [10, 32, 30, 30, 20, 24, 30];
+      var ftotalColW = 0; for (var fi = 0; fi < fcols.length; fi++) ftotalColW += fcols[fi];
+      doc.setFillColor(40, 60, 70); doc.rect(lm, y, ftotalColW, 8, 'F');
+      doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold');
+      var fheaders = ['#', 'Fish Type', 'Buyer', 'Supplier', 'Rate', 'Weight (Kg)', 'Amount (Rs.)'];
+      var ftx = lm + 2; for (var fh = 0; fh < fheaders.length; fh++) { doc.text(fheaders[fh], ftx, y + 5.5); ftx += fcols[fh]; }
+      y += 8; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+
+      var rowIdx = 0;
+      for (var fi2 = 0; fi2 < sortedFish.length; fi2++) {
+        var fname = sortedFish[fi2], fd = byFish[fname];
+        var sortedSups = Object.keys(fd.suppliers).sort(function(a, b2) { return fd.suppliers[b2].amt - fd.suppliers[a].amt; });
+        for (var si = 0; si < sortedSups.length; si++) {
+          var sname = sortedSups[si], sd = fd.suppliers[sname]; rowIdx++;
+          if (y > 270) { doc.addPage(); y = 20; doc.setFillColor(40, 60, 70); doc.rect(lm, y, ftotalColW, 8, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold'); ftx = lm + 2; for (var fh2 = 0; fh2 < fheaders.length; fh2++) { doc.text(fheaders[fh2], ftx, y + 5.5); ftx += fcols[fh2]; } y += 8; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); }
+          if (rowIdx % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, ftotalColW, 7, 'F'); }
+          var avgRate = sd.rates.length > 0 ? sd.rates.reduce(function(a, b2) { return a + b2; }, 0) / sd.rates.length : 0;
+          var frx = lm + 2;
+          doc.setTextColor(120, 120, 120); doc.text('' + rowIdx, frx, y + 5); frx += fcols[0];
+          doc.setTextColor(50, 50, 50); doc.setFont('helvetica', 'bold'); doc.text(fname, frx, y + 5); frx += fcols[1];
+          doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'normal'); doc.text(sd.buyer || '-', frx, y + 5); frx += fcols[2];
+          doc.setTextColor(50, 50, 50); doc.text(sname, frx, y + 5); frx += fcols[3];
+          doc.setTextColor(120, 120, 120); doc.text(formatPdfNum(avgRate), frx, y + 5); frx += fcols[4];
+          doc.text(sd.wt.toFixed(2), frx, y + 5); frx += fcols[5];
+          doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(sd.amt), frx, y + 5);
+          y += 7;
+        }
+        if (y > 265) { doc.addPage(); y = 20; }
+        doc.setFillColor(252, 242, 244); doc.rect(lm, y, ftotalColW, 7, 'F');
+        doc.setDrawColor(194, 58, 80); doc.setLineWidth(0.3); doc.line(lm, y, lm + ftotalColW, y);
+        doc.setTextColor(194, 58, 80); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
+        frx = lm + 2 + fcols[0]; doc.text('Subtotal: ' + fname, frx, y + 5); frx += fcols[1];
+        doc.setTextColor(120, 120, 120); doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
+        doc.text('(' + fd.count + ' entries)', frx, y + 5);
+        frx = lm + 2 + fcols[0] + fcols[1] + fcols[2] + fcols[3] + fcols[4];
+        doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
+        doc.text(fd.totalWt.toFixed(2), frx, y + 5); frx += fcols[5]; doc.text(formatPdfNum(fd.totalAmt), frx, y + 5);
+        y += 7;
+      }
+
+      // Footer
+      doc.setFontSize(7); doc.setTextColor(150, 150, 150); doc.setFont('helvetica', 'normal');
+      doc.text('Generated for ' + (compName || 'FishFactor') + ' (Fish Factor)  |  ' + creditRecs.length + ' credit transactions across ' + buyerCount + ' buyers and ' + fishCount + ' fish types', pw / 2, 287, { align: 'center' });
+
+      doc.save((compName || 'FishFactor').replace(/\s+/g, '_') + '_Credit_Summary_' + (filterDate || 'all') + '.pdf');
+      toast('Non-Cash summary PDF downloaded (' + creditRecs.length + ' records).', 'success');
+    } catch (e) { console.error('Credit PDF error:', e); toast('Error generating Credit PDF.', 'error'); }
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-handshake"></i> Non-Cash Summary';
+  }, 80);
+}
+
+// ====================================================================
 // CSV Import / Export
 // ====================================================================
 
@@ -2392,19 +3575,28 @@ document.getElementById('recordImportFile').addEventListener('change', function(
     var first = lines[0].toLowerCase();
     var start = (first.indexOf('date') >= 0 || first.indexOf('fish') >= 0 || first.indexOf('supplier') >= 0)
       ? 1 : 0;
-    var imported = 0, newFish = [], newSup = [];
+    var imported = 0, newFish = [], newSup = [], skipped = 0;
     for (var i = start; i < lines.length; i++) {
       var cols = lines[i].split(',').map(function(c) { return c.trim(); });
       if (cols.length < 5) continue;
       var date = cols[0], fish = cols[1], sup = cols[2];
       var rate = parseFloat(cols[3]), amt = parseFloat(cols[4]);
+      if (!date || !fish || !sup || isNaN(rate) || isNaN(amt) || rate <= 0 || amt <= 0) continue;
       var wt = cols.length > 5
         ? (parseFloat(cols[5]) || 0)
         : (rate > 0 ? amt / rate : 0);
-      if (!date || !fish || !sup || isNaN(rate) || isNaN(amt) || rate <= 0 || amt <= 0) continue;
-      // Auto-add new fish types and suppliers
-      if (fishTypes.indexOf(fish) === -1) { fishTypes.push(fish); newFish.push(fish); }
-      if (suppliers.indexOf(sup) === -1) { suppliers.push(sup); newSup.push(sup); }
+      if (isDuplicate(date, sup, fish, cols[2] || '', rate, amt, wt)) { skipped++; continue; }
+      // Auto-add new fish types and suppliers (case-insensitive check)
+      var fishExists = false;
+      for (var fi = 0; fi < fishTypes.length; fi++) {
+        if (fishTypes[fi].toLowerCase() === fish.toLowerCase()) { fishExists = true; break; }
+      }
+      if (!fishExists) { fishTypes.push(fish); newFish.push(fish); }
+      var supExists = false;
+      for (var si = 0; si < suppliers.length; si++) {
+        if (suppliers[si].toLowerCase() === sup.toLowerCase()) { supExists = true; break; }
+      }
+      if (!supExists) { suppliers.push(sup); newSup.push(sup); }
       records.push({
         id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5) + '_' + i,
         date: date, fish: fish, supplier: sup,
@@ -2416,10 +3608,13 @@ document.getElementById('recordImportFile').addEventListener('change', function(
       save();
       refreshUI();
       var msg = 'Imported ' + imported + ' record(s).';
+      if (skipped > 0) msg += ' (' + skipped + ' duplicate' + (skipped > 1 ? 's' : '') + ' skipped)';
       if (newFish.length) msg += '<br>New fish types: ' + newFish.join(', ') + '.';
       if (newSup.length) msg += '<br>New suppliers: ' + newSup.join(', ') + '.';
       document.getElementById('importResultMsg').innerHTML = msg;
       openModal('importModal');
+    } else if (skipped > 0) {
+      toast('All ' + skipped + ' record(s) are duplicates.', 'error');
     } else {
       toast('No valid records found in file.', 'error');
     }
@@ -2445,7 +3640,7 @@ function exportCSV() {
   a.href = url;
   a.download = 'fish_factor_' + (activeCompany
     ? activeCompany.name.replace(/\s+/g, '_')
-    : 'export') + '_' + new Date().toISOString().split('T')[0] + '.csv';
+    : 'export') + '_' + (filterDate || 'all') + '.csv';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -2481,14 +3676,20 @@ document.getElementById('usersList').addEventListener('click', function(e) {
   if (btn) deleteUser(btn.getAttribute('data-del-user'));
 });
 document.getElementById('fishTypeList').addEventListener('click', function(e) {
+  var editBtn = e.target.closest('[data-rename-fish]');
+  if (editBtn) { openRenameFish(editBtn.getAttribute('data-rename-fish')); return; }
   var btn = e.target.closest('[data-del-fish]');
   if (btn) deleteFishType(btn.getAttribute('data-del-fish'));
 });
 document.getElementById('supplierList').addEventListener('click', function(e) {
+  var editBtn = e.target.closest('[data-rename-sup]');
+  if (editBtn) { openRenameSupplier(editBtn.getAttribute('data-rename-sup')); return; }
   var btn = e.target.closest('[data-del-sup]');
   if (btn) deleteSupplier(btn.getAttribute('data-del-sup'));
 });
 document.getElementById('buyerList').addEventListener('click', function(e) {
+  var editBtn = e.target.closest('[data-rename-buyer]');
+  if (editBtn) { openRenameBuyer(editBtn.getAttribute('data-rename-buyer')); return; }
   var btn = e.target.closest('[data-del-buyer]');
   if (btn) deleteBuyer(btn.getAttribute('data-del-buyer'));
 });
@@ -2509,6 +3710,116 @@ document.getElementById('tableBody').addEventListener('click', function(e) {
 // ====================================================================
 // Modal confirmation handlers
 // ====================================================================
+
+// --- Rename functions ---
+function openRenameFish(name) {
+  renameFishTarget = name;
+  document.getElementById('renameFishInput').value = name;
+  openModal('renameFishModal');
+  setTimeout(function() { document.getElementById('renameFishInput').focus(); }, 200);
+}
+
+function openRenameSupplier(name) {
+  renameSupplierTarget = name;
+  document.getElementById('renameSupplierInput').value = name;
+  openModal('renameSupplierModal');
+  setTimeout(function() { document.getElementById('renameSupplierInput').focus(); }, 200);
+}
+
+function openRenameBuyer(name) {
+  renameBuyerTarget = name;
+  document.getElementById('renameBuyerInput').value = name;
+  openModal('renameBuyerModal');
+  setTimeout(function() { document.getElementById('renameBuyerInput').focus(); }, 200);
+}
+
+function doRenameFish() {
+  var newName = document.getElementById('renameFishInput').value.trim();
+  if (!newName) { toast('Enter a name.', 'error'); return; }
+  if (newName === renameFishTarget) { closeModal('renameFishModal'); return; }
+  // Check for duplicate
+  for (var i = 0; i < fishTypes.length; i++) {
+    if (fishTypes[i].toLowerCase() === newName.toLowerCase() && fishTypes[i] !== renameFishTarget) {
+      toast('A fish type with this name already exists.', 'error');
+      return;
+    }
+  }
+  // Update the name in the array
+  for (var i = 0; i < fishTypes.length; i++) {
+    if (fishTypes[i] === renameFishTarget) { fishTypes[i] = newName; break; }
+  }
+  // Update all records that reference the old name
+  for (var i = 0; i < records.length; i++) {
+    if (records[i].fish === renameFishTarget) records[i].fish = newName;
+  }
+  var oldName = renameFishTarget;
+  renameFishTarget = null;
+  closeModal('renameFishModal');
+  save();
+  renderFishTypes();
+  populateFormSelects();
+  populateFilterSelects();
+  renderTable();
+  renderStats();
+  toast('Renamed "' + oldName + '" to "' + newName + '".', 'success');
+}
+
+function doRenameSupplier() {
+  var newName = document.getElementById('renameSupplierInput').value.trim();
+  if (!newName) { toast('Enter a name.', 'error'); return; }
+  if (newName === renameSupplierTarget) { closeModal('renameSupplierModal'); return; }
+  for (var i = 0; i < suppliers.length; i++) {
+    if (suppliers[i].toLowerCase() === newName.toLowerCase() && suppliers[i] !== renameSupplierTarget) {
+      toast('A supplier with this name already exists.', 'error');
+      return;
+    }
+  }
+  for (var i = 0; i < suppliers.length; i++) {
+    if (suppliers[i] === renameSupplierTarget) { suppliers[i] = newName; break; }
+  }
+  for (var i = 0; i < records.length; i++) {
+    if (records[i].supplier === renameSupplierTarget) records[i].supplier = newName;
+  }
+  var oldName = renameSupplierTarget;
+  renameSupplierTarget = null;
+  closeModal('renameSupplierModal');
+  save();
+  renderSuppliers();
+  populateFormSelects();
+  populateFilterSelects();
+  renderTable();
+  renderStats();
+  toast('Renamed "' + oldName + '" to "' + newName + '".', 'success');
+}
+
+function doRenameBuyer() {
+  var newName = document.getElementById('renameBuyerInput').value.trim();
+  if (!newName) { toast('Enter a name.', 'error'); return; }
+  if (newName === renameBuyerTarget) { closeModal('renameBuyerModal'); return; }
+  for (var i = 0; i < buyers.length; i++) {
+    if (buyers[i].toLowerCase() === newName.toLowerCase() && buyers[i] !== renameBuyerTarget) {
+      toast('A buyer with this name already exists.', 'error');
+      return;
+    }
+  }
+  for (var i = 0; i < buyers.length; i++) {
+    if (buyers[i] === renameBuyerTarget) { buyers[i] = newName; break; }
+  }
+  for (var i = 0; i < records.length; i++) {
+    if (records[i].buyer === renameBuyerTarget) records[i].buyer = newName;
+  }
+  var oldName = renameBuyerTarget;
+  renameBuyerTarget = null;
+  closeModal('renameBuyerModal');
+  save();
+  renderBuyers();
+  populateFormSelects();
+  renderTable();
+  renderStats();
+  toast('Renamed "' + oldName + '" to "' + newName + '".', 'success');
+}
+
+// --- Existing modal handlers ---
 
 document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
   if (!delTarget) return;
@@ -2574,6 +3885,21 @@ document.getElementById('confirmDeleteBuyerBtn').addEventListener('click', funct
   renderBuyers();
   populateFormSelects();
   toast('Buyer removed.', 'success');
+});
+
+// Rename confirmation handlers
+document.getElementById('confirmRenameFishBtn').addEventListener('click', doRenameFish);
+document.getElementById('confirmRenameSupplierBtn').addEventListener('click', doRenameSupplier);
+document.getElementById('confirmRenameBuyerBtn').addEventListener('click', doRenameBuyer);
+// Enter key support for rename inputs
+document.getElementById('renameFishInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); doRenameFish(); }
+});
+document.getElementById('renameSupplierInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); doRenameSupplier(); }
+});
+document.getElementById('renameBuyerInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); doRenameBuyer(); }
 });
 
 document.getElementById('confirmDeleteUserBtn').addEventListener('click', function() {
@@ -2682,7 +4008,55 @@ document.getElementById('buyerUpload').addEventListener('change', function() {
   uploadBuyers(this);
 });
 document.getElementById('quickEntryBtn').addEventListener('click', openQuickEntry);
-document.getElementById('qeAddRowBtn').addEventListener('click', function() { addQEBuyerRow(); });
+// Re-group fish types when supplier changes in main form
+document.getElementById('supplier').addEventListener('change', function() {
+  populateFishSelect(this.value, '');
+});
+
+// Reload saved buyers when fish type changes inside Quick Entry modal
+document.getElementById('qeFishSelect').addEventListener('change', function() {
+  var fish = this.value;
+  var sup = document.getElementById('qeSupName').textContent;
+  if (!fish || !sup) return;
+
+  // Clear old draft — context has changed
+  clearQEDraft();
+
+  // Sync fish type back to main form
+  document.getElementById('fishType').value = fish;
+
+  var selectedDate = document.getElementById('entryDate').value;
+
+  // Find existing records for this date + supplier + fish combo
+  var savedRows = [];
+  if (selectedDate) {
+    for (var i = 0; i < records.length; i++) {
+      if (records[i].date === selectedDate && records[i].supplier === sup && records[i].fish === fish) {
+        savedRows.push(records[i]);
+      }
+    }
+  }
+
+  // Reset rows and pre-populate
+  qeRowCounter = 0;
+  document.getElementById('qeBuyerRows').innerHTML = '';
+  if (savedRows.length > 0) {
+    for (var i = 0; i < savedRows.length; i++) {
+      addQEBuyerRow(savedRows[i].buyer);
+      var lastRow = document.querySelector('#qeBuyerRows .qe-row:last-child');
+      if (lastRow) {
+        var rateInput = lastRow.querySelector('.qe-rate');
+        var amtInput = lastRow.querySelector('.qe-amt');
+        if (rateInput) { rateInput.value = savedRows[i].rate; rateInput.dispatchEvent(new Event('input')); }
+        if (amtInput) { amtInput.value = savedRows[i].amount; amtInput.dispatchEvent(new Event('input')); }
+      }
+    }
+  } else {
+    addQEBuyerRow('Cash');
+  }
+  updateQETotal();
+});
+document.getElementById('qeAddRowBtn').addEventListener('click', function() { addQEBuyerRow('Cash'); });
 document.getElementById('qeSubmitAll').addEventListener('click', submitAllQE);
 document.getElementById('qeNewBuyerToggle').addEventListener('click', function() {
   var row = document.getElementById('qeNewBuyerRow');
@@ -2706,7 +4080,7 @@ document.getElementById('qeNewBuyerSave').addEventListener('click', function() {
   for (var i = 0; i < rows.length; i++) {
     var sel = rows[i].querySelector('.qe-buyer-sel');
     var cur = sel.value;
-    var opts = '<option value="">Buyer</option>';
+    var opts = '<option value="Cash"' + (cur === 'Cash' ? ' selected' : '') + '>Cash</option>';
     for (var j = 0; j < buyers.length; j++) {
       opts += '<option value="' + escA(buyers[j]) + '"' + (buyers[j] === cur ? ' selected' : '') + '>' + esc(buyers[j]) + '</option>';
     }
@@ -2741,7 +4115,7 @@ document.getElementById('qeBuyerCsvInput').addEventListener('change', function(i
       for (var i = 0; i < rows.length; i++) {
         var sel = rows[i].querySelector('.qe-buyer-sel');
         var cur = sel.value;
-        var opts = '<option value="">Buyer</option>';
+        var opts = '<option value="Cash"' + (cur === 'Cash' ? ' selected' : '') + '>Cash</option>';
         for (var j = 0; j < buyers.length; j++) {
           opts += '<option value="' + escA(buyers[j]) + '"' + (buyers[j] === cur ? ' selected' : '') + '>' + esc(buyers[j]) + '</option>';
         }
@@ -2797,10 +4171,12 @@ document.getElementById('loginUser').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') document.getElementById('loginPass').focus();
 });
 document.getElementById('loginPass').addEventListener('keydown', function(e) {
-  if (loginMode === 'setup') {
-    document.getElementById('loginPassConfirm').focus();
-  } else {
-    handleLogin();
+  if (e.key === 'Enter') {
+    if (loginMode === 'setup') {
+      document.getElementById('loginPassConfirm').focus();
+    } else {
+      handleLogin();
+    }
   }
 });
 document.getElementById('loginPassConfirm').addEventListener('keydown', function(e) {
@@ -3071,7 +4447,7 @@ function initApp() {
 }
 
 // Version stamp — helps verify the user is running the latest file
-var _FF_VERSION = 'v8-buyers-quick-entry';
+var _FF_VERSION = 'v12-fix-dedup-buyer-visible';
 dbg('Script loaded. Version: ' + _FF_VERSION);
 
 // Run initApp with extra safety
