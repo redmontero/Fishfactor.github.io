@@ -1935,9 +1935,6 @@ function openQuickEntry() {
   var activeFish = sel.value; // the fish currently selected in QE modal
 
   // 1. Check for auto-saved draft — only use if context matches exactly
-  // NOTE: We do NOT load existing records here. Quick Entry is for NEW entries only.
-  // Previously saved records are visible in the main table. Loading them here caused
-  // duplicate confusion — users saw old data and couldn't submit without errors.
   var draft = loadQEDraft();
   var usedDraft = false;
   if (draft && draft.rows && draft.rows.length > 0
@@ -1948,12 +1945,21 @@ function openQuickEntry() {
     usedDraft = true;
   }
 
+  // 2. If no matching draft, load existing records for this exact combo
+  if (!usedDraft && activeFish && selectedDate && sup) {
+    for (var i = 0; i < records.length; i++) {
+      if (records[i].date === selectedDate && records[i].supplier === sup && records[i].fish === activeFish) {
+        savedRows.push(records[i]);
+      }
+    }
+  }
+
   // Reset buyer rows
   qeRowCounter = 0;
   document.getElementById('qeBuyerRows').innerHTML = '';
   document.getElementById('qeNewBuyerRow').style.display = 'none';
 
-  // If we have a crash-recovery draft, pre-populate rows
+  // If we have a crash-recovery draft or existing records, pre-populate rows
   // Suppress auto-draft during restoration to avoid saving partial/incomplete state
   var qeSuppressDraft = true;
   var origSaveQEDraft = saveQEDraft;
@@ -2099,11 +2105,15 @@ function renumberQERows() {
 
 // Submit all buyer rows as records
 // Check for duplicate record (date + supplier + fish + buyer + rate + amount + weight)
+// Uses fuzzy comparison for numeric fields to avoid false negatives from
+// floating-point or type coercion issues.
 function isDuplicate(date, supplier, fish, buyer, rate, amount, weight) {
   for (var i = 0; i < records.length; i++) {
     var r = records[i];
+    var rRate = parseFloat(r.rate);
     if (r.date === date && r.supplier === supplier && r.fish === fish
-      && r.buyer === buyer && r.rate === rate
+      && r.buyer === buyer
+      && Math.abs(rRate - rate) < 0.01
       && Math.abs(r.amount - amount) < 0.01
       && Math.abs(r.weight - weight) < 0.001) {
       return true;
@@ -2143,7 +2153,13 @@ function submitAllQE() {
     });
     added++;
   }
-  if (added === 0 && skipped > 0) { toast('All ' + skipped + ' row(s) are duplicates. No new records added.', 'error'); return; }
+  if (added === 0 && skipped > 0) {
+    // All rows matched existing records — nothing new to save, just close
+    clearQEDraft();
+    closeModal('quickEntryModal');
+    toast('No new entries. All ' + skipped + ' row(s) already exist.', 'info');
+    return;
+  }
   if (added === 0) { toast('Fill at least one row with rate & amount.', 'error'); return; }
 
   clearQEDraft();
