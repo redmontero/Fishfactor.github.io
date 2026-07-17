@@ -1,8 +1,26 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<script>
+(function(){
+  var w=window.innerWidth;
+  var isTouch='ontouchstart' in window||navigator.maxTouchPoints>0;
+  var d=document.documentElement;
+  if(w>=1024&&!isTouch){d.classList.add('is-desktop');}
+  else if(w>=768){d.classList.add('is-tablet');}
+  else{d.classList.add('is-mobile');}
+  d.classList.add('device-detected');
+  window.addEventListener('resize',function(){
+    var nw=window.innerWidth,nt='ontouchstart' in window||navigator.maxTouchPoints>0;
+    d.classList.remove('is-desktop','is-tablet','is-mobile');
+    if(nw>=1024&&!nt){d.classList.add('is-desktop');}
+    else if(nw>=768){d.classList.add('is-tablet');}
+    else{d.classList.add('is-mobile');}
+  });
+})();
+</script>
 <meta name="theme-color" content="#0f1a1e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -259,6 +277,56 @@ tbody td{padding:9px 10px;font-size:12px;vertical-align:middle}
 .loading-hint i{color:var(--accent);animation:sp 1s infinite}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 @media(max-width:480px){.header-actions{gap:4px}.header-btn{padding:6px 8px;font-size:10px}.header-btn .btn-label{display:none}.stats-row{grid-template-columns:repeat(2,1fr)}}
+/* ====== Desktop (PC / large screen, no touch-primary) ====== */
+html.is-desktop .screen-box{max-width:520px}
+html.is-desktop main{max-width:1100px;padding:18px 24px 80px}
+html.is-desktop .modal{max-width:560px;padding:28px}
+html.is-desktop .modal h3{font-size:17px}
+html.is-desktop .modal p{font-size:14px}
+html.is-desktop .form-card{padding:20px}
+html.is-desktop .form-grid{grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
+html.is-desktop .form-grid .form-group:nth-child(4){grid-column:span 2}
+html.is-desktop .stats-row{grid-template-columns:repeat(4,1fr);gap:12px}
+html.is-desktop .stat-card{padding:16px 14px}
+html.is-desktop .stat-value{font-size:22px}
+html.is-desktop .stat-label{font-size:11px}
+html.is-desktop .table-scroll{max-height:65vh}
+html.is-desktop .mgmt-add .ni{min-width:160px}
+html.is-desktop .mgmt-add .pi{min-width:160px}
+html.is-desktop .qe-rate,html.is-desktop .qe-amt{width:90px;font-size:13px}
+html.is-desktop .qe-buyer-sel{min-width:120px}
+html.is-desktop .qe-header-row span:nth-child(2){min-width:120px}
+html.is-desktop .qe-header-row span:nth-child(3){width:85px}
+html.is-desktop .qe-header-row span:nth-child(4){width:85px}
+html.is-desktop .qe-header-row span:nth-child(5){width:60px}
+html.is-desktop .qe-row{padding:9px 10px;gap:7px}
+html.is-desktop .qe-wt{width:60px;font-size:12px}
+html.is-desktop .qe-total-amount{font-size:22px}
+html.is-desktop .table-filters{padding:10px 14px;gap:8px}
+html.is-desktop .search-box input{font-size:13px;padding:9px 10px 9px 32px}
+html.is-desktop thead th{padding:10px 14px;font-size:11px}
+html.is-desktop tbody td{padding:10px 14px;font-size:13px}
+html.is-desktop .mgmt-row{padding:14px 18px;gap:14px}
+html.is-desktop .mgmt-name{font-size:14px}
+html.is-desktop .mgmt-icon{width:42px;height:42px;font-size:16px}
+html.is-desktop .date-filter-bar{padding:10px 6px}
+html.is-desktop header{padding:14px 24px}
+html.is-desktop .toast-container{left:24px;right:24px;top:76px}
+/* ====== Tablet ====== */
+html.is-tablet .screen-box{max-width:440px}
+html.is-tablet main{max-width:860px;padding:16px 20px 80px}
+html.is-tablet .modal{max-width:480px;padding:26px}
+html.is-tablet .form-grid{grid-template-columns:1fr 1fr 1fr;gap:12px}
+html.is-tablet .stats-row{grid-template-columns:repeat(4,1fr);gap:10px}
+html.is-tablet .stat-card{padding:14px 12px}
+html.is-tablet .stat-value{font-size:19px}
+html.is-tablet .table-scroll{max-height:58vh}
+html.is-tablet .qe-rate,html.is-tablet .qe-amt{width:80px}
+html.is-tablet .qe-buyer-sel{min-width:100px}
+html.is-tablet .qe-row{padding:8px 9px;gap:6px}
+html.is-tablet header{padding:13px 20px}
+html.is-tablet thead th{padding:10px 12px}
+html.is-tablet tbody td{padding:10px 12px;font-size:12px}
 </style>
 </head>
 <body>
@@ -785,7 +853,12 @@ document.addEventListener('keydown', function(e) {
 
 // Close buttons with data-close attribute
 document.querySelectorAll('[data-close]').forEach(function(btn) {
-  btn.addEventListener('click', function() { closeModal(this.getAttribute('data-close')); });
+  btn.addEventListener('click', function() {
+    var modalId = this.getAttribute('data-close');
+    // Clear Quick Entry draft when closing QE modal without submitting
+    if (modalId === 'quickEntryModal') { clearQEDraft(); }
+    closeModal(modalId);
+  });
 });
 
 // Toggle management card open/closed state
@@ -1862,6 +1935,9 @@ function openQuickEntry() {
   var activeFish = sel.value; // the fish currently selected in QE modal
 
   // 1. Check for auto-saved draft — only use if context matches exactly
+  // NOTE: We do NOT load existing records here. Quick Entry is for NEW entries only.
+  // Previously saved records are visible in the main table. Loading them here caused
+  // duplicate confusion — users saw old data and couldn't submit without errors.
   var draft = loadQEDraft();
   var usedDraft = false;
   if (draft && draft.rows && draft.rows.length > 0
@@ -1872,21 +1948,17 @@ function openQuickEntry() {
     usedDraft = true;
   }
 
-  // 2. If no matching draft, load existing records for this exact combo
-  if (!usedDraft && activeFish && selectedDate && sup) {
-    for (var i = 0; i < records.length; i++) {
-      if (records[i].date === selectedDate && records[i].supplier === sup && records[i].fish === activeFish) {
-        savedRows.push(records[i]);
-      }
-    }
-  }
-
   // Reset buyer rows
   qeRowCounter = 0;
   document.getElementById('qeBuyerRows').innerHTML = '';
   document.getElementById('qeNewBuyerRow').style.display = 'none';
 
-  // If we have saved records/draft, pre-populate rows
+  // If we have a crash-recovery draft, pre-populate rows
+  // Suppress auto-draft during restoration to avoid saving partial/incomplete state
+  var qeSuppressDraft = true;
+  var origSaveQEDraft = saveQEDraft;
+  saveQEDraft = function() { if (!qeSuppressDraft) origSaveQEDraft(); };
+
   if (savedRows.length > 0) {
     for (var i = 0; i < savedRows.length; i++) {
       var rowBuyer = savedRows[i].buyer || 'Cash';
@@ -1897,8 +1969,8 @@ function openQuickEntry() {
       if (lastRow) {
         var rateInput = lastRow.querySelector('.qe-rate');
         var amtInput = lastRow.querySelector('.qe-amt');
-        if (rateInput && rowRate) { rateInput.value = rowRate; rateInput.dispatchEvent(new Event('input')); }
-        if (amtInput && rowAmt) { amtInput.value = rowAmt; amtInput.dispatchEvent(new Event('input')); }
+        if (rateInput && rowRate) { rateInput.value = rowRate; }
+        if (amtInput && rowAmt) { amtInput.value = rowAmt; }
       }
     }
   } else {
@@ -1906,6 +1978,9 @@ function openQuickEntry() {
   }
 
   updateQETotal();
+  // Re-enable draft auto-save after restoration is complete
+  qeSuppressDraft = false;
+  saveQEDraft = origSaveQEDraft;
   openModal('quickEntryModal');
 }
 
@@ -2463,10 +2538,9 @@ function editRecord(id) {
       }
     }
     editingId = null;
+    clearQEDraft();
     save();
     closeModal('quickEntryModal');
-    document.getElementById('fishType').value = fish;
-    document.getElementById('editBar').classList.remove('active');
     document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> New Entry';
     submitBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> Submit All';
     submitBtn.onclick = submitAllQE; // restore default
