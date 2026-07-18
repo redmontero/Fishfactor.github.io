@@ -2413,9 +2413,25 @@ function populateFormSelects() {
   var fs = document.getElementById('fishType');
   var sv = ss.value, fv = fs.value;
   ss.innerHTML = '<option value="">Select supplier</option>';
+  // Group suppliers: those with records for the selected date come first
+  var selectedDate = document.getElementById('entryDate').value;
+  var dateSuppliers = [], otherSuppliers = [];
   var sortedSup = suppliers.slice().sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
   for (var i = 0; i < sortedSup.length; i++) {
-    ss.innerHTML += '<option value="' + escA(sortedSup[i]) + '">' + esc(sortedSup[i]) + '</option>';
+    var found = false;
+    if (selectedDate) {
+      for (var j = 0; j < records.length; j++) {
+        if (records[j].supplier === sortedSup[i] && records[j].date === selectedDate) { found = true; break; }
+      }
+    }
+    if (found) dateSuppliers.push(sortedSup[i]); else otherSuppliers.push(sortedSup[i]);
+  }
+  for (var i = 0; i < dateSuppliers.length; i++) {
+    ss.innerHTML += '<option value="' + escA(dateSuppliers[i]) + '">' + esc(dateSuppliers[i]) + '</option>';
+  }
+  if (dateSuppliers.length && otherSuppliers.length) ss.innerHTML += '<option disabled>─────────</option>';
+  for (var i = 0; i < otherSuppliers.length; i++) {
+    ss.innerHTML += '<option value="' + escA(otherSuppliers[i]) + '">' + esc(otherSuppliers[i]) + '</option>';
   }
   ss.value = sv;
   // Populate fish type with supplier grouping
@@ -2695,14 +2711,13 @@ function applyDateFilter() {
 }
 document.getElementById('entryDate').addEventListener('input', function() {
   applyDateFilter();
-  // Re-group fish types for selected date
-  var sup = document.getElementById('supplier').value;
-  if (sup) populateFishSelect(sup, document.getElementById('fishType').value);
+  // Re-group suppliers and fish types for selected date
+  populateFormSelects();
 });
 document.getElementById('entryDate').addEventListener('change', function() {
   applyDateFilter();
-  var sup = document.getElementById('supplier').value;
-  if (sup) populateFishSelect(sup, document.getElementById('fishType').value);
+  // Re-group suppliers and fish types for selected date
+  populateFormSelects();
 });
 
 // ====================================================================
