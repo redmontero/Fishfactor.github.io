@@ -276,7 +276,7 @@ tbody td{padding:9px 10px;font-size:12px;vertical-align:middle}
 .loading-hint.show{display:flex}
 .loading-hint i{color:var(--accent);animation:sp 1s infinite}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-@media(max-width:480px){.header-actions{gap:4px}.header-btn{padding:6px 8px;font-size:10px}.header-btn .btn-label{display:none}.stats-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.header-actions{gap:3px}.header-btn{padding:6px 7px;font-size:10px}.header-btn .btn-label{display:none}.header-btn#cloudBtn{display:none}#roleBadge{display:none}.stats-row{grid-template-columns:repeat(2,1fr)}}
 /* ====== Desktop (PC / large screen, no touch-primary) ====== */
 html.is-desktop .screen-box{max-width:520px}
 html.is-desktop main{max-width:1100px;padding:18px 24px 80px}
@@ -431,7 +431,7 @@ html.is-tablet tbody td{padding:10px 12px;font-size:12px}
     <button class="header-btn" id="cloudBtn" title="Cloud settings"><i class="fa-solid fa-cloud"></i></button>
     <button class="header-btn accent-btn" id="importBtn" title="Import CSV"><i class="fa-solid fa-file-import"></i> <span class="btn-label">Import</span></button>
     <button class="header-btn" id="exportBtn" title="Export CSV"><i class="fa-solid fa-file-export"></i> <span class="btn-label">Export</span></button>
-    <button class="header-btn" id="clearAllBtn" title="Clear all records"><i class="fa-solid fa-trash-can"></i></button>
+    <button class="header-btn" id="dedupBtn" title="Remove duplicates"><i class="fa-solid fa-clone"></i> <span class="btn-label">Dedup</span></button>
     <button class="lock-btn" id="lockBtn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
   </div>
 </header>
@@ -1715,7 +1715,7 @@ function refreshUI() {
   setTodayDate();
   cancelEdit();
   document.getElementById('usersCard').style.display = isAdmin() ? '' : 'none';
-  document.getElementById('clearAllBtn').style.display = isAdmin() ? '' : 'none';
+  // clearAllBtn removed
 }
 
 function setTodayDate() {
@@ -1876,6 +1876,8 @@ function saveQEDraft() {
     rows: []
   };
   for (var i = 0; i < rows.length; i++) {
+    // Skip rows pre-loaded from existing records — they are not new draft data
+    if (rows[i].getAttribute('data-existing-id')) continue;
     var r = parseFloat(rows[i].querySelector('.qe-rate').value) || 0;
     var a = parseFloat(rows[i].querySelector('.qe-amt').value) || 0;
     if (r > 0 || a > 0) { // Only save rows that have some data
@@ -1970,6 +1972,7 @@ function openQuickEntry() {
       var rowBuyer = savedRows[i].buyer || 'Cash';
       var rowRate = savedRows[i].rate || '';
       var rowAmt = savedRows[i].amount || '';
+      var existingId = savedRows[i].id || '';
       addQEBuyerRow(rowBuyer);
       var lastRow = document.querySelector('#qeBuyerRows .qe-row:last-child');
       if (lastRow) {
@@ -1977,6 +1980,8 @@ function openQuickEntry() {
         var amtInput = lastRow.querySelector('.qe-amt');
         if (rateInput && rowRate) { rateInput.value = rowRate; }
         if (amtInput && rowAmt) { amtInput.value = rowAmt; }
+        // Mark this row as pre-loaded from existing records
+        if (existingId) { lastRow.setAttribute('data-existing-id', existingId); }
       }
     }
   } else {
@@ -2131,10 +2136,12 @@ function submitAllQE() {
   if (!fish) { toast('Select a fish type.', 'error'); return; }
 
   var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
-  var added = 0, skipped = 0;
+  var added = 0, skipped = 0, existingSkipped = 0;
   // Track batch-internal duplicates
   var batchKeys = {};
   for (var i = 0; i < rows.length; i++) {
+    // Skip rows that are pre-loaded from existing records (not new entries)
+    if (rows[i].getAttribute('data-existing-id')) { existingSkipped++; continue; }
     var buyer = rows[i].querySelector('.qe-buyer-sel').value;
     var rate = parseFloat(rows[i].querySelector('.qe-rate').value);
     var amt = parseFloat(rows[i].querySelector('.qe-amt').value);
@@ -2153,11 +2160,12 @@ function submitAllQE() {
     });
     added++;
   }
-  if (added === 0 && skipped > 0) {
+  if (added === 0 && (skipped > 0 || existingSkipped > 0)) {
     // All rows matched existing records — nothing new to save, just close
     clearQEDraft();
     closeModal('quickEntryModal');
-    toast('No new entries. All ' + skipped + ' row(s) already exist.', 'info');
+    var totalSkipped = skipped + existingSkipped;
+    toast('No new entries. All ' + totalSkipped + ' row(s) already exist.', 'info');
     return;
   }
   if (added === 0) { toast('Fill at least one row with rate & amount.', 'error'); return; }
@@ -2413,9 +2421,25 @@ function populateFormSelects() {
   var fs = document.getElementById('fishType');
   var sv = ss.value, fv = fs.value;
   ss.innerHTML = '<option value="">Select supplier</option>';
+  // Group suppliers: those with records for the selected date come first
+  var selectedDate = document.getElementById('entryDate').value;
+  var dateSuppliers = [], otherSuppliers = [];
   var sortedSup = suppliers.slice().sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
   for (var i = 0; i < sortedSup.length; i++) {
-    ss.innerHTML += '<option value="' + escA(sortedSup[i]) + '">' + esc(sortedSup[i]) + '</option>';
+    var found = false;
+    if (selectedDate) {
+      for (var j = 0; j < records.length; j++) {
+        if (records[j].supplier === sortedSup[i] && records[j].date === selectedDate) { found = true; break; }
+      }
+    }
+    if (found) dateSuppliers.push(sortedSup[i]); else otherSuppliers.push(sortedSup[i]);
+  }
+  for (var i = 0; i < dateSuppliers.length; i++) {
+    ss.innerHTML += '<option value="' + escA(dateSuppliers[i]) + '">' + esc(dateSuppliers[i]) + '</option>';
+  }
+  if (dateSuppliers.length && otherSuppliers.length) ss.innerHTML += '<option disabled>─────────</option>';
+  for (var i = 0; i < otherSuppliers.length; i++) {
+    ss.innerHTML += '<option value="' + escA(otherSuppliers[i]) + '">' + esc(otherSuppliers[i]) + '</option>';
   }
   ss.value = sv;
   // Populate fish type with supplier grouping
@@ -2695,14 +2719,13 @@ function applyDateFilter() {
 }
 document.getElementById('entryDate').addEventListener('input', function() {
   applyDateFilter();
-  // Re-group fish types for selected date
-  var sup = document.getElementById('supplier').value;
-  if (sup) populateFishSelect(sup, document.getElementById('fishType').value);
+  // Re-group suppliers and fish types for selected date
+  populateFormSelects();
 });
 document.getElementById('entryDate').addEventListener('change', function() {
   applyDateFilter();
-  var sup = document.getElementById('supplier').value;
-  if (sup) populateFishSelect(sup, document.getElementById('fishType').value);
+  // Re-group suppliers and fish types for selected date
+  populateFormSelects();
 });
 
 // ====================================================================
@@ -3733,6 +3756,34 @@ document.getElementById('recordImportFile').addEventListener('change', function(
   e.target.value = '';
 });
 
+// Remove exact duplicate records from the records array
+function removeDuplicates() {
+  if (!records.length) { toast('No records to check.', 'info'); return; }
+  var seen = {};
+  var before = records.length;
+  var kept = [];
+  for (var i = 0; i < records.length; i++) {
+    var r = records[i];
+    // Build a key from all matching fields
+    var key = r.date + '|' + r.supplier + '|' + r.fish + '|' + r.buyer + '|' + parseFloat(r.rate).toFixed(2) + '|' + parseFloat(r.amount).toFixed(2) + '|' + parseFloat(r.weight).toFixed(2);
+    if (seen[key]) continue; // duplicate — skip
+    seen[key] = true;
+    kept.push(r);
+  }
+  var removed = before - kept.length;
+  if (removed === 0) {
+    toast('No duplicates found. All ' + before + ' records are unique.', 'success');
+    return;
+  }
+  records = kept;
+  save();
+  renderTable();
+  renderStats();
+  renderFishTypes();
+  renderSuppliers();
+  toast('Removed ' + removed + ' duplicate(s). ' + records.length + ' records remaining.', 'success');
+}
+
 function exportCSV() {
   var filtered = getFilteredRecords();
   if (!filtered.length) { toast('No records to export.', 'error'); return; }
@@ -4090,7 +4141,8 @@ document.getElementById('importBtn').addEventListener('click', function() {
   document.getElementById('recordImportFile').click();
 });
 document.getElementById('exportBtn').addEventListener('click', exportCSV);
-document.getElementById('clearAllBtn').addEventListener('click', openClearModal);
+document.getElementById('dedupBtn').addEventListener('click', removeDuplicates);
+  // clearAllBtn removed
 document.getElementById('lockBtn').addEventListener('click', logout);
 document.getElementById('userTagBtn').addEventListener('click', function() {
   document.getElementById('cpCurrent').value = '';
@@ -4159,6 +4211,8 @@ document.getElementById('qeFishSelect').addEventListener('change', function() {
         var amtInput = lastRow.querySelector('.qe-amt');
         if (rateInput) { rateInput.value = savedRows[i].rate; rateInput.dispatchEvent(new Event('input')); }
         if (amtInput) { amtInput.value = savedRows[i].amount; amtInput.dispatchEvent(new Event('input')); }
+        // Mark this row as pre-loaded from existing records
+        if (savedRows[i].id) { lastRow.setAttribute('data-existing-id', savedRows[i].id); }
       }
     }
   } else {
