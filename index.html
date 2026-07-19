@@ -431,6 +431,7 @@ html.is-tablet tbody td{padding:10px 12px;font-size:12px}
     <button class="header-btn" id="cloudBtn" title="Cloud settings"><i class="fa-solid fa-cloud"></i></button>
     <button class="header-btn accent-btn" id="importBtn" title="Import CSV"><i class="fa-solid fa-file-import"></i> <span class="btn-label">Import</span></button>
     <button class="header-btn" id="exportBtn" title="Export CSV"><i class="fa-solid fa-file-export"></i> <span class="btn-label">Export</span></button>
+    <button class="header-btn" id="dedupBtn" title="Remove duplicate records" style="color:var(--danger);border-color:rgba(224,82,82,0.3)"><i class="fa-solid fa-clone"></i></button>
     <button class="header-btn" id="clearAllBtn" title="Clear all records"><i class="fa-solid fa-trash-can"></i></button>
     <button class="lock-btn" id="lockBtn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
   </div>
@@ -3756,6 +3757,34 @@ document.getElementById('recordImportFile').addEventListener('change', function(
   e.target.value = '';
 });
 
+// Remove exact duplicate records from the records array
+function removeDuplicates() {
+  if (!records.length) { toast('No records to check.', 'info'); return; }
+  var seen = {};
+  var before = records.length;
+  var kept = [];
+  for (var i = 0; i < records.length; i++) {
+    var r = records[i];
+    // Build a key from all matching fields
+    var key = r.date + '|' + r.supplier + '|' + r.fish + '|' + r.buyer + '|' + parseFloat(r.rate).toFixed(2) + '|' + parseFloat(r.amount).toFixed(2) + '|' + parseFloat(r.weight).toFixed(2);
+    if (seen[key]) continue; // duplicate — skip
+    seen[key] = true;
+    kept.push(r);
+  }
+  var removed = before - kept.length;
+  if (removed === 0) {
+    toast('No duplicates found. All ' + before + ' records are unique.', 'success');
+    return;
+  }
+  records = kept;
+  save();
+  renderTable();
+  renderStats();
+  renderFishTypes();
+  renderSuppliers();
+  toast('Removed ' + removed + ' duplicate(s). ' + records.length + ' records remaining.', 'success');
+}
+
 function exportCSV() {
   var filtered = getFilteredRecords();
   if (!filtered.length) { toast('No records to export.', 'error'); return; }
@@ -4113,6 +4142,7 @@ document.getElementById('importBtn').addEventListener('click', function() {
   document.getElementById('recordImportFile').click();
 });
 document.getElementById('exportBtn').addEventListener('click', exportCSV);
+document.getElementById('dedupBtn').addEventListener('click', removeDuplicates);
 document.getElementById('clearAllBtn').addEventListener('click', openClearModal);
 document.getElementById('lockBtn').addEventListener('click', logout);
 document.getElementById('userTagBtn').addEventListener('click', function() {
