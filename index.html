@@ -1876,6 +1876,8 @@ function saveQEDraft() {
     rows: []
   };
   for (var i = 0; i < rows.length; i++) {
+    // Skip rows pre-loaded from existing records — they are not new draft data
+    if (rows[i].getAttribute('data-existing-id')) continue;
     var r = parseFloat(rows[i].querySelector('.qe-rate').value) || 0;
     var a = parseFloat(rows[i].querySelector('.qe-amt').value) || 0;
     if (r > 0 || a > 0) { // Only save rows that have some data
@@ -1970,6 +1972,7 @@ function openQuickEntry() {
       var rowBuyer = savedRows[i].buyer || 'Cash';
       var rowRate = savedRows[i].rate || '';
       var rowAmt = savedRows[i].amount || '';
+      var existingId = savedRows[i].id || '';
       addQEBuyerRow(rowBuyer);
       var lastRow = document.querySelector('#qeBuyerRows .qe-row:last-child');
       if (lastRow) {
@@ -1977,6 +1980,8 @@ function openQuickEntry() {
         var amtInput = lastRow.querySelector('.qe-amt');
         if (rateInput && rowRate) { rateInput.value = rowRate; }
         if (amtInput && rowAmt) { amtInput.value = rowAmt; }
+        // Mark this row as pre-loaded from existing records
+        if (existingId) { lastRow.setAttribute('data-existing-id', existingId); }
       }
     }
   } else {
@@ -2131,10 +2136,12 @@ function submitAllQE() {
   if (!fish) { toast('Select a fish type.', 'error'); return; }
 
   var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
-  var added = 0, skipped = 0;
+  var added = 0, skipped = 0, existingSkipped = 0;
   // Track batch-internal duplicates
   var batchKeys = {};
   for (var i = 0; i < rows.length; i++) {
+    // Skip rows that are pre-loaded from existing records (not new entries)
+    if (rows[i].getAttribute('data-existing-id')) { existingSkipped++; continue; }
     var buyer = rows[i].querySelector('.qe-buyer-sel').value;
     var rate = parseFloat(rows[i].querySelector('.qe-rate').value);
     var amt = parseFloat(rows[i].querySelector('.qe-amt').value);
@@ -2153,11 +2160,12 @@ function submitAllQE() {
     });
     added++;
   }
-  if (added === 0 && skipped > 0) {
+  if (added === 0 && (skipped > 0 || existingSkipped > 0)) {
     // All rows matched existing records — nothing new to save, just close
     clearQEDraft();
     closeModal('quickEntryModal');
-    toast('No new entries. All ' + skipped + ' row(s) already exist.', 'info');
+    var totalSkipped = skipped + existingSkipped;
+    toast('No new entries. All ' + totalSkipped + ' row(s) already exist.', 'info');
     return;
   }
   if (added === 0) { toast('Fill at least one row with rate & amount.', 'error'); return; }
@@ -4174,6 +4182,8 @@ document.getElementById('qeFishSelect').addEventListener('change', function() {
         var amtInput = lastRow.querySelector('.qe-amt');
         if (rateInput) { rateInput.value = savedRows[i].rate; rateInput.dispatchEvent(new Event('input')); }
         if (amtInput) { amtInput.value = savedRows[i].amount; amtInput.dispatchEvent(new Event('input')); }
+        // Mark this row as pre-loaded from existing records
+        if (savedRows[i].id) { lastRow.setAttribute('data-existing-id', savedRows[i].id); }
       }
     }
   } else {
