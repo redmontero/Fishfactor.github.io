@@ -1983,8 +1983,8 @@ function openQuickEntry() {
       if (lastRow) {
         var rateInput = lastRow.querySelector('.qe-rate');
         var amtInput = lastRow.querySelector('.qe-amt');
-        if (rateInput && rowRate) { rateInput.value = rowRate; }
-        if (amtInput && rowAmt) { amtInput.value = rowAmt; }
+        if (rateInput && rowRate) { rateInput.value = rowRate; rateInput.dispatchEvent(new Event('input')); }
+        if (amtInput && rowAmt) { amtInput.value = rowAmt; amtInput.dispatchEvent(new Event('input')); }
         // Mark this row as pre-loaded from existing records
         if (existingId) { lastRow.setAttribute('data-existing-id', existingId); }
       }
