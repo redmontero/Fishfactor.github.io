@@ -2113,21 +2113,18 @@ function renumberQERows() {
   }
 }
 
-// Submit all buyer rows as records
-// Check for duplicate record (date + supplier + fish + buyer + rate + amount + weight)
-// Uses fuzzy comparison for numeric fields to avoid false negatives from
-// floating-point or type coercion issues.
+// Build a unique key string from record fields for exact duplicate matching
+function recKey(date, supplier, fish, buyer, rate, amount, weight) {
+  return date + '|' + supplier + '|' + fish + '|' + buyer + '|'
+    + parseFloat(rate).toFixed(2) + '|' + parseFloat(amount).toFixed(2) + '|' + parseFloat(weight).toFixed(2);
+}
+
+// Check if a record with the exact same fields already exists in records[]
 function isDuplicate(date, supplier, fish, buyer, rate, amount, weight) {
+  var key = recKey(date, supplier, fish, buyer, rate, amount, weight);
   for (var i = 0; i < records.length; i++) {
     var r = records[i];
-    var rRate = parseFloat(r.rate);
-    if (r.date === date && r.supplier === supplier && r.fish === fish
-      && r.buyer === buyer
-      && Math.abs(rRate - rate) < 0.01
-      && Math.abs(r.amount - amount) < 0.01
-      && Math.abs(r.weight - weight) < 0.001) {
-      return true;
-    }
+    if (recKey(r.date, r.supplier, r.fish, r.buyer, r.rate, r.amount, r.weight) === key) return true;
   }
   return false;
 }
@@ -2152,8 +2149,8 @@ function submitAllQE() {
     var amt = parseFloat(rows[i].querySelector('.qe-amt').value);
     if (!buyer || isNaN(rate) || isNaN(amt) || rate <= 0 || amt <= 0) continue;
     var wt = amt / rate;
-    // Check duplicate within same batch
-    var batchKey = buyer + '|' + rate + '|' + amt;
+    // Check duplicate within same batch (full key match)
+    var batchKey = recKey(date, sup, fish, buyer, rate, amt, wt);
     if (batchKeys[batchKey]) { skipped++; continue; }
     // Check duplicate against existing records
     if (isDuplicate(date, sup, fish, buyer, rate, amt, wt)) { skipped++; continue; }
@@ -3769,8 +3766,7 @@ function removeDuplicates() {
   var kept = [];
   for (var i = 0; i < records.length; i++) {
     var r = records[i];
-    // Build a key from all matching fields
-    var key = r.date + '|' + r.supplier + '|' + r.fish + '|' + r.buyer + '|' + parseFloat(r.rate).toFixed(2) + '|' + parseFloat(r.amount).toFixed(2) + '|' + parseFloat(r.weight).toFixed(2);
+    var key = recKey(r.date, r.supplier, r.fish, r.buyer, r.rate, r.amount, r.weight);
     if (seen[key]) continue; // duplicate — skip
     seen[key] = true;
     kept.push(r);
