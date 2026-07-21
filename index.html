@@ -2844,24 +2844,24 @@ function generateSummaryPDF() {
       }
 
       // ---- Detail table ----
-      y = y + cardH + 12;
-      var cols = [8, 22, 28, 28, 28, 22, 28, 22]; // #, Date, Fish, Supplier, Buyer, Rate, Amount, Weight
+      y = y + cardH + 8;
+      var cols = [7, 18, 24, 30, 28, 18, 28, 29]; // #, Date, Fish, Supplier, Buyer, Rate, Amount, Weight — total 182mm
       var totalColW = 0;
       for (var ci = 0; ci < cols.length; ci++) totalColW += cols[ci];
 
       // Table header
       doc.setFillColor(40, 60, 70);
-      doc.rect(lm, y, totalColW, 8, 'F');
+      doc.rect(lm, y, totalColW, 5, 'F');
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(7);
       doc.setFont('helvetica', 'bold');
       var headers = ['#', 'Date', 'Fish', 'Supplier', 'Buyer', 'Rate', 'Amount', 'Weight'];
       var tx = lm + 2;
       for (var h = 0; h < headers.length; h++) {
-        doc.text(headers[h], tx, y + 5.5);
+        doc.text(headers[h], tx, y + 4);
         tx += cols[h];
       }
-      y += 8;
+      y += 6;
 
       // Table rows
       doc.setFont('helvetica', 'normal');
@@ -2871,7 +2871,7 @@ function generateSummaryPDF() {
         // Alternate row background
         if (i % 2 === 0) {
           doc.setFillColor(248, 248, 248);
-          doc.rect(lm, y, totalColW, 7, 'F');
+          doc.rect(lm, y, totalColW, 5.5, 'F');
         }
 
         // Check page break
@@ -2889,7 +2889,7 @@ function generateSummaryPDF() {
             doc.text(headers[h2], tx, y + 5.5);
             tx += cols[h2];
           }
-          y += 8;
+          y += 6;
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(7.5);
         }
@@ -2899,18 +2899,18 @@ function generateSummaryPDF() {
         var rowTexts = [
           '' + (i + 1),
           formatDateStr(r.date),
-          r.fish || '-',
-          r.supplier || '-',
-          r.buyer || '-',
+          truncateText(doc, r.fish || '-', cols[2] - 2),
+          truncateText(doc, r.supplier || '-', cols[3] - 2),
+          truncateText(doc, r.buyer || '-', cols[4] - 2),
           formatPdfNum(r.rate),
           formatPdfNum(r.amount),
           r.weight.toFixed(1) + ' Kg'
         ];
         for (var ri = 0; ri < rowTexts.length; ri++) {
-          doc.text(rowTexts[ri], rx, y + 5);
+          doc.text(rowTexts[ri], rx, y + 4);
           rx += cols[ri];
         }
-        y += 7;
+        y += 5.5;
       }
 
       // Table footer totals
@@ -2942,14 +2942,14 @@ function generateSummaryPDF() {
       }
       var buyerKeys = Object.keys(buyerMap);
       if (buyerKeys.length > 1) {
-        y += 14;
+        y += 10;
         doc.setFillColor(40, 60, 70);
-        doc.rect(lm, y, totalColW, 7, 'F');
+        doc.rect(lm, y, totalColW, 5.5, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
-        doc.text('Buyer-wise Breakdown', lm + 2, y + 5);
-        y += 7;
+        doc.text('Buyer-wise Breakdown', lm + 2, y + 4);
+        y += 5.5;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(7.5);
         for (var bi = 0; bi < buyerKeys.length; bi++) {
@@ -2957,14 +2957,14 @@ function generateSummaryPDF() {
           var bd = buyerMap[bname];
           if (bi % 2 === 0) {
             doc.setFillColor(248, 248, 248);
-            doc.rect(lm, y, totalColW, 6, 'F');
+            doc.rect(lm, y, totalColW, 5, 'F');
           }
           doc.setTextColor(50, 50, 50);
-          doc.text(bname, lm + 2, y + 4.5);
-          doc.text('' + bd.n + ' entries', lm + 2 + 40, y + 4.5);
-          doc.text(bd.wt.toFixed(1) + ' Kg', lm + 2 + 75, y + 4.5);
+          doc.text(bname, lm + 2, y + 3.5);
+          doc.text('' + bd.n + ' entries', lm + 2 + 40, y + 3.5);
+          doc.text(bd.wt.toFixed(1) + ' Kg', lm + 2 + 75, y + 3.5);
           doc.text(formatPdfNum(bd.amt), lm + 2 + 110, y + 4.5);
-          y += 6;
+          y += 5;
         }
       }
 
@@ -2996,6 +2996,14 @@ function formatDateStr(d) {
 function formatPdfNum(n) {
   if (isNaN(n) || n === null || n === undefined) return '0.00';
   return Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function truncateText(doc, text, maxW) {
+  if (!text) return '';
+  if (doc.getTextWidth(text) <= maxW) return text;
+  var t = text;
+  while (t.length > 1 && doc.getTextWidth(t + '..') > maxW) t = t.slice(0, -1);
+  return t.length < text.length ? t + '..' : t;
 }
 
 // ====================================================================
@@ -3115,7 +3123,7 @@ function generateFishSummaryPDF() {
       }
 
       // ---- Per-fish-type consolidated table ----
-      y = y + cardH + 14;
+      y = y + cardH + 10;
 
       // Section title
       doc.setTextColor(40, 60, 70);
@@ -3130,17 +3138,17 @@ function generateFishSummaryPDF() {
 
       // Table header
       doc.setFillColor(40, 60, 70);
-      doc.rect(lm, y, ftotalColW, 8, 'F');
+      doc.rect(lm, y, ftotalColW, 6, 'F');
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(7.5);
       doc.setFont('helvetica', 'bold');
       var fheaders = ['#', 'Fish Type', 'Entries', 'Weight', 'Amount', 'Avg/Kg', 'Avg Rate'];
       var ftx = lm + 2;
       for (var fh = 0; fh < fheaders.length; fh++) {
-        doc.text(fheaders[fh], ftx, y + 5.5);
+        doc.text(fheaders[fh], ftx, y + 4);
         ftx += fcols[fh];
       }
-      y += 8;
+      y += 6;
 
       // Fish rows
       doc.setFont('helvetica', 'normal');
@@ -3166,7 +3174,7 @@ function generateFishSummaryPDF() {
         var frx = lm + 2;
         var frowTexts = [
           '' + (fi2 + 1),
-          fname,
+          truncateText(doc, fname, fcols[1] - 2),
           '' + fd.n,
           fd.wt.toFixed(1) + ' Kg',
           formatPdfNum(fd.amt),
@@ -3177,7 +3185,7 @@ function generateFishSummaryPDF() {
           doc.text(frowTexts[fri], frx, y + 5.5);
           frx += fcols[fri];
         }
-        y += 8;
+        y += 6;
       }
 
       // Grand total row
@@ -3185,7 +3193,7 @@ function generateFishSummaryPDF() {
       doc.setDrawColor(40, 60, 70);
       doc.setLineWidth(0.5);
       doc.line(lm, y, lm + ftotalColW, y);
-      y += 7;
+      y += 5;
       doc.setFillColor(232, 168, 50, 30);
       doc.rect(lm, y - 4, ftotalColW, 9, 'F');
       doc.setTextColor(40, 60, 70);
@@ -3198,15 +3206,15 @@ function generateFishSummaryPDF() {
       doc.text(formatPdfNum(grandAvg), lm + 2 + fcols[0] + fcols[1] + fcols[2] + fcols[3] + fcols[4] - 4, y + 1.5);
 
       // ---- Per-fish detail breakdown (each fish type, its buyer rows) ----
-      y += 18;
+      y += 12;
       doc.addPage(); y = 20;
       doc.setTextColor(40, 60, 70);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.text('Detailed Breakdown by Fish Type', lm, y);
-      y += 8;
+      y += 6;
 
-      var dcols = [10, 40, 36, 28, 22, 28, 22]; // #, Fish, Buyer, Rate, Amount, Weight, Avg/Kg
+      var dcols = [10, 38, 34, 26, 22, 28, 24]; // #, Fish, Buyer, Rate, Amount, Weight, Avg/Kg — total 182mm
       var dtotalColW = 0;
       for (var di = 0; di < dcols.length; di++) dtotalColW += dcols[di];
 
@@ -3222,26 +3230,26 @@ function generateFishSummaryPDF() {
 
         // Fish type sub-header
         doc.setFillColor(60, 198, 138);
-        doc.roundedRect(lm, y, dtotalColW, 7, 1, 1, 'F');
+        doc.roundedRect(lm, y, dtotalColW, 5.5, 1, 1, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(8);
         doc.setFont('helvetica', 'bold');
-        doc.text(fishName + '  (' + fishData.n + ' entries, ' + fishData.wt.toFixed(1) + ' Kg, ' + formatPdfNum(fishData.amt) + ')', lm + 3, y + 5);
-        y += 7;
+        doc.text(fishName + '  (' + fishData.n + ' entries, ' + fishData.wt.toFixed(1) + ' Kg, ' + formatPdfNum(fishData.amt) + ')', lm + 3, y + 4);
+        y += 5.5;
 
         // Detail table header
         doc.setFillColor(220, 230, 235);
-        doc.rect(lm, y, dtotalColW, 7, 'F');
+        doc.rect(lm, y, dtotalColW, 5.5, 'F');
         doc.setTextColor(60, 60, 60);
         doc.setFontSize(6.5);
         doc.setFont('helvetica', 'bold');
         var dheaders = ['#', 'Buyer', 'Entries', 'Rate', 'Amount', 'Weight', 'Avg/Kg'];
         var dtx = lm + 2;
         for (var dh = 0; dh < dheaders.length; dh++) {
-          doc.text(dheaders[dh], dtx, y + 5);
+          doc.text(dheaders[dh], dtx, y + 4);
           dtx += dcols[dh];
         }
-        y += 7;
+        y += 5.5;
 
         // Group by buyer within this fish type
         var bMap = {};
@@ -3276,14 +3284,14 @@ function generateFishSummaryPDF() {
 
           if (bk3 % 2 === 0) {
             doc.setFillColor(252, 252, 252);
-            doc.rect(lm, y, dtotalColW, 6, 'F');
+            doc.rect(lm, y, dtotalColW, 5, 'F');
           }
 
           doc.setTextColor(50, 50, 50);
           var drx = lm + 2;
           var drowTexts = [
             '' + (bk3 + 1),
-            buyerName,
+            truncateText(doc, buyerName, dcols[1] - 2),
             '' + bd2.n,
             formatPdfNum(bAvgRate),
             formatPdfNum(bd2.amt),
@@ -3291,10 +3299,10 @@ function generateFishSummaryPDF() {
             formatPdfNum(bAvg)
           ];
           for (var dri = 0; dri < drowTexts.length; dri++) {
-            doc.text(drowTexts[dri], drx, y + 4.5);
+            doc.text(drowTexts[dri], drx, y + 3.5);
             drx += dcols[dri];
           }
-          y += 6;
+          y += 5;
         }
 
         // Subtotal for this fish
@@ -3305,8 +3313,8 @@ function generateFishSummaryPDF() {
         doc.setTextColor(60, 60, 60);
         doc.setFontSize(7);
         doc.setFont('helvetica', 'bold');
-        doc.text('Subtotal: ' + fishData.n + ' entries  |  ' + fishData.wt.toFixed(1) + ' Kg  |  ' + formatPdfNum(fishData.amt), lm + 2, y + 2);
-        y += 10;
+        doc.text('Subtotal: ' + fishData.n + ' entries  |  ' + fishData.wt.toFixed(1) + ' Kg  |  ' + formatPdfNum(fishData.amt), lm + 2, y + 1.5);
+        y += 5;
       }
 
       // Save
@@ -3404,18 +3412,18 @@ function generateCashSummaryPDF() {
       }
       var sortedFish = Object.keys(byFish).sort(function(a, b) { return byFish[b].totalAmt - byFish[a].totalAmt; });
 
-      y = y + cardH + 14;
+      y = y + cardH + 10;
       doc.addPage(); y = 20;
       doc.setTextColor(30, 80, 60); doc.setFontSize(10); doc.setFont('helvetica', 'bold');
       doc.text('Detailed Breakdown by Fish Type', lm, y); y += 6;
 
-      var cols = [10, 36, 34, 16, 26, 30, 34];
+      var cols = [10, 36, 40, 16, 28, 52]; // #, Fish, Supplier, Qty, Weight, Amount — total 182mm
       var totalColW = 0; for (var ci = 0; ci < cols.length; ci++) totalColW += cols[ci];
-      doc.setFillColor(40, 60, 70); doc.rect(lm, y, totalColW, 8, 'F');
+      doc.setFillColor(40, 60, 70); doc.rect(lm, y, totalColW, 5, 'F');
       doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold');
-      var headers = ['#', 'Fish Type', 'Supplier', 'Qty', 'Weight (Kg)', 'Amount (Rs.)', ''];
-      var tx = lm + 2; for (var h = 0; h < headers.length; h++) { doc.text(headers[h], tx, y + 5.5); tx += cols[h]; }
-      y += 8; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+      var headers = ['#', 'Fish Type', 'Supplier', 'Qty', 'Weight (Kg)', 'Amount (Rs.)'];
+      var tx = lm + 2; for (var h = 0; h < headers.length; h++) { doc.text(headers[h], tx, y + 4); tx += cols[h]; }
+      y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
 
       var rowNum = 0;
       for (var fi = 0; fi < sortedFish.length; fi++) {
@@ -3423,27 +3431,27 @@ function generateCashSummaryPDF() {
         var sortedSups = Object.keys(fd.suppliers).sort(function(a, b) { return fd.suppliers[b].amt - fd.suppliers[a].amt; });
         for (var si = 0; si < sortedSups.length; si++) {
           var sname = sortedSups[si], sd = fd.suppliers[sname]; rowNum++;
-          if (y > 270) { doc.addPage(); y = 20; doc.setFillColor(40, 60, 70); doc.rect(lm, y, totalColW, 8, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold'); tx = lm + 2; for (var h2 = 0; h2 < headers.length; h2++) { doc.text(headers[h2], tx, y + 5.5); tx += cols[h2]; } y += 8; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); }
-          if (rowNum % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, totalColW, 7, 'F'); }
+          if (y > 270) { doc.addPage(); y = 20; doc.setFillColor(40, 60, 70); doc.rect(lm, y, totalColW, 8, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold'); tx = lm + 2; for (var h2 = 0; h2 < headers.length; h2++) { doc.text(headers[h2], tx, y + 4); tx += cols[h2]; } y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); }
+          if (rowNum % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, totalColW, 5.5, 'F'); }
           doc.setTextColor(50, 50, 50); var rx = lm + 2;
-          doc.text('' + rowNum, rx, y + 5); rx += cols[0];
-          doc.setFont('helvetica', 'bold'); doc.text(si === 0 ? fname : '', rx, y + 5); rx += cols[1];
-          doc.setFont('helvetica', 'normal'); doc.text(sname, rx, y + 5); rx += cols[2];
-          doc.setTextColor(120, 120, 120); doc.text('' + sd.n, rx, y + 5); rx += cols[3];
-          doc.setTextColor(50, 50, 50); doc.text(sd.wt.toFixed(2), rx, y + 5); rx += cols[4];
+          doc.text('' + rowNum, rx, y + 4); rx += cols[0];
+          doc.setFont('helvetica', 'bold'); doc.text(truncateText(doc, si === 0 ? fname : '', cols[1] - 2), rx, y + 4); rx += cols[1];
+          doc.setFont('helvetica', 'normal'); doc.text(truncateText(doc, sname, cols[2] - 2), rx, y + 4); rx += cols[2];
+          doc.setTextColor(120, 120, 120); doc.text('' + sd.n, rx, y + 4); rx += cols[3];
+          doc.setTextColor(50, 50, 50); doc.text(sd.wt.toFixed(2), rx, y + 4); rx += cols[4];
           doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(sd.amt), rx, y + 5);
-          y += 7;
+          y += 5.5;
         }
         if (y > 270) { doc.addPage(); y = 20; }
-        doc.setFillColor(232, 244, 248); doc.rect(lm, y, totalColW, 7, 'F');
+        doc.setFillColor(232, 244, 248); doc.rect(lm, y, totalColW, 5.5, 'F');
         doc.setDrawColor(44, 123, 162); doc.setLineWidth(0.3); doc.line(lm, y, lm + totalColW, y);
         doc.setTextColor(44, 123, 162); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-        rx = lm + 2 + cols[0]; doc.text('Subtotal: ' + fname, rx, y + 5); rx += cols[1];
+        rx = lm + 2 + cols[0]; doc.text('Subtotal: ' + fname, rx, y + 4); rx += cols[1];
         doc.setTextColor(120, 120, 120); doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
-        doc.text('(' + fd.count + ' entries)', rx, y + 5); rx += cols[2] + cols[3];
+        doc.text('(' + fd.count + ' entries)', rx, y + 4); rx += cols[2] + cols[3];
         doc.setTextColor(44, 123, 162); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
-        doc.text(fd.totalWt.toFixed(2), rx, y + 5); rx += cols[4]; doc.text(formatPdfNum(fd.totalAmt), rx, y + 5);
-        y += 7;
+        doc.text(fd.totalWt.toFixed(2), rx, y + 4); rx += cols[4]; doc.text(formatPdfNum(fd.totalAmt), rx, y + 5);
+        y += 5.5;
       }
 
       // Grand total bar — Total Sale (all transactions)
@@ -3458,7 +3466,7 @@ function generateCashSummaryPDF() {
       doc.text(filtered.length + ' total transactions', lm + 42, y + 6);
       doc.text(allTotalWt.toFixed(2) + ' Kg', lm + totalColW - 60, y + 6);
       doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(allTotalAmt), lm + totalColW - 2, y + 6, { align: 'right' });
-      y += 14; // advance past the 9mm bar + 5mm gap
+      y += 10; // advance past bar + 5mm gap
 
       // Summary breakdown: Cash Sale + Credit/Other
       var creditTotal = 0;
@@ -3583,34 +3591,34 @@ function generateNonCashSummaryPDF() {
       }
       var sortedBuyers = Object.keys(byBuyer).sort(function(a, b) { return byBuyer[b].totalAmt - byBuyer[a].totalAmt; });
 
-      y = y + cardH + 14;
+      y = y + cardH + 10;
       doc.setTextColor(80, 30, 40); doc.setFontSize(10); doc.setFont('helvetica', 'bold');
-      doc.text('Credit Breakdown by Buyer', lm, y); y += 6;
+      doc.text('Credit Breakdown by Buyer', lm, y); y += 4;
 
-      var bcols = [10, 34, 46, 16, 26, 30];
+      var bcols = [10, 36, 52, 16, 28, 40]; // #, Buyer, Fish Types, Qty, Weight, Credit Amount — total 182mm
       var btotalColW = 0; for (var bi = 0; bi < bcols.length; bi++) btotalColW += bcols[bi];
-      doc.setFillColor(40, 60, 70); doc.rect(lm, y, btotalColW, 8, 'F');
+      doc.setFillColor(40, 60, 70); doc.rect(lm, y, btotalColW, 6, 'F');
       doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold');
       var bheaders = ['#', 'Buyer', 'Fish Type(s)', 'Qty', 'Weight (Kg)', 'Credit Amount (Rs.)'];
-      var btx = lm + 2; for (var bh = 0; bh < bheaders.length; bh++) { doc.text(bheaders[bh], btx, y + 5.5); btx += bcols[bh]; }
-      y += 8; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+      var btx = lm + 2; for (var bh = 0; bh < bheaders.length; bh++) { doc.text(bheaders[bh], btx, y + 4); btx += bcols[bh]; }
+      y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
 
       for (var bi2 = 0; bi2 < sortedBuyers.length; bi2++) {
         var bname = sortedBuyers[bi2], bd = byBuyer[bname];
         var fishNames = Object.keys(bd.fishTypes).sort(function(a, b2) { return bd.fishTypes[b2].amt - bd.fishTypes[a].amt; });
         var fishStr = fishNames.join(', ');
         if (fishStr.length > 50) fishStr = fishStr.substring(0, 47) + '...';
-        if (bi2 % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, btotalColW, 7, 'F'); }
+        if (bi2 % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, btotalColW, 5.5, 'F'); }
         doc.setTextColor(50, 50, 50); var brx = lm + 2;
-        doc.text('' + (bi2 + 1), brx, y + 5); brx += bcols[0];
-        doc.setFont('helvetica', 'bold'); doc.text(bname, brx, y + 5); brx += bcols[1];
+        doc.text('' + (bi2 + 1), brx, y + 4); brx += bcols[0];
+        doc.setFont('helvetica', 'bold'); doc.text(truncateText(doc, bname, bcols[1] - 2), brx, y + 4); brx += bcols[1];
         doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(120, 120, 120);
-        doc.text(fishStr, brx, y + 5); brx += bcols[2];
-        doc.setFontSize(7.5); doc.text('' + bd.count, brx, y + 5); brx += bcols[3];
-        doc.text(bd.totalWt.toFixed(2), brx, y + 5); brx += bcols[4];
+        doc.text(truncateText(doc, fishStr, bcols[2] - 2), brx, y + 4); brx += bcols[2];
+        doc.setFontSize(7.5); doc.text('' + bd.count, brx, y + 4); brx += bcols[3];
+        doc.text(bd.totalWt.toFixed(2), brx, y + 4); brx += bcols[4];
         doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'bold');
         doc.text(formatPdfNum(bd.totalAmt), brx, y + 5);
-        y += 7;
+        y += 5.5;
       }
 
       // Buyer total bar
@@ -3635,18 +3643,18 @@ function generateNonCashSummaryPDF() {
       }
       var sortedFish = Object.keys(byFish).sort(function(a, b) { return byFish[b].totalAmt - byFish[a].totalAmt; });
 
-      y += 16;
+      y += 12;
       doc.addPage(); y = 20;
       doc.setTextColor(80, 30, 40); doc.setFontSize(10); doc.setFont('helvetica', 'bold');
-      doc.text('Detailed Records by Fish Type', lm, y); y += 6;
+      doc.text('Detailed Records by Fish Type', lm, y); y += 4;
 
-      var fcols = [10, 32, 30, 30, 20, 24, 30];
+      var fcols = [10, 34, 30, 32, 20, 24, 32]; // #, Fish, Buyer, Supplier, Rate, Weight, Amount — total 182mm
       var ftotalColW = 0; for (var fi = 0; fi < fcols.length; fi++) ftotalColW += fcols[fi];
-      doc.setFillColor(40, 60, 70); doc.rect(lm, y, ftotalColW, 8, 'F');
+      doc.setFillColor(40, 60, 70); doc.rect(lm, y, ftotalColW, 6, 'F');
       doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold');
       var fheaders = ['#', 'Fish Type', 'Buyer', 'Supplier', 'Rate', 'Weight (Kg)', 'Amount (Rs.)'];
-      var ftx = lm + 2; for (var fh = 0; fh < fheaders.length; fh++) { doc.text(fheaders[fh], ftx, y + 5.5); ftx += fcols[fh]; }
-      y += 8; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+      var ftx = lm + 2; for (var fh = 0; fh < fheaders.length; fh++) { doc.text(fheaders[fh], ftx, y + 4); ftx += fcols[fh]; }
+      y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
 
       var rowIdx = 0;
       for (var fi2 = 0; fi2 < sortedFish.length; fi2++) {
@@ -3654,30 +3662,30 @@ function generateNonCashSummaryPDF() {
         var sortedSups = Object.keys(fd.suppliers).sort(function(a, b2) { return fd.suppliers[b2].amt - fd.suppliers[a].amt; });
         for (var si = 0; si < sortedSups.length; si++) {
           var sname = sortedSups[si], sd = fd.suppliers[sname]; rowIdx++;
-          if (y > 270) { doc.addPage(); y = 20; doc.setFillColor(40, 60, 70); doc.rect(lm, y, ftotalColW, 8, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold'); ftx = lm + 2; for (var fh2 = 0; fh2 < fheaders.length; fh2++) { doc.text(fheaders[fh2], ftx, y + 5.5); ftx += fcols[fh2]; } y += 8; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); }
-          if (rowIdx % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, ftotalColW, 7, 'F'); }
+          if (y > 270) { doc.addPage(); y = 20; doc.setFillColor(40, 60, 70); doc.rect(lm, y, ftotalColW, 8, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold'); ftx = lm + 2; for (var fh2 = 0; fh2 < fheaders.length; fh2++) { doc.text(fheaders[fh2], ftx, y + 4); ftx += fcols[fh2]; } y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); }
+          if (rowIdx % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, ftotalColW, 5.5, 'F'); }
           var avgRate = sd.rates.length > 0 ? sd.rates.reduce(function(a, b2) { return a + b2; }, 0) / sd.rates.length : 0;
           var frx = lm + 2;
-          doc.setTextColor(120, 120, 120); doc.text('' + rowIdx, frx, y + 5); frx += fcols[0];
-          doc.setTextColor(50, 50, 50); doc.setFont('helvetica', 'bold'); doc.text(fname, frx, y + 5); frx += fcols[1];
-          doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'normal'); doc.text(sd.buyer || '-', frx, y + 5); frx += fcols[2];
-          doc.setTextColor(50, 50, 50); doc.text(sname, frx, y + 5); frx += fcols[3];
-          doc.setTextColor(120, 120, 120); doc.text(formatPdfNum(avgRate), frx, y + 5); frx += fcols[4];
-          doc.text(sd.wt.toFixed(2), frx, y + 5); frx += fcols[5];
+          doc.setTextColor(120, 120, 120); doc.text('' + rowIdx, frx, y + 4); frx += fcols[0];
+          doc.setTextColor(50, 50, 50); doc.setFont('helvetica', 'bold'); doc.text(truncateText(doc, fname, fcols[1] - 2), frx, y + 4); frx += fcols[1];
+          doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'normal'); doc.text(truncateText(doc, sd.buyer || '-', fcols[2] - 2), frx, y + 4); frx += fcols[2];
+          doc.setTextColor(50, 50, 50); doc.text(truncateText(doc, sname, fcols[3] - 2), frx, y + 4); frx += fcols[3];
+          doc.setTextColor(120, 120, 120); doc.text(formatPdfNum(avgRate), frx, y + 4); frx += fcols[4];
+          doc.text(sd.wt.toFixed(2), frx, y + 4); frx += fcols[5];
           doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(sd.amt), frx, y + 5);
-          y += 7;
+          y += 5.5;
         }
         if (y > 265) { doc.addPage(); y = 20; }
-        doc.setFillColor(252, 242, 244); doc.rect(lm, y, ftotalColW, 7, 'F');
+        doc.setFillColor(252, 242, 244); doc.rect(lm, y, ftotalColW, 5.5, 'F');
         doc.setDrawColor(194, 58, 80); doc.setLineWidth(0.3); doc.line(lm, y, lm + ftotalColW, y);
         doc.setTextColor(194, 58, 80); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-        frx = lm + 2 + fcols[0]; doc.text('Subtotal: ' + fname, frx, y + 5); frx += fcols[1];
+        frx = lm + 2 + fcols[0]; doc.text('Subtotal: ' + fname, frx, y + 4); frx += fcols[1];
         doc.setTextColor(120, 120, 120); doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
-        doc.text('(' + fd.count + ' entries)', frx, y + 5);
+        doc.text('(' + fd.count + ' entries)', frx, y + 4);
         frx = lm + 2 + fcols[0] + fcols[1] + fcols[2] + fcols[3] + fcols[4];
         doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
-        doc.text(fd.totalWt.toFixed(2), frx, y + 5); frx += fcols[5]; doc.text(formatPdfNum(fd.totalAmt), frx, y + 5);
-        y += 7;
+        doc.text(fd.totalWt.toFixed(2), frx, y + 4); frx += fcols[5]; doc.text(formatPdfNum(fd.totalAmt), frx, y + 5);
+        y += 5.5;
       }
 
       // Footer
