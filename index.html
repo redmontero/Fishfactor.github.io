@@ -191,9 +191,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:.8}
 .mgmt-item-edit:active{color:var(--accent);background:var(--accent-glow)}
 .qe-draft-hint{font-size:10px;color:var(--accent);text-align:center;margin-top:4px;opacity:.8}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 10px;text-align:center}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 10px;text-align:left}
 .stat-label{font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.stat-value{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--fg)}
+.stat-value{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--fg);text-align:right}
 .stat-value.success{color:var(--success)}
 .stat-value.accent{color:var(--accent)}
 .stat-unit{font-size:11px;font-weight:500;opacity:.7}
@@ -2856,9 +2856,11 @@ function generateSummaryPDF() {
       doc.setFontSize(7);
       doc.setFont('helvetica', 'bold');
       var headers = ['#', 'Date', 'Fish', 'Supplier', 'Buyer', 'Rate', 'Amount', 'Weight'];
+      var sRightCols = {0:true, 5:true, 6:true, 7:true};
       var tx = lm + 2;
       for (var h = 0; h < headers.length; h++) {
-        doc.text(headers[h], tx, y + 4);
+        if (sRightCols[h]) { doc.text(headers[h], tx + cols[h] - 1, y + 4, { align: 'right' }); }
+        else { doc.text(headers[h], tx, y + 4); }
         tx += cols[h];
       }
       y += 6;
@@ -2886,7 +2888,8 @@ function generateSummaryPDF() {
           doc.setFont('helvetica', 'bold');
           tx = lm + 2;
           for (var h2 = 0; h2 < headers.length; h2++) {
-            doc.text(headers[h2], tx, y + 5.5);
+            if (sRightCols[h2]) { doc.text(headers[h2], tx + cols[h2] - 1, y + 5.5, { align: 'right' }); }
+            else { doc.text(headers[h2], tx, y + 5.5); }
             tx += cols[h2];
           }
           y += 6;
@@ -2907,7 +2910,8 @@ function generateSummaryPDF() {
           r.weight.toFixed(1) + ' Kg'
         ];
         for (var ri = 0; ri < rowTexts.length; ri++) {
-          doc.text(rowTexts[ri], rx, y + 4);
+          if (sRightCols[ri]) { doc.text(rowTexts[ri], rx + cols[ri] - 1, y + 4, { align: 'right' }); }
+          else { doc.text(rowTexts[ri], rx, y + 4); }
           rx += cols[ri];
         }
         y += 5.5;
@@ -2923,12 +2927,12 @@ function generateSummaryPDF() {
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       doc.text('TOTAL', lm + 2, y);
-      doc.text(formatPdfNum(totalAmt), lm + 2 + cols[0] + cols[1] + cols[2] + cols[3] + cols[4] + cols[5], y);
+      doc.text(formatPdfNum(totalAmt), lm + totalColW - 1, y, { align: 'right' });
       y += 5;
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.text('Weight: ' + totalWt.toFixed(1) + ' Kg', lm + 2, y);
-      doc.text('Avg/Kg: ' + formatPdfNum(avgKg), lm + 2 + cols[0] + cols[1] + cols[2] + cols[3] + cols[4] + cols[5], y);
+      doc.text('Avg/Kg: ' + formatPdfNum(avgKg), lm + totalColW - 1, y, { align: 'right' });
 
       // ---- Per-buyer sub-summary if multiple buyers ----
       var buyerMap = {};
@@ -2961,9 +2965,9 @@ function generateSummaryPDF() {
           }
           doc.setTextColor(50, 50, 50);
           doc.text(bname, lm + 2, y + 3.5);
-          doc.text('' + bd.n + ' entries', lm + 2 + 40, y + 3.5);
-          doc.text(bd.wt.toFixed(1) + ' Kg', lm + 2 + 75, y + 3.5);
-          doc.text(formatPdfNum(bd.amt), lm + 2 + 110, y + 4.5);
+          doc.text('' + bd.n + ' entries', lm + 2 + 42, y + 3.5, { align: 'right' });
+          doc.text(bd.wt.toFixed(1) + ' Kg', lm + 2 + 80, y + 3.5, { align: 'right' });
+          doc.text(formatPdfNum(bd.amt), lm + totalColW - 1, y + 4.5, { align: 'right' });
           y += 5;
         }
       }
@@ -3143,9 +3147,11 @@ function generateFishSummaryPDF() {
       doc.setFontSize(7.5);
       doc.setFont('helvetica', 'bold');
       var fheaders = ['#', 'Fish Type', 'Entries', 'Weight', 'Amount', 'Avg/Kg', 'Avg Rate'];
+      var fcRightCols = {0:true, 2:true, 3:true, 4:true, 5:true, 6:true};
       var ftx = lm + 2;
       for (var fh = 0; fh < fheaders.length; fh++) {
-        doc.text(fheaders[fh], ftx, y + 4);
+        if (fcRightCols[fh]) { doc.text(fheaders[fh], ftx + fcols[fh] - 1, y + 4, { align: 'right' }); }
+        else { doc.text(fheaders[fh], ftx, y + 4); }
         ftx += fcols[fh];
       }
       y += 6;
@@ -3182,7 +3188,8 @@ function generateFishSummaryPDF() {
           formatPdfNum(avgRate)
         ];
         for (var fri = 0; fri < frowTexts.length; fri++) {
-          doc.text(frowTexts[fri], frx, y + 5.5);
+          if (fcRightCols[fri]) { doc.text(frowTexts[fri], frx + fcols[fri] - 1, y + 5.5, { align: 'right' }); }
+          else { doc.text(frowTexts[fri], frx, y + 5.5); }
           frx += fcols[fri];
         }
         y += 6;
@@ -3200,10 +3207,14 @@ function generateFishSummaryPDF() {
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       doc.text('GRAND TOTAL', lm + 2, y + 1.5);
-      doc.text('' + filtered.length, lm + 2 + fcols[0] + fcols[1] - 6, y + 1.5);
-      doc.text(grandWt.toFixed(1) + ' Kg', lm + 2 + fcols[0] + fcols[1] + fcols[2] - 4, y + 1.5);
-      doc.text(formatPdfNum(grandAmt), lm + 2 + fcols[0] + fcols[1] + fcols[2] + fcols[3] - 4, y + 1.5);
-      doc.text(formatPdfNum(grandAvg), lm + 2 + fcols[0] + fcols[1] + fcols[2] + fcols[3] + fcols[4] - 4, y + 1.5);
+      var gTx = lm + 2 + fcols[0] + fcols[1];
+      doc.text('' + filtered.length, gTx + fcols[2] - 1, y + 1.5, { align: 'right' });
+      gTx += fcols[2];
+      doc.text(grandWt.toFixed(1) + ' Kg', gTx + fcols[3] - 1, y + 1.5, { align: 'right' });
+      gTx += fcols[3];
+      doc.text(formatPdfNum(grandAmt), gTx + fcols[4] - 1, y + 1.5, { align: 'right' });
+      gTx += fcols[4];
+      doc.text(formatPdfNum(grandAvg), gTx + fcols[5] - 1, y + 1.5, { align: 'right' });
 
       // ---- Per-fish detail breakdown (each fish type, its buyer rows) ----
       y += 12;
@@ -3244,9 +3255,11 @@ function generateFishSummaryPDF() {
         doc.setFontSize(6.5);
         doc.setFont('helvetica', 'bold');
         var dheaders = ['#', 'Buyer', 'Entries', 'Rate', 'Amount', 'Weight', 'Avg/Kg'];
+        var dcRightCols = {0:true, 2:true, 3:true, 4:true, 5:true, 6:true};
         var dtx = lm + 2;
         for (var dh = 0; dh < dheaders.length; dh++) {
-          doc.text(dheaders[dh], dtx, y + 4);
+          if (dcRightCols[dh]) { doc.text(dheaders[dh], dtx + dcols[dh] - 1, y + 4, { align: 'right' }); }
+          else { doc.text(dheaders[dh], dtx, y + 4); }
           dtx += dcols[dh];
         }
         y += 5.5;
@@ -3299,7 +3312,8 @@ function generateFishSummaryPDF() {
             formatPdfNum(bAvg)
           ];
           for (var dri = 0; dri < drowTexts.length; dri++) {
-            doc.text(drowTexts[dri], drx, y + 3.5);
+            if (dcRightCols[dri]) { doc.text(drowTexts[dri], drx + dcols[dri] - 1, y + 3.5, { align: 'right' }); }
+            else { doc.text(drowTexts[dri], drx, y + 3.5); }
             drx += dcols[dri];
           }
           y += 5;
@@ -3422,7 +3436,8 @@ function generateCashSummaryPDF() {
       doc.setFillColor(40, 60, 70); doc.rect(lm, y, totalColW, 5, 'F');
       doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold');
       var headers = ['#', 'Fish Type', 'Supplier', 'Qty', 'Weight (Kg)', 'Amount (Rs.)'];
-      var tx = lm + 2; for (var h = 0; h < headers.length; h++) { doc.text(headers[h], tx, y + 4); tx += cols[h]; }
+      var cRightCols = {0:true, 3:true, 4:true, 5:true};
+      var tx = lm + 2; for (var h = 0; h < headers.length; h++) { if (cRightCols[h]) { doc.text(headers[h], tx + cols[h] - 1, y + 4, { align: 'right' }); } else { doc.text(headers[h], tx, y + 4); } tx += cols[h]; }
       y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
 
       var rowNum = 0;
@@ -3431,15 +3446,15 @@ function generateCashSummaryPDF() {
         var sortedSups = Object.keys(fd.suppliers).sort(function(a, b) { return fd.suppliers[b].amt - fd.suppliers[a].amt; });
         for (var si = 0; si < sortedSups.length; si++) {
           var sname = sortedSups[si], sd = fd.suppliers[sname]; rowNum++;
-          if (y > 270) { doc.addPage(); y = 20; doc.setFillColor(40, 60, 70); doc.rect(lm, y, totalColW, 8, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold'); tx = lm + 2; for (var h2 = 0; h2 < headers.length; h2++) { doc.text(headers[h2], tx, y + 4); tx += cols[h2]; } y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); }
+          if (y > 270) { doc.addPage(); y = 20; doc.setFillColor(40, 60, 70); doc.rect(lm, y, totalColW, 8, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold'); tx = lm + 2; for (var h2 = 0; h2 < headers.length; h2++) { if (cRightCols[h2]) { doc.text(headers[h2], tx + cols[h2] - 1, y + 4, { align: 'right' }); } else { doc.text(headers[h2], tx, y + 4); } tx += cols[h2]; } y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); }
           if (rowNum % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, totalColW, 5.5, 'F'); }
           doc.setTextColor(50, 50, 50); var rx = lm + 2;
-          doc.text('' + rowNum, rx, y + 4); rx += cols[0];
+          doc.text('' + rowNum, rx + cols[0] - 1, y + 4, { align: 'right' }); rx += cols[0];
           doc.setFont('helvetica', 'bold'); doc.text(truncateText(doc, si === 0 ? fname : '', cols[1] - 2), rx, y + 4); rx += cols[1];
           doc.setFont('helvetica', 'normal'); doc.text(truncateText(doc, sname, cols[2] - 2), rx, y + 4); rx += cols[2];
-          doc.setTextColor(120, 120, 120); doc.text('' + sd.n, rx, y + 4); rx += cols[3];
-          doc.setTextColor(50, 50, 50); doc.text(sd.wt.toFixed(2), rx, y + 4); rx += cols[4];
-          doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(sd.amt), rx, y + 5);
+          doc.setTextColor(120, 120, 120); doc.text('' + sd.n, rx + cols[3] - 1, y + 4, { align: 'right' }); rx += cols[3];
+          doc.setTextColor(50, 50, 50); doc.text(sd.wt.toFixed(2), rx + cols[4] - 1, y + 4, { align: 'right' }); rx += cols[4];
+          doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(sd.amt), rx + cols[5] - 1, y + 5, { align: 'right' });
           y += 5.5;
         }
         if (y > 270) { doc.addPage(); y = 20; }
@@ -3450,7 +3465,8 @@ function generateCashSummaryPDF() {
         doc.setTextColor(120, 120, 120); doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
         doc.text('(' + fd.count + ' entries)', rx, y + 4); rx += cols[2] + cols[3];
         doc.setTextColor(44, 123, 162); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
-        doc.text(fd.totalWt.toFixed(2), rx, y + 4); rx += cols[4]; doc.text(formatPdfNum(fd.totalAmt), rx, y + 5);
+        doc.text(fd.totalWt.toFixed(2), rx + cols[4] - 1, y + 4, { align: 'right' }); rx += cols[4];
+        doc.text(formatPdfNum(fd.totalAmt), rx + cols[5] - 1, y + 5, { align: 'right' });
         y += 5.5;
       }
 
@@ -3464,7 +3480,7 @@ function generateCashSummaryPDF() {
       doc.text('TOTAL SALE', lm + 2, y + 6);
       doc.setFontSize(8); doc.setFont('helvetica', 'normal');
       doc.text(filtered.length + ' total transactions', lm + 42, y + 6);
-      doc.text(allTotalWt.toFixed(2) + ' Kg', lm + totalColW - 60, y + 6);
+      doc.text(allTotalWt.toFixed(2) + ' Kg', lm + totalColW - 55, y + 6, { align: 'right' });
       doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(allTotalAmt), lm + totalColW - 2, y + 6, { align: 'right' });
       y += 10; // advance past bar + 5mm gap
 
@@ -3600,7 +3616,8 @@ function generateNonCashSummaryPDF() {
       doc.setFillColor(40, 60, 70); doc.rect(lm, y, btotalColW, 6, 'F');
       doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold');
       var bheaders = ['#', 'Buyer', 'Fish Type(s)', 'Qty', 'Weight (Kg)', 'Credit Amount (Rs.)'];
-      var btx = lm + 2; for (var bh = 0; bh < bheaders.length; bh++) { doc.text(bheaders[bh], btx, y + 4); btx += bcols[bh]; }
+      var ncRightCols = {0:true, 3:true, 4:true, 5:true};
+      var btx = lm + 2; for (var bh = 0; bh < bheaders.length; bh++) { if (ncRightCols[bh]) { doc.text(bheaders[bh], btx + bcols[bh] - 1, y + 4, { align: 'right' }); } else { doc.text(bheaders[bh], btx, y + 4); } btx += bcols[bh]; }
       y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
 
       for (var bi2 = 0; bi2 < sortedBuyers.length; bi2++) {
@@ -3610,14 +3627,14 @@ function generateNonCashSummaryPDF() {
         if (fishStr.length > 50) fishStr = fishStr.substring(0, 47) + '...';
         if (bi2 % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, btotalColW, 5.5, 'F'); }
         doc.setTextColor(50, 50, 50); var brx = lm + 2;
-        doc.text('' + (bi2 + 1), brx, y + 4); brx += bcols[0];
+        doc.text('' + (bi2 + 1), brx + bcols[0] - 1, y + 4, { align: 'right' }); brx += bcols[0];
         doc.setFont('helvetica', 'bold'); doc.text(truncateText(doc, bname, bcols[1] - 2), brx, y + 4); brx += bcols[1];
         doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(120, 120, 120);
         doc.text(truncateText(doc, fishStr, bcols[2] - 2), brx, y + 4); brx += bcols[2];
-        doc.setFontSize(7.5); doc.text('' + bd.count, brx, y + 4); brx += bcols[3];
-        doc.text(bd.totalWt.toFixed(2), brx, y + 4); brx += bcols[4];
+        doc.setFontSize(7.5); doc.text('' + bd.count, brx + bcols[3] - 1, y + 4, { align: 'right' }); brx += bcols[3];
+        doc.text(bd.totalWt.toFixed(2), brx + bcols[4] - 1, y + 4, { align: 'right' }); brx += bcols[4];
         doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'bold');
-        doc.text(formatPdfNum(bd.totalAmt), brx, y + 5);
+        doc.text(formatPdfNum(bd.totalAmt), brx + bcols[5] - 1, y + 5, { align: 'right' });
         y += 5.5;
       }
 
@@ -3627,8 +3644,8 @@ function generateNonCashSummaryPDF() {
       doc.text('TOTAL CREDIT', lm + 2, y + 6);
       doc.setFontSize(8); doc.setFont('helvetica', 'normal');
       doc.text(buyerCount + ' buyers, ' + fishCount + ' fish types', lm + 42, y + 6);
-      doc.text('' + creditRecs.length, lm + btotalColW - 60, y + 6);
-      doc.text(totalWt.toFixed(2) + ' Kg', lm + btotalColW - 38, y + 6);
+      doc.text(creditRecs.length + ' txns', lm + btotalColW - 58, y + 6, { align: 'right' });
+      doc.text(totalWt.toFixed(2) + ' Kg', lm + btotalColW - 35, y + 6, { align: 'right' });
       doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(totalAmt), lm + btotalColW - 2, y + 6, { align: 'right' });
 
       // Group by fish type for detailed records
@@ -3653,7 +3670,8 @@ function generateNonCashSummaryPDF() {
       doc.setFillColor(40, 60, 70); doc.rect(lm, y, ftotalColW, 6, 'F');
       doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold');
       var fheaders = ['#', 'Fish Type', 'Buyer', 'Supplier', 'Rate', 'Weight (Kg)', 'Amount (Rs.)'];
-      var ftx = lm + 2; for (var fh = 0; fh < fheaders.length; fh++) { doc.text(fheaders[fh], ftx, y + 4); ftx += fcols[fh]; }
+      var ndRightCols = {0:true, 4:true, 5:true, 6:true};
+      var ftx = lm + 2; for (var fh = 0; fh < fheaders.length; fh++) { if (ndRightCols[fh]) { doc.text(fheaders[fh], ftx + fcols[fh] - 1, y + 4, { align: 'right' }); } else { doc.text(fheaders[fh], ftx, y + 4); } ftx += fcols[fh]; }
       y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
 
       var rowIdx = 0;
@@ -3662,17 +3680,17 @@ function generateNonCashSummaryPDF() {
         var sortedSups = Object.keys(fd.suppliers).sort(function(a, b2) { return fd.suppliers[b2].amt - fd.suppliers[a].amt; });
         for (var si = 0; si < sortedSups.length; si++) {
           var sname = sortedSups[si], sd = fd.suppliers[sname]; rowIdx++;
-          if (y > 270) { doc.addPage(); y = 20; doc.setFillColor(40, 60, 70); doc.rect(lm, y, ftotalColW, 8, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold'); ftx = lm + 2; for (var fh2 = 0; fh2 < fheaders.length; fh2++) { doc.text(fheaders[fh2], ftx, y + 4); ftx += fcols[fh2]; } y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); }
+          if (y > 270) { doc.addPage(); y = 20; doc.setFillColor(40, 60, 70); doc.rect(lm, y, ftotalColW, 8, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold'); ftx = lm + 2; for (var fh2 = 0; fh2 < fheaders.length; fh2++) { if (ndRightCols[fh2]) { doc.text(fheaders[fh2], ftx + fcols[fh2] - 1, y + 4, { align: 'right' }); } else { doc.text(fheaders[fh2], ftx, y + 4); } ftx += fcols[fh2]; } y += 6; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); }
           if (rowIdx % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(lm, y, ftotalColW, 5.5, 'F'); }
           var avgRate = sd.rates.length > 0 ? sd.rates.reduce(function(a, b2) { return a + b2; }, 0) / sd.rates.length : 0;
           var frx = lm + 2;
-          doc.setTextColor(120, 120, 120); doc.text('' + rowIdx, frx, y + 4); frx += fcols[0];
+          doc.setTextColor(120, 120, 120); doc.text('' + rowIdx, frx + fcols[0] - 1, y + 4, { align: 'right' }); frx += fcols[0];
           doc.setTextColor(50, 50, 50); doc.setFont('helvetica', 'bold'); doc.text(truncateText(doc, fname, fcols[1] - 2), frx, y + 4); frx += fcols[1];
           doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'normal'); doc.text(truncateText(doc, sd.buyer || '-', fcols[2] - 2), frx, y + 4); frx += fcols[2];
           doc.setTextColor(50, 50, 50); doc.text(truncateText(doc, sname, fcols[3] - 2), frx, y + 4); frx += fcols[3];
-          doc.setTextColor(120, 120, 120); doc.text(formatPdfNum(avgRate), frx, y + 4); frx += fcols[4];
-          doc.text(sd.wt.toFixed(2), frx, y + 4); frx += fcols[5];
-          doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(sd.amt), frx, y + 5);
+          doc.setTextColor(120, 120, 120); doc.text(formatPdfNum(avgRate), frx + fcols[4] - 1, y + 4, { align: 'right' }); frx += fcols[4];
+          doc.text(sd.wt.toFixed(2), frx + fcols[5] - 1, y + 4, { align: 'right' }); frx += fcols[5];
+          doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'bold'); doc.text(formatPdfNum(sd.amt), frx + fcols[6] - 1, y + 5, { align: 'right' });
           y += 5.5;
         }
         if (y > 265) { doc.addPage(); y = 20; }
@@ -3684,7 +3702,8 @@ function generateNonCashSummaryPDF() {
         doc.text('(' + fd.count + ' entries)', frx, y + 4);
         frx = lm + 2 + fcols[0] + fcols[1] + fcols[2] + fcols[3] + fcols[4];
         doc.setTextColor(194, 58, 80); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
-        doc.text(fd.totalWt.toFixed(2), frx, y + 4); frx += fcols[5]; doc.text(formatPdfNum(fd.totalAmt), frx, y + 5);
+        doc.text(fd.totalWt.toFixed(2), frx + fcols[5] - 1, y + 4, { align: 'right' }); frx += fcols[5];
+        doc.text(formatPdfNum(fd.totalAmt), frx + fcols[6] - 1, y + 5, { align: 'right' });
         y += 5.5;
       }
 
