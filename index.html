@@ -1993,11 +1993,14 @@ function openQuickEntry() {
     addQEBuyerRow('Cash'); // First row defaults to Cash
   }
 
-  updateQETotal();
   // Re-enable draft auto-save after restoration is complete
   qeSuppressDraft = false;
   saveQEDraft = origSaveQEDraft;
+  updateQETotal(); // immediate recalculation of all row amounts
   openModal('quickEntryModal');
+  // Force recalculate total after modal is visible (dispatchEvent may not fire handlers reliably on some mobile browsers)
+  setTimeout(updateQETotal, 50);
+  setTimeout(updateQETotal, 200);
 }
 
 // Add a buyer row in the quick entry modal
@@ -2114,17 +2117,20 @@ function renumberQERows() {
 }
 
 // Build a unique key string from record fields for exact duplicate matching
-function recKey(date, supplier, fish, buyer, rate, amount, weight) {
-  return date + '|' + supplier + '|' + fish + '|' + buyer + '|'
+// seq is optional — when present, it makes otherwise-identical records distinct
+function recKey(date, supplier, fish, buyer, rate, amount, weight, seq) {
+  var k = date + '|' + supplier + '|' + fish + '|' + buyer + '|'
     + parseFloat(rate).toFixed(2) + '|' + parseFloat(amount).toFixed(2) + '|' + parseFloat(weight).toFixed(2);
+  if (seq) k += '|seq:' + seq;
+  return k;
 }
 
 // Check if a record with the exact same fields already exists in records[]
-function isDuplicate(date, supplier, fish, buyer, rate, amount, weight) {
-  var key = recKey(date, supplier, fish, buyer, rate, amount, weight);
+function isDuplicate(date, supplier, fish, buyer, rate, amount, weight, seq) {
+  var key = recKey(date, supplier, fish, buyer, rate, amount, weight, seq);
   for (var i = 0; i < records.length; i++) {
     var r = records[i];
-    if (recKey(r.date, r.supplier, r.fish, r.buyer, r.rate, r.amount, r.weight) === key) return true;
+    if (recKey(r.date, r.supplier, r.fish, r.buyer, r.rate, r.amount, r.weight, r.seq) === key) return true;
   }
   return false;
 }
@@ -2138,36 +2144,94 @@ function submitAllQE() {
   if (!fish) { toast('Select a fish type.', 'error'); return; }
 
   var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
-  var added = 0, skipped = 0, existingSkipped = 0;
-  // Track batch-internal duplicates
-  var batchKeys = {};
+  var added = 0, existingSkipped = 0;
+
+  // Phase 1: Collect all valid new rows with their base keys
+  var newEntries = []; // {buyer, rate, amt, wt, baseKey, rowIdx}
   for (var i = 0; i < rows.length; i++) {
-    // Skip rows that are pre-loaded from existing records (not new entries)
     if (rows[i].getAttribute('data-existing-id')) { existingSkipped++; continue; }
     var buyer = rows[i].querySelector('.qe-buyer-sel').value;
     var rate = parseFloat(rows[i].querySelector('.qe-rate').value);
     var amt = parseFloat(rows[i].querySelector('.qe-amt').value);
     if (!buyer || isNaN(rate) || isNaN(amt) || rate <= 0 || amt <= 0) continue;
     var wt = amt / rate;
-    // Check duplicate within same batch (full key match)
-    var batchKey = recKey(date, sup, fish, buyer, rate, amt, wt);
-    if (batchKeys[batchKey]) { skipped++; continue; }
-    // Check duplicate against existing records
-    if (isDuplicate(date, sup, fish, buyer, rate, amt, wt)) { skipped++; continue; }
-    batchKeys[batchKey] = true;
-    records.push({
-      id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-      date: date, fish: fish, supplier: sup, buyer: buyer,
-      rate: rate, amount: amt, weight: wt, createdAt: Date.now()
-    });
+    var baseKey = recKey(date, sup, fish, buyer, rate, amt, wt);
+    newEntries.push({buyer: buyer, rate: rate, amt: amt, wt: wt, baseKey: baseKey, rowIdx: i});
+  }
+
+  // Phase 2: Count occurrences of each base key in this batch
+  // This tells us which entries are intentional duplicates within the batch
+  var batchKeyCount = {};
+  for (var i = 0; i < newEntries.length; i++) {
+    batchKeyCount[newEntries[i].baseKey] = (batchKeyCount[newEntries[i].baseKey] || 0) + 1;
+  }
+
+  // Phase 3: Pre-scan existing records to find highest seq for each base key
+  var existingSeqMap = {}; // baseKey -> highest seq already in DB
+  var existingCountMap = {}; // baseKey -> how many existing records have this base key (no seq)
+  for (var ei = 0; ei < records.length; ei++) {
+    var er = records[ei];
+    if (er.date === date && er.supplier === sup && er.fish === fish) {
+      var ek = recKey(er.date, er.supplier, er.fish, er.buyer, er.rate, er.amount, er.weight);
+      if (er.seq) {
+        if (!existingSeqMap[ek] || existingSeqMap[ek] < er.seq) existingSeqMap[ek] = er.seq;
+      } else {
+        existingCountMap[ek] = (existingCountMap[ek] || 0) + 1;
+      }
+    }
+  }
+
+  // Phase 4: Save entries — assign seq only when there are duplicates
+  // A record needs seq when:
+  //   - Multiple entries in THIS batch share the same base key (batchKeyCount > 1)
+  //   - OR entries in this batch match existing records without seq (existingCountMap > 0)
+  var batchSeqTracker = {}; // baseKey -> next seq for batch-internal duplicates
+  for (var i = 0; i < newEntries.length; i++) {
+    var e = newEntries[i];
+    var bk = e.baseKey;
+    var needsSeq = false;
+
+    // Case 1: Multiple rows in this batch have the same combo → all need seq
+    if (batchKeyCount[bk] > 1) {
+      needsSeq = true;
+    }
+    // Case 2: This combo already exists in DB (without seq) → needs seq to avoid being treated as duplicate
+    else if ((existingCountMap[bk] || 0) > 0) {
+      needsSeq = true;
+    }
+
+    var seqVal = undefined; // no seq by default
+    if (needsSeq) {
+      var prevMax = existingSeqMap[bk] || 0;
+      // If there are existing records without seq, count them as implicit seq slots
+      var existingBase = existingCountMap[bk] || 0;
+      // Total existing with this combo (with seq + without seq)
+      var totalExisting = prevMax + existingBase;
+      // For batch-internal duplicates, track which number this is
+      if (batchKeyCount[bk] > 1) {
+        if (!batchSeqTracker[bk]) batchSeqTracker[bk] = 1;
+        seqVal = totalExisting + batchSeqTracker[bk];
+        batchSeqTracker[bk]++;
+      } else {
+        // Single entry matching existing → next number after all existing
+        seqVal = totalExisting + 1;
+      }
+    }
+
+    var rec = {
+      id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5) + '_' + added,
+      date: date, fish: fish, supplier: sup, buyer: e.buyer,
+      rate: e.rate, amount: e.amt, weight: e.wt, createdAt: Date.now() + added
+    };
+    if (seqVal !== undefined) rec.seq = seqVal;
+    records.push(rec);
     added++;
   }
-  if (added === 0 && (skipped > 0 || existingSkipped > 0)) {
+  if (added === 0 && existingSkipped > 0) {
     // All rows matched existing records — nothing new to save, just close
     clearQEDraft();
     closeModal('quickEntryModal');
-    var totalSkipped = skipped + existingSkipped;
-    toast('No new entries. All ' + totalSkipped + ' row(s) already exist.', 'info');
+    toast('No new entries. All ' + existingSkipped + ' row(s) already exist.', 'info');
     return;
   }
   if (added === 0) { toast('Fill at least one row with rate & amount.', 'error'); return; }
@@ -2182,8 +2246,7 @@ function submitAllQE() {
   renderFishTypes();
   renderSuppliers();
   var msg = added + ' record' + (added > 1 ? 's' : '') + ' added for ' + fish + '.';
-  if (skipped > 0) msg += ' (' + skipped + ' duplicate' + (skipped > 1 ? 's' : '') + ' skipped)';
-  toast(msg, skipped > 0 ? 'info' : 'success');
+  toast(msg, 'success');
   // Scroll table to top and highlight
   var scroll = document.querySelector('.table-scroll');
   if (scroll) scroll.scrollTop = 0;
@@ -2662,7 +2725,7 @@ function renderTable() {
       buyerCell = '<td style="font-size:12px;color:var(--info)">' + esc(r.buyer || '-') + '</td>';
     }
     html += '<tr class="row-enter">'
-      + '<td>' + (i + 1) + '</td>'
+      + '<td>' + (i + 1) + (r.seq ? '<br><span style="font-size:9px;color:var(--accent);font-weight:700">seq ' + r.seq + '</span>' : '') + '</td>'
       + '<td class="date-cell">' + fmtDate(r.date) + '</td>'
       + '<td><span class="fish-badge" style="background:' + fc + '15;color:' + fc + '">' + esc(r.fish) + '</span></td>'
       + '<td><span class="supplier-badge" style="background:' + sc + '15;color:' + sc + '">' + esc(r.supplier) + '</span></td>'
@@ -3786,20 +3849,53 @@ document.getElementById('recordImportFile').addEventListener('change', function(
 });
 
 // Remove exact duplicate records from the records array
+// Strategy: FIRST, assign seq numbers to groups of identical records (without seq)
+// so that intentionally-saved duplicates are preserved. Then remove any remaining true dupes.
 function removeDuplicates() {
   if (!records.length) { toast('No records to check.', 'info'); return; }
-  var seen = {};
   var before = records.length;
+
+  // Step 1: Group records WITHOUT seq by their base key
+  var groups = {}; // baseKey -> array of record indices
+  for (var i = 0; i < records.length; i++) {
+    var r = records[i];
+    if (r.seq) continue; // already has seq, skip
+    var key = recKey(r.date, r.supplier, r.fish, r.buyer, r.rate, r.amount, r.weight);
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(i);
+  }
+
+  // Step 2: For groups with MORE than 1 record, assign seq numbers (they are intentional duplicates)
+  // For groups with exactly 1 record, they are unique — no seq needed
+  var seqAssigned = 0;
+  for (var key in groups) {
+    var indices = groups[key];
+    if (indices.length > 1) {
+      // Multiple identical records → assign seq numbers
+      for (var j = 0; j < indices.length; j++) {
+        records[indices[j]].seq = j + 1;
+        seqAssigned++;
+      }
+    }
+  }
+
+  // Step 3: Remove true duplicates — now only single-occurrence base keys without seq are candidates
+  // Since step 2 assigned seq to all groups with >1, the only remaining dupes would be
+  // records where the base key appears exactly once (already unique, nothing to remove)
+  // But as safety, do a final pass to remove any that somehow slipped through
+  var seen = {};
   var kept = [];
   for (var i = 0; i < records.length; i++) {
     var r = records[i];
-    var key = recKey(r.date, r.supplier, r.fish, r.buyer, r.rate, r.amount, r.weight);
-    if (seen[key]) continue; // duplicate — skip
-    seen[key] = true;
+    if (r.seq) { kept.push(r); continue; }
+    var k = recKey(r.date, r.supplier, r.fish, r.buyer, r.rate, r.amount, r.weight);
+    if (seen[k]) continue;
+    seen[k] = true;
     kept.push(r);
   }
+
   var removed = before - kept.length;
-  if (removed === 0) {
+  if (removed === 0 && seqAssigned === 0) {
     toast('No duplicates found. All ' + before + ' records are unique.', 'success');
     return;
   }
@@ -3809,7 +3905,11 @@ function removeDuplicates() {
   renderStats();
   renderFishTypes();
   renderSuppliers();
-  toast('Removed ' + removed + ' duplicate(s). ' + records.length + ' records remaining.', 'success');
+  if (removed === 0) {
+    toast('No duplicates removed. ' + seqAssigned + ' duplicate group(s) marked with sequence numbers.', 'success');
+  } else {
+    toast('Removed ' + removed + ' duplicate(s). ' + records.length + ' records remaining.', 'success');
+  }
 }
 
 function exportCSV() {
