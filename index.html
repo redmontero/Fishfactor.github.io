@@ -1798,7 +1798,107 @@ function enterApp() {
   document.getElementById('loginScreen').classList.add('hidden');
   // SDK data listener disabled — REST is primary (prevents race conditions)
   refreshUI();
+  // Kick the cloud connection — by login time, the Firebase SDK has had
+  // plenty of time to load, so this is the perfect moment to (re)attempt
+  // the connection if the startup path didn't manage to.
+  ensureCloudConnectedAfterLogin();
   toast('Welcome, ' + curUser().username + '!', 'success');
+}
+
+// (Re)attempt Firebase cloud connection right after the user logs in.
+// This fixes the case where the SDK finished loading AFTER initApp() ran,
+// leaving the app in a "connecting" yellow state forever until the user
+// manually opened the setup modal and clicked Connect.
+function ensureCloudConnectedAfterLogin() {
+  var config = getCloudConfig();
+  if (!config || !config.apiKey || !config.databaseURL) {
+    dbg('ensureCloud: no valid config, skipping');
+    return;
+  }
+
+  // 1. If SDK is ready but real-time cloud is NOT initialized yet, init now.
+  //    This is the most common fix — SDK loaded after connectToFirebase() ran.
+  if (firebaseReady && !useCloud) {
+    dbg('ensureCloud: SDK ready but useCloud=false, initializing Firebase now');
+    try {
+      initFirebase(config);
+    } catch(e) {
+      dbg('ensureCloud: initFirebase error: ' + e.message);
+    }
+  } else if (!firebaseReady) {
+    // 2. SDK still not loaded (slow network) — set the flag so the IIFE
+    //    will trigger initFirebase when the SDK finally loads.
+    dbg('ensureCloud: SDK not ready yet, setting pendingCloudConnect=true');
+    pendingCloudConnect = true;
+    var dot = document.getElementById('syncIndicator');
+    if (dot) {
+      dot.className = 'sync-dot connecting';
+      dot.title = 'Connecting...';
+    }
+  }
+
+  // 3. If REST never succeeded (useCloudREST=false), retry it now.
+  //    This commonly happens if the very first REST call hit a network glitch
+  //    or timed out, leaving the dot grey/red forever.
+  if (!useCloudREST) {
+    dbg('ensureCloud: REST not active yet, retrying REST fetch');
+    // Don't show loading spinner — user is already in the app
+    var config2 = getCloudConfig();
+    if (config2 && config2.databaseURL && typeof fetch !== 'undefined') {
+      fetch(config2.databaseURL + '/ff/companies.json')
+        .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function(data) {
+          useCloudREST = true;
+          dbg('ensureCloud: REST retry succeeded, useCloudREST=true');
+          // If companies changed, refresh
+          if (data && typeof data === 'object') {
+            var cloudComps = [];
+            var keys = Object.keys(data);
+            for (var i = 0; i < keys.length; i++) {
+              cloudComps.push({
+                id: keys[i],
+                name: data[keys[i]].name,
+                createdAt: data[keys[i]].createdAt || Date.now()
+              });
+            }
+            var merged = [];
+            var seenIds = {};
+            for (var i = 0; i < cloudComps.length; i++) { merged.push(cloudComps[i]); seenIds[cloudComps[i].id] = true; }
+            for (var i = 0; i < companies.length; i++) {
+              if (!seenIds[companies[i].id]) { merged.push(companies[i]); }
+            }
+            if (JSON.stringify(merged) !== JSON.stringify(companies)) {
+              companies = merged;
+              saveCompaniesLocal();
+            }
+          }
+          updateSyncDot();
+        })
+        .catch(function(err) {
+          dbg('ensureCloud: REST retry failed: ' + err.message);
+          updateSyncDot();
+        });
+    }
+  }
+
+  // 4. If we have an active company and the SDK is ready, also re-fetch
+  //    company data via REST to make sure records/users are fresh.
+  if (activeCompanyId && useCloudREST) {
+    fetchCompanyDataViaREST(activeCompanyId).then(function() {
+      updateSyncDot();
+      // Re-render table/stats in case cloud had newer data
+      if (typeof renderTable === 'function') renderTable();
+      if (typeof renderStats === 'function') renderStats();
+    }).catch(function() {});
+  }
+
+  // 5. Force-update the dot immediately so the user sees feedback.
+  updateSyncDot();
+
+  // 6. Schedule a follow-up dot refresh — the .info/connected listener
+  //    can take 1-3 seconds to fire even after initFirebase() succeeds.
+  setTimeout(updateSyncDot, 1500);
+  setTimeout(updateSyncDot, 4000);
 }
 
 // Log out and return to the login screen
@@ -4951,6 +5051,5 @@ try {
 </script>
 </body>
 </html>
-
 
 
