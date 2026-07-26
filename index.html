@@ -1806,9 +1806,15 @@ function enterApp() {
 }
 
 // (Re)attempt Firebase cloud connection right after the user logs in.
-// This fixes the case where the SDK finished loading AFTER initApp() ran,
-// leaving the app in a "connecting" yellow state forever until the user
-// manually opened the setup modal and clicked Connect.
+// KEY INSIGHT: The Firebase SDK real-time listener (.info/connected) is
+// unreliable in this app — it sometimes never fires, leaving the dot
+// grey/red forever. The MANUAL Connect button works because by the time
+// the user opens the modal and clicks it, the SDK has settled.
+//
+// SOLUTION: Don't depend on the SDK. Make the dot green based purely on
+// a successful REST ping to the Firebase database. The SDK is still
+// initialized for real-time sync as a bonus, but the dot does NOT wait
+// for it.
 function ensureCloudConnectedAfterLogin() {
   var config = getCloudConfig();
   if (!config || !config.apiKey || !config.databaseURL) {
@@ -1816,89 +1822,150 @@ function ensureCloudConnectedAfterLogin() {
     return;
   }
 
-  // 1. If SDK is ready but real-time cloud is NOT initialized yet, init now.
-  //    This is the most common fix — SDK loaded after connectToFirebase() ran.
-  if (firebaseReady && !useCloud) {
-    dbg('ensureCloud: SDK ready but useCloud=false, initializing Firebase now');
+  console.log('[FF] ensureCloud started. firebaseReady=' + firebaseReady + ', useCloud=' + useCloud + ', useCloudREST=' + useCloudREST + ', isActuallyConnected=' + isActuallyConnected);
+
+  // Show yellow immediately so user sees we're trying
+  var dot0 = document.getElementById('syncIndicator');
+  if (dot0 && !useCloudREST) {
+    dot0.className = 'sync-dot connecting';
+    dot0.title = 'Connecting...';
+  }
+
+  // === STEP 1: REST ping (the reliable path to green) ===
+  // This is what ACTUALLY turns the dot green. SDK real-time is bonus.
+  function pingRest() {
+    var cfg = getCloudConfig();
+    if (!cfg || !cfg.databaseURL || typeof fetch === 'undefined') {
+      console.warn('[FF] REST ping skipped: no config or no fetch');
+      return Promise.resolve(false);
+    }
+    var url = cfg.databaseURL + '/ff/companies.json';
+    return fetch(url)
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        useCloudREST = true;
+        console.log('[FF] REST ping SUCCESS — useCloudREST=true, dot will turn green');
+        dbg('ensureCloud: REST ping succeeded, useCloudREST=true');
+
+        // Merge cloud companies into local list
+        if (data && typeof data === 'object') {
+          var cloudComps = [];
+          var keys = Object.keys(data);
+          for (var i = 0; i < keys.length; i++) {
+            cloudComps.push({
+              id: keys[i],
+              name: data[keys[i]].name,
+              createdAt: data[keys[i]].createdAt || Date.now()
+            });
+          }
+          var merged = [];
+          var seenIds = {};
+          for (var i = 0; i < cloudComps.length; i++) { merged.push(cloudComps[i]); seenIds[cloudComps[i].id] = true; }
+          for (var i = 0; i < companies.length; i++) {
+            if (!seenIds[companies[i].id]) { merged.push(companies[i]); }
+          }
+          if (JSON.stringify(merged) !== JSON.stringify(companies)) {
+            companies = merged;
+            saveCompaniesLocal();
+          }
+        }
+        updateSyncDot();
+        return true;
+      })
+      .catch(function(err) {
+        console.warn('[FF] REST ping FAILED:', err.message);
+        dbg('ensureCloud: REST ping failed: ' + err.message);
+        updateSyncDot();
+        return false;
+      });
+  }
+
+  // === STEP 2: SDK real-time init (bonus, not required for green) ===
+  function initSdk() {
+    if (!firebaseReady) {
+      console.log('[FF] SDK not ready yet, setting pendingCloudConnect=true');
+      pendingCloudConnect = true;
+      return;
+    }
+    // Teardown stale listeners
+    if (companyListenerOn && db) {
+      try { db.ref('ff/companies').off(); } catch(e) {}
+      companyListenerOn = false;
+      companyListenerFired = false;
+    }
+    disconnectDataListener();
+    if (connectionListenerOn && db) {
+      try { db.ref('.info/connected').off(); } catch(e) {}
+      connectionListenerOn = false;
+      isActuallyConnected = false;
+    }
+    console.log('[FF] SDK ready, calling initFirebase()');
     try {
       initFirebase(config);
     } catch(e) {
-      dbg('ensureCloud: initFirebase error: ' + e.message);
-    }
-  } else if (!firebaseReady) {
-    // 2. SDK still not loaded (slow network) — set the flag so the IIFE
-    //    will trigger initFirebase when the SDK finally loads.
-    dbg('ensureCloud: SDK not ready yet, setting pendingCloudConnect=true');
-    pendingCloudConnect = true;
-    var dot = document.getElementById('syncIndicator');
-    if (dot) {
-      dot.className = 'sync-dot connecting';
-      dot.title = 'Connecting...';
+      console.error('[FF] initFirebase error:', e.message);
     }
   }
 
-  // 3. If REST never succeeded (useCloudREST=false), retry it now.
-  //    This commonly happens if the very first REST call hit a network glitch
-  //    or timed out, leaving the dot grey/red forever.
-  if (!useCloudREST) {
-    dbg('ensureCloud: REST not active yet, retrying REST fetch');
-    // Don't show loading spinner — user is already in the app
-    var config2 = getCloudConfig();
-    if (config2 && config2.databaseURL && typeof fetch !== 'undefined') {
-      fetch(config2.databaseURL + '/ff/companies.json')
-        .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(function(data) {
-          useCloudREST = true;
-          dbg('ensureCloud: REST retry succeeded, useCloudREST=true');
-          // If companies changed, refresh
-          if (data && typeof data === 'object') {
-            var cloudComps = [];
-            var keys = Object.keys(data);
-            for (var i = 0; i < keys.length; i++) {
-              cloudComps.push({
-                id: keys[i],
-                name: data[keys[i]].name,
-                createdAt: data[keys[i]].createdAt || Date.now()
-              });
-            }
-            var merged = [];
-            var seenIds = {};
-            for (var i = 0; i < cloudComps.length; i++) { merged.push(cloudComps[i]); seenIds[cloudComps[i].id] = true; }
-            for (var i = 0; i < companies.length; i++) {
-              if (!seenIds[companies[i].id]) { merged.push(companies[i]); }
-            }
-            if (JSON.stringify(merged) !== JSON.stringify(companies)) {
-              companies = merged;
-              saveCompaniesLocal();
-            }
-          }
-          updateSyncDot();
-        })
-        .catch(function(err) {
-          dbg('ensureCloud: REST retry failed: ' + err.message);
-          updateSyncDot();
-        });
-    }
-  }
+  // Kick both off immediately
+  pingRest();
+  initSdk();
 
-  // 4. If we have an active company and the SDK is ready, also re-fetch
-  //    company data via REST to make sure records/users are fresh.
-  if (activeCompanyId && useCloudREST) {
+  // Re-fetch active company data via REST so records/users are fresh
+  if (activeCompanyId) {
     fetchCompanyDataViaREST(activeCompanyId).then(function() {
       updateSyncDot();
-      // Re-render table/stats in case cloud had newer data
       if (typeof renderTable === 'function') renderTable();
       if (typeof renderStats === 'function') renderStats();
     }).catch(function() {});
   }
 
-  // 5. Force-update the dot immediately so the user sees feedback.
-  updateSyncDot();
+  // === STEP 3: Aggressive retry loop ===
+  // If REST failed, retry every 2s for up to 30s. Once it succeeds, stop.
+  // This catches slow networks, transient failures, etc.
+  var retryCount = 0;
+  var maxRetries = 15; // 15 * 2s = 30s
+  var retryTimer = setInterval(function() {
+    retryCount++;
+    if (useCloudREST) {
+      console.log('[FF] REST already active, stopping retry loop');
+      clearInterval(retryTimer);
+      return;
+    }
+    if (retryCount > maxRetries) {
+      console.warn('[FF] REST retry loop exhausted after ' + maxRetries + ' attempts');
+      clearInterval(retryTimer);
+      return;
+    }
+    console.log('[FF] REST retry #' + retryCount + '/' + maxRetries);
+    pingRest().then(function(ok) {
+      if (ok) {
+        clearInterval(retryTimer);
+        // Also try SDK one more time
+        initSdk();
+      }
+    });
+  }, 2000);
 
-  // 6. Schedule a follow-up dot refresh — the .info/connected listener
-  //    can take 1-3 seconds to fire even after initFirebase() succeeds.
-  setTimeout(updateSyncDot, 1500);
-  setTimeout(updateSyncDot, 4000);
+  // === STEP 4: Keep updating the dot for 30s ===
+  // The .info/connected listener can take 1-3s to fire. If we don't keep
+  // updating the dot, it might never turn green even after a successful
+  // SDK connection.
+  var dotUpdateCount = 0;
+  var dotTimer = setInterval(function() {
+    dotUpdateCount++;
+    if (dotUpdateCount > 15 || (useCloudREST && useCloud && isActuallyConnected)) {
+      clearInterval(dotTimer);
+      return;
+    }
+    updateSyncDot();
+  }, 2000);
+
+  // Force one immediate dot update
+  updateSyncDot();
 }
 
 // Log out and return to the login screen
