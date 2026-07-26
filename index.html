@@ -212,22 +212,24 @@ main{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px;pad
 .qe-header-row span:nth-child(2){flex:1;min-width:80px}
 .qe-header-row span:nth-child(3){width:72px;flex-shrink:0;text-align:right}
 .qe-header-row span:nth-child(4){width:72px;flex-shrink:0;text-align:right}
-.qe-header-row span:nth-child(5){width:36px;flex-shrink:0;text-align:center}
-.qe-header-row span:nth-child(6){width:50px;flex-shrink:0;text-align:right}
+.qe-header-row span:nth-child(5){width:64px;flex-shrink:0;text-align:right}
+.qe-header-row span:nth-child(6){width:42px;flex-shrink:0;text-align:center}
 .qe-header-row span:nth-child(7){width:22px;flex-shrink:0}
 .qe-row{display:flex;gap:5px;align-items:center;padding:7px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:5px;background:var(--bg2);flex-wrap:nowrap;transition:background .15s}
 .qe-row:hover{background:var(--card-hover)}
 .qe-row.cash-row{border-left:2.5px solid var(--accent)}
 .qe-row.credit-row{border-left:2.5px solid var(--info)}
 .qe-row-num{width:22px;height:22px;border-radius:50%;background:var(--accent-glow);color:var(--accent);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Space Grotesk',sans-serif}
-.qe-buyer-sel{padding:7px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--fg);font-size:12px;font-family:inherit;flex:1;min-width:80px;outline:none;flex-shrink:0;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%238ba8b4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 5px center;padding-right:18px}
+.qe-buyer-sel{padding:7px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--fg);font-size:12px;font-family:inherit;flex:1;min-width:60px;outline:none;flex-shrink:1;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%238ba8b4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 5px center;padding-right:18px}
 .qe-buyer-sel:focus{border-color:var(--accent)}
 .qe-rate,.qe-amt{padding:7px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--fg);font-size:12px;font-family:inherit;outline:none;width:72px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums}
 .qe-rate:focus,.qe-amt:focus{border-color:var(--accent)}
-.qe-repeat{padding:7px 2px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg);color:var(--accent);font-size:12px;font-weight:700;font-family:inherit;outline:none;width:36px;flex-shrink:0;text-align:center;font-variant-numeric:tabular-nums}
-.qe-repeat:focus{border-color:var(--accent)}
-.qe-repeat.has-multi{background:var(--accent-glow);border-color:var(--accent)}
-.qe-wt{padding:7px 6px;border:1px solid transparent;background:transparent;color:var(--success);font-size:11px;font-weight:700;width:50px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif}
+.qe-seq{padding:5px 2px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--fg-muted);font-size:11px;font-weight:700;width:42px;flex-shrink:0;text-align:center;font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif;line-height:1.4;display:flex;align-items:center;justify-content:center;height:26px;min-height:26px}
+.qe-seq.has-multi{background:var(--accent-glow);border-color:var(--accent);color:var(--accent);font-weight:800}
+.qe-seq.has-multi::before{content:'#';font-size:9px;opacity:.7;margin-right:1px}
+.qe-wt{padding:7px 4px;border:1px solid var(--success);border-radius:var(--radius-sm);background:rgba(60,198,138,.10);color:var(--success);font-size:12px;font-weight:800;width:64px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qe-wt.has-value{background:rgba(60,198,138,.18);box-shadow:0 0 0 1px rgba(60,198,138,.25)}
+.qe-wt .qe-wt-unit{font-size:9px;font-weight:700;opacity:.7;margin-left:2px}
 .qe-del-row{width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
 /* Date input icon visibility on dark theme */
 input[type="date"]{color-scheme:dark}
@@ -379,6 +381,7 @@ tbody td{padding:9px 10px;font-size:12px;vertical-align:middle}
 html.is-desktop .screen-box{max-width:520px}
 html.is-desktop main{max-width:1100px;padding:18px 24px 80px}
 html.is-desktop .modal{max-width:560px;padding:28px}
+html.is-desktop .qe-modal{max-width:760px;padding:26px 28px}
 html.is-desktop .modal h3{font-size:17px}
 html.is-desktop #qeDateBadge{font-size:17px}
 html.is-desktop .qe-sup-info #qeSupName{font-size:16px}
@@ -393,16 +396,17 @@ html.is-desktop .stat-label{font-size:11px}
 html.is-desktop .table-scroll{max-height:65vh}
 html.is-desktop .mgmt-add .ni{min-width:160px}
 html.is-desktop .mgmt-add .pi{min-width:160px}
-html.is-desktop .qe-rate,html.is-desktop .qe-amt{width:90px;font-size:13px}
-html.is-desktop .qe-buyer-sel{min-width:120px}
-html.is-desktop .qe-repeat{width:42px;font-size:13px}
-html.is-desktop .qe-header-row span:nth-child(2){min-width:120px}
-html.is-desktop .qe-header-row span:nth-child(3){width:85px}
-html.is-desktop .qe-header-row span:nth-child(4){width:85px}
-html.is-desktop .qe-header-row span:nth-child(5){width:42px}
-html.is-desktop .qe-header-row span:nth-child(6){width:60px}
-html.is-desktop .qe-row{padding:9px 10px;gap:7px}
-html.is-desktop .qe-wt{width:60px;font-size:12px}
+html.is-desktop .qe-rate,html.is-desktop .qe-amt{width:100px;font-size:13px}
+html.is-desktop .qe-buyer-sel{min-width:130px}
+html.is-desktop .qe-seq{width:50px;font-size:12px;height:28px}
+html.is-desktop .qe-header-row span:nth-child(2){min-width:140px}
+html.is-desktop .qe-header-row span:nth-child(3){width:95px}
+html.is-desktop .qe-header-row span:nth-child(4){width:95px}
+html.is-desktop .qe-header-row span:nth-child(5){width:84px}
+html.is-desktop .qe-header-row span:nth-child(6){width:50px}
+html.is-desktop .qe-row{padding:9px 10px;gap:8px}
+html.is-desktop .qe-wt{width:84px;font-size:13px}
+html.is-desktop .qe-wt .qe-wt-unit{font-size:10px}
 html.is-desktop .qe-total-amount{font-size:22px}
 html.is-desktop .table-filters{padding:10px 14px;gap:8px}
 html.is-desktop .search-box input{font-size:13px;padding:9px 10px 9px 32px}
@@ -418,14 +422,19 @@ html.is-desktop .toast-container{left:24px;right:24px;top:76px}
 html.is-tablet .screen-box{max-width:440px}
 html.is-tablet main{max-width:860px;padding:16px 20px 80px}
 html.is-tablet .modal{max-width:480px;padding:26px}
+html.is-tablet .qe-modal{max-width:680px;padding:24px 26px}
 html.is-tablet .form-grid{grid-template-columns:1fr 1fr 1fr;gap:12px}
 html.is-tablet .stats-row{grid-template-columns:repeat(4,1fr);gap:10px}
 html.is-tablet .stat-card{padding:14px 12px}
 html.is-tablet .stat-value{font-size:19px}
 html.is-tablet .table-scroll{max-height:58vh}
-html.is-tablet .qe-rate,html.is-tablet .qe-amt{width:80px}
-html.is-tablet .qe-buyer-sel{min-width:100px}
-html.is-tablet .qe-row{padding:8px 9px;gap:6px}
+html.is-tablet .qe-rate,html.is-tablet .qe-amt{width:88px}
+html.is-tablet .qe-buyer-sel{min-width:110px}
+html.is-tablet .qe-row{padding:8px 9px;gap:7px}
+html.is-tablet .qe-wt{width:78px;font-size:12px}
+html.is-tablet .qe-header-row span:nth-child(5){width:78px}
+html.is-tablet .qe-header-row span:nth-child(6){width:46px}
+html.is-tablet .qe-seq{width:46px;font-size:11px}
 html.is-tablet header{padding:13px 20px}
 html.is-tablet thead th{padding:10px 12px}
 html.is-tablet tbody td{padding:10px 12px;font-size:12px}
@@ -514,7 +523,7 @@ html.is-tablet tbody td{padding:10px 12px;font-size:12px}
 <div class="modal-overlay" id="renameSupplierModal"><div class="modal" style="max-width:340px"><h3><i class="fa-solid fa-truck-field" style="color:var(--accent);margin-right:6px"></i>Rename Supplier</h3><p>Change name — all records will be updated.</p><input class="modal-input" type="text" id="renameSupplierInput" placeholder="New name"><div class="modal-actions"><button class="modal-btn" data-close="renameSupplierModal">Cancel</button><button class="modal-btn" id="confirmRenameSupplierBtn" style="background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">Rename</button></div></div></div>
 <!-- Rename buyer modal -->
 <div class="modal-overlay" id="renameBuyerModal"><div class="modal" style="max-width:340px"><h3><i class="fa-solid fa-cart-shopping" style="color:var(--accent);margin-right:6px"></i>Rename Buyer</h3><p>Change name — all records will be updated.</p><input class="modal-input" type="text" id="renameBuyerInput" placeholder="New name"><div class="modal-actions"><button class="modal-btn" data-close="renameBuyerModal">Cancel</button><button class="modal-btn" id="confirmRenameBuyerBtn" style="background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">Rename</button></div></div></div>
-  <div class="modal-overlay" id="quickEntryModal"><div class="modal" style="max-width:520px;max-height:88vh;display:flex;flex-direction:column"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:8px"><h3 style="margin-bottom:0"><i class="fa-solid fa-bolt" style="color:var(--accent);margin-right:6px"></i>Quick Entry</h3><div style="display:flex;align-items:center;gap:8px"><span id="qeDateBadge" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:var(--accent-glow);color:#fff;font-size:15px;font-weight:700;border:1px solid var(--accent);white-space:nowrap;line-height:1.4"><i class="fa-solid fa-calendar-day"></i><span id="qeDateText">-</span></span><button class="modal-btn" data-close="quickEntryModal" style="padding:6px 10px;border:none;background:transparent;color:var(--fg-muted);font-size:16px;cursor:pointer"><i class="fa-solid fa-xmark"></i></button></div></div><!-- Supplier + Fish info bar --><div class="qe-sup-info" id="qeSupInfo"><i class="fa-solid fa-truck-field"></i><span id="qeSupName">-</span><span style="margin:0 4px;opacity:.5">|</span><i class="fa-solid fa-fish-fins"></i><select id="qeFishSelect" style="flex:1;padding:4px 22px 4px 6px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--accent);font-size:12px;font-family:inherit;outline:none;font-weight:700;-webkit-appearance:none;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23e8a832'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 4px center"></select></div><p style="margin-bottom:8px;font-size:11px;color:var(--fg-muted)"><i class="fa-solid fa-circle-info" style="margin-right:3px"></i>Select <b>Cash</b> for cash sale, or pick a buyer for credit sale.</p><!-- Column headers --><div class="qe-header-row"><span>#</span><span>Buyer</span><span>Rate</span><span>Amount</span><span>x</span><span>Wt</span><span></span></div><!-- Buyer rows container --><div id="qeBuyerRows" style="flex:1;overflow-y:auto;max-height:52vh;min-height:60px"></div><!-- Total row --><div class="qe-total-row"><span class="qe-total-label">Total</span><span class="qe-total-amount" id="qeGrandTotal">0.00</span></div><!-- Add buyer row + manage buyers --><div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap"><button type="button" id="qeAddRowBtn" style="padding:7px 14px;border-radius:var(--radius-sm);border:1.5px dashed var(--border);background:transparent;color:var(--fg-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-plus"></i> Add Row</button><button type="button" id="qeSortBtn" style="padding:7px 14px;border-radius:var(--radius-sm);border:1.5px dashed var(--border);background:transparent;color:var(--fg-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-arrow-down-a-z"></i> Sort</button><div style="flex:1"></div><button type="button" id="qeNewBuyerToggle" style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit"><i class="fa-solid fa-user-plus" style="margin-right:3px"></i> New Buyer</button><label style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px"><i class="fa-solid fa-file-arrow-up"></i> Import CSV<input type="file" id="qeBuyerCsvInput" accept=".csv,.txt" style="display:none"></label></div><!-- Inline new buyer input (hidden by default) --><div id="qeNewBuyerRow" style="display:none;margin-top:6px;gap:6px;align-items:center"><input type="text" id="qeNewBuyerInput" placeholder="Buyer name" style="flex:1;padding:8px 10px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:12px;font-family:inherit;outline:none"><button type="button" id="qeNewBuyerSave" style="padding:8px 14px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#0f1a1e;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Add</button></div><!-- Submit --><div class="modal-actions" style="margin-top:10px;justify-content:stretch;gap:8px"><button type="button" id="qeSubmitAll" style="flex:1;height:44px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-check-double"></i> Submit All</button></div></div></div>
+  <div class="modal-overlay" id="quickEntryModal"><div class="modal qe-modal" style="max-width:640px;max-height:90vh;display:flex;flex-direction:column"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:8px"><h3 style="margin-bottom:0"><i class="fa-solid fa-bolt" style="color:var(--accent);margin-right:6px"></i>Quick Entry</h3><div style="display:flex;align-items:center;gap:8px"><span id="qeDateBadge" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:var(--accent-glow);color:#fff;font-size:15px;font-weight:700;border:1px solid var(--accent);white-space:nowrap;line-height:1.4"><i class="fa-solid fa-calendar-day"></i><span id="qeDateText">-</span></span><button class="modal-btn" data-close="quickEntryModal" style="padding:6px 10px;border:none;background:transparent;color:var(--fg-muted);font-size:16px;cursor:pointer"><i class="fa-solid fa-xmark"></i></button></div></div><!-- Supplier + Fish info bar --><div class="qe-sup-info" id="qeSupInfo"><i class="fa-solid fa-truck-field"></i><span id="qeSupName">-</span><span style="margin:0 4px;opacity:.5">|</span><i class="fa-solid fa-fish-fins"></i><select id="qeFishSelect" style="flex:1;padding:4px 22px 4px 6px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--accent);font-size:12px;font-family:inherit;outline:none;font-weight:700;-webkit-appearance:none;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23e8a832'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 4px center"></select></div><p style="margin-bottom:8px;font-size:11px;color:var(--fg-muted)"><i class="fa-solid fa-circle-info" style="margin-right:3px"></i>Select <b>Cash</b> for cash sale, or pick a buyer for credit sale.</p><!-- Column headers --><div class="qe-header-row"><span>#</span><span>Buyer</span><span>Rate</span><span>Amount</span><span>Wt</span><span>Seq</span><span></span></div><!-- Buyer rows container --><div id="qeBuyerRows" style="flex:1;overflow-y:auto;max-height:52vh;min-height:60px"></div><!-- Total row --><div class="qe-total-row"><span class="qe-total-label">Total</span><span class="qe-total-amount" id="qeGrandTotal">0.00</span></div><!-- Add buyer row + manage buyers --><div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap"><button type="button" id="qeAddRowBtn" style="padding:7px 14px;border-radius:var(--radius-sm);border:1.5px dashed var(--border);background:transparent;color:var(--fg-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-plus"></i> Add Row</button><button type="button" id="qeSortBtn" style="padding:7px 14px;border-radius:var(--radius-sm);border:1.5px dashed var(--border);background:transparent;color:var(--fg-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-arrow-down-a-z"></i> Sort</button><div style="flex:1"></div><button type="button" id="qeNewBuyerToggle" style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit"><i class="fa-solid fa-user-plus" style="margin-right:3px"></i> New Buyer</button><label style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px"><i class="fa-solid fa-file-arrow-up"></i> Import CSV<input type="file" id="qeBuyerCsvInput" accept=".csv,.txt" style="display:none"></label></div><!-- Inline new buyer input (hidden by default) --><div id="qeNewBuyerRow" style="display:none;margin-top:6px;gap:6px;align-items:center"><input type="text" id="qeNewBuyerInput" placeholder="Buyer name" style="flex:1;padding:8px 10px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:12px;font-family:inherit;outline:none"><button type="button" id="qeNewBuyerSave" style="padding:8px 14px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#0f1a1e;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Add</button></div><!-- Submit --><div class="modal-actions" style="margin-top:10px;justify-content:stretch;gap:8px"><button type="button" id="qeSubmitAll" style="flex:1;height:44px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-check-double"></i> Submit All</button></div></div></div>
 <!-- Cloud sync setup modal -->
 <div class="modal-overlay" id="setupModal"><div class="modal" style="max-width:430px"><div style="text-align:center;margin-bottom:14px"><div style="width:52px;height:52px;background:var(--accent-glow);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:22px;color:var(--accent);margin-bottom:8px"><i class="fa-solid fa-cloud-arrow-up"></i></div><h3>Cloud Sync Setup</h3></div><p style="text-align:center;margin-bottom:14px">Connect to Firebase Realtime Database for cross-device sync.</p><div class="setup-steps"><strong>Quick Setup:</strong><ol><li>Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li><li>Create a project, then Realtime Database, start in test mode</li><li>Settings > Project settings > Add web app, copy config JSON</li><li>Paste the full JSON below</li></ol></div><textarea class="setup-textarea" id="firebaseConfigInput" placeholder='Paste Firebase config JSON here:
 {
@@ -2181,8 +2190,7 @@ function saveQEDraft() {
       draft.rows.push({
         buyer: rows[i].querySelector('.qe-buyer-sel').value,
         rate: rows[i].querySelector('.qe-rate').value,
-        amount: rows[i].querySelector('.qe-amt').value,
-        repeat: rows[i].querySelector('.qe-repeat') ? rows[i].querySelector('.qe-repeat').value : '1'
+        amount: rows[i].querySelector('.qe-amt').value
       });
     }
   }
@@ -2296,17 +2304,14 @@ function openQuickEntry() {
       var rowBuyer = savedRows[i].buyer || 'Cash';
       var rowRate = savedRows[i].rate || '';
       var rowAmt = savedRows[i].amount || '';
-      var rowRepeat = savedRows[i].repeat || '1';
       var existingId = savedRows[i].id || '';
       addQEBuyerRow(rowBuyer);
       var lastRow = document.querySelector('#qeBuyerRows .qe-row:last-child');
       if (lastRow) {
         var rateInput = lastRow.querySelector('.qe-rate');
         var amtInput = lastRow.querySelector('.qe-amt');
-        var repeatInput = lastRow.querySelector('.qe-repeat');
         if (rateInput && rowRate) { rateInput.value = rowRate; rateInput.dispatchEvent(new Event('input')); }
         if (amtInput && rowAmt) { amtInput.value = rowAmt; amtInput.dispatchEvent(new Event('input')); }
-        if (repeatInput && rowRepeat) { repeatInput.value = rowRepeat; repeatInput.dispatchEvent(new Event('input')); }
         // Only mark as existing if the record STILL exists in records[]
         // If it was deleted (e.g. by dedup), treat this as a new entry
         if (existingId && existingIdSet[existingId]) {
@@ -2326,10 +2331,11 @@ function openQuickEntry() {
   // If draft had stale (deleted) record IDs, clear the draft so it doesn't keep loading ghost rows
   if (staleDraft) { clearQEDraft(); }
   updateQETotal(); // immediate recalculation of all row amounts
+  updateQESeq();   // recompute seq numbers for restored rows
   openModal('quickEntryModal');
   // Force recalculate total after modal is visible (dispatchEvent may not fire handlers reliably on some mobile browsers)
-  setTimeout(updateQETotal, 50);
-  setTimeout(updateQETotal, 200);
+  setTimeout(function() { updateQETotal(); updateQESeq(); }, 50);
+  setTimeout(function() { updateQETotal(); updateQESeq(); }, 200);
 }
 
 // Add a buyer row in the quick entry modal
@@ -2361,32 +2367,35 @@ function addQEBuyerRow(presetBuyer) {
     + '<select class="qe-buyer-sel">' + opts + '</select>'
     + '<input type="text" inputmode="numeric" pattern="[0-9.]*" class="qe-rate" placeholder="Rate" value="' + prevRate + '">'
     + '<input type="text" inputmode="numeric" pattern="[0-9.]*" class="qe-amt" placeholder="Amt">'
-    + '<input type="text" inputmode="numeric" pattern="[0-9]*" class="qe-repeat" placeholder="1" value="1" title="Repeat count: how many sequenced entries to create (seq 1, 2, 3...)" maxlength="3">'
     + '<span class="qe-wt">-</span>'
+    + '<span class="qe-seq" title="Sequence number — increments when same buyer+rate+amount combo repeats">1</span>'
     + '<button type="button" class="qe-del-row" title="Remove row"><i class="fa-solid fa-xmark"></i></button>';
   container.appendChild(row);
 
-  // Wire rate/amount/repeat inputs to calc weight for this row
+  // Wire rate/amount inputs to calc weight for this row
   var rateInput = row.querySelector('.qe-rate');
   var amtInput = row.querySelector('.qe-amt');
-  var repeatInput = row.querySelector('.qe-repeat');
   var wtSpan = row.querySelector('.qe-wt');
   function calcRowWeight() {
     var r = parseFloat(rateInput.value) || 0;
     var a = parseFloat(amtInput.value) || 0;
-    var x = parseInt(repeatInput.value) || 1;
-    if (x < 1) x = 1;
-    // Total weight = (amount per entry / rate) * repeat count
-    wtSpan.textContent = r > 0 ? ((a * x) / r).toFixed(2) : '-';
-    // Highlight the repeat field when it's > 1 (visual cue that this row will expand)
-    if (x > 1) repeatInput.classList.add('has-multi');
-    else repeatInput.classList.remove('has-multi');
+    // Weight = amount / rate (no repeat multiplier)
+    if (r > 0) {
+      var wtVal = (a / r).toFixed(2);
+      wtSpan.innerHTML = wtVal + '<span class="qe-wt-unit">kg</span>';
+      wtSpan.classList.add('has-value');
+      wtSpan.title = wtVal + ' kg (amount ÷ rate)';
+    } else {
+      wtSpan.textContent = '-';
+      wtSpan.classList.remove('has-value');
+      wtSpan.title = 'Enter rate to calculate weight';
+    }
+    updateQESeq();
     updateQETotal();
     saveQEDraft();
   }
   rateInput.addEventListener('input', calcRowWeight);
   amtInput.addEventListener('input', calcRowWeight);
-  repeatInput.addEventListener('input', calcRowWeight);
 
   // Toggle row style when buyer changes (cash vs credit)
   var buyerSel = row.querySelector('.qe-buyer-sel');
@@ -2401,6 +2410,7 @@ function addQEBuyerRow(presetBuyer) {
       row.classList.remove('cash-row', 'credit-row');
     }
     saveQEDraft();
+    updateQESeq();
   });
 
   // Jump to amount when rate is entered
@@ -2436,17 +2446,48 @@ function addQEBuyerRow(presetBuyer) {
 }
 
 // Calculate and display the grand total of all amounts in quick entry
-// Multiplies each row's amount by its repeat count (the "x" field)
 function updateQETotal() {
   var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
   var total = 0;
   for (var i = 0; i < rows.length; i++) {
     var amt = parseFloat(rows[i].querySelector('.qe-amt').value) || 0;
-    var x = parseInt(rows[i].querySelector('.qe-repeat').value) || 1;
-    if (x < 1) x = 1;
-    total += amt * x;
+    total += amt;
   }
   document.getElementById('qeGrandTotal').textContent = fmtN(total);
+}
+
+// Auto-compute sequence numbers for rows that share the same buyer+rate+amount combo.
+// First occurrence shows "1" (subtle), repeats show "2", "3"... (highlighted amber).
+// This visually identifies duplicate sales of the same fish to the same buyer at the same rate/amount.
+function updateQESeq() {
+  var rows = document.querySelectorAll('#qeBuyerRows .qe-row');
+  // Map: "buyer|rate|amount" -> count of occurrences seen so far
+  var seen = {};
+  for (var i = 0; i < rows.length; i++) {
+    var buyer = (rows[i].querySelector('.qe-buyer-sel').value || '').trim();
+    var rate = (rows[i].querySelector('.qe-rate').value || '').trim();
+    var amt = (rows[i].querySelector('.qe-amt').value || '').trim();
+    var seqEl = rows[i].querySelector('.qe-seq');
+    if (!seqEl) continue;
+    // Only assign a sequence when row is fully filled
+    if (!buyer || !rate || !amt) {
+      seqEl.textContent = '1';
+      seqEl.classList.remove('has-multi');
+      seqEl.title = 'Sequence number — fills in when buyer, rate & amount are all set';
+      continue;
+    }
+    var key = buyer.toLowerCase() + '|' + rate + '|' + amt;
+    seen[key] = (seen[key] || 0) + 1;
+    var seqNum = seen[key];
+    seqEl.textContent = seqNum;
+    if (seqNum > 1) {
+      seqEl.classList.add('has-multi');
+      seqEl.title = 'Seq #' + seqNum + ' — duplicate of an earlier row with same buyer (' + buyer + '), rate (' + rate + ') and amount (' + amt + ')';
+    } else {
+      seqEl.classList.remove('has-multi');
+      seqEl.title = 'Seq #1 — unique combo so far (buyer: ' + buyer + ', rate: ' + rate + ', amount: ' + amt + ')';
+    }
+  }
 }
 
 // Renumber buyer rows after deletion
@@ -2455,6 +2496,7 @@ function renumberQERows() {
   for (var i = 0; i < rows.length; i++) {
     rows[i].querySelector('.qe-row-num').textContent = (i + 1);
   }
+  updateQESeq();
 }
 
 // Sort Quick Entry rows by buyer (alphabetically, Cash last) then by rate (ascending), then amount (ascending)
@@ -2494,6 +2536,7 @@ function sortQERows() {
   renumberQERows();
   updateQETotal();
   saveQEDraft();
+  updateQESeq();
 }
 
 // Build a unique key string from record fields for exact duplicate matching
@@ -2527,23 +2570,20 @@ function submitAllQE() {
   var added = 0, existingSkipped = 0;
 
   // Phase 1: Collect all valid new rows with their base keys
-  var newEntries = []; // {buyer, rate, amt, wt, baseKey, rowIdx}
+  // No more manual expansion — each row becomes exactly one entry.
+  // The auto-calculated Seq number shown in the UI is used for duplicate detection.
+  var newEntries = []; // {buyer, rate, amt, wt, baseKey, rowIdx, uiSeq}
   for (var i = 0; i < rows.length; i++) {
     if (rows[i].getAttribute('data-existing-id')) { existingSkipped++; continue; }
     var buyer = rows[i].querySelector('.qe-buyer-sel').value;
     var rate = parseFloat(rows[i].querySelector('.qe-rate').value);
     var amt = parseFloat(rows[i].querySelector('.qe-amt').value);
-    var repeatVal = parseInt(rows[i].querySelector('.qe-repeat').value) || 1;
+    var uiSeqEl = rows[i].querySelector('.qe-seq');
+    var uiSeq = uiSeqEl ? parseInt(uiSeqEl.textContent) || 1 : 1;
     if (!buyer || isNaN(rate) || isNaN(amt) || rate <= 0 || amt <= 0) continue;
-    if (repeatVal < 1) repeatVal = 1;
-    if (repeatVal > 999) repeatVal = 999;
     var wt = amt / rate;
     var baseKey = recKey(date, sup, fish, buyer, rate, amt, wt);
-    // EXPAND: repeatVal > 1 creates that many entries with the same base key.
-    // Phase 2 (batchKeyCount) will then assign seq 1, 2, 3... to them automatically.
-    for (var rx = 0; rx < repeatVal; rx++) {
-      newEntries.push({buyer: buyer, rate: rate, amt: amt, wt: wt, baseKey: baseKey, rowIdx: i});
-    }
+    newEntries.push({buyer: buyer, rate: rate, amt: amt, wt: wt, baseKey: baseKey, rowIdx: i, uiSeq: uiSeq});
   }
 
   // Phase 2: Count occurrences of each base key in this batch
@@ -2572,7 +2612,7 @@ function submitAllQE() {
   // A record needs seq when:
   //   - Multiple entries in THIS batch share the same base key (batchKeyCount > 1)
   //   - OR entries in this batch match existing records without seq (existingCountMap > 0)
-  var batchSeqTracker = {}; // baseKey -> next seq for batch-internal duplicates
+  // When seq is needed, use the UI-displayed seq number (1, 2, 3...) offset by existing records.
   for (var i = 0; i < newEntries.length; i++) {
     var e = newEntries[i];
     var bk = e.baseKey;
@@ -2594,15 +2634,9 @@ function submitAllQE() {
       var existingBase = existingCountMap[bk] || 0;
       // Total existing with this combo (with seq + without seq)
       var totalExisting = prevMax + existingBase;
-      // For batch-internal duplicates, track which number this is
-      if (batchKeyCount[bk] > 1) {
-        if (!batchSeqTracker[bk]) batchSeqTracker[bk] = 1;
-        seqVal = totalExisting + batchSeqTracker[bk];
-        batchSeqTracker[bk]++;
-      } else {
-        // Single entry matching existing → next number after all existing
-        seqVal = totalExisting + 1;
-      }
+      // Use the UI-displayed seq number (e.uiSeq) added to existing count
+      // e.uiSeq is 1, 2, 3... for batch-internal duplicates of the same combo
+      seqVal = totalExisting + e.uiSeq;
     }
 
     var rec = {
@@ -2983,15 +3017,22 @@ function editRecord(id) {
   if (lastRow) {
     lastRow.querySelector('.qe-rate').value = r.rate;
     lastRow.querySelector('.qe-amt').value = r.amount;
-    // When editing, default repeat to 1 (single record edit)
-    if (lastRow.querySelector('.qe-repeat')) lastRow.querySelector('.qe-repeat').value = '1';
     // Trigger weight calc
     var rateInput = lastRow.querySelector('.qe-rate');
     var amtInput = lastRow.querySelector('.qe-amt');
     var r2 = parseFloat(rateInput.value) || 0;
     var a2 = parseFloat(amtInput.value) || 0;
-    lastRow.querySelector('.qe-wt').textContent = r2 > 0 ? (a2 / r2).toFixed(2) : '-';
+    var wtEl = lastRow.querySelector('.qe-wt');
+    if (r2 > 0) {
+      var wv = (a2 / r2).toFixed(2);
+      wtEl.innerHTML = wv + '<span class="qe-wt-unit">kg</span>';
+      wtEl.classList.add('has-value');
+    } else {
+      wtEl.textContent = '-';
+      wtEl.classList.remove('has-value');
+    }
     updateQETotal();
+    updateQESeq();
   }
   document.getElementById('editBar').classList.add('active');
   document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen"></i> Edit Entry';
@@ -4737,6 +4778,7 @@ document.getElementById('qeFishSelect').addEventListener('change', function() {
     addQEBuyerRow('Cash');
   }
   updateQETotal();
+  updateQESeq();
 });
 document.getElementById('qeAddRowBtn').addEventListener('click', function() { addQEBuyerRow('Cash'); });
 document.getElementById('qeSortBtn').addEventListener('click', sortQERows);
@@ -4769,6 +4811,7 @@ document.getElementById('qeNewBuyerSave').addEventListener('click', function() {
     }
     sel.innerHTML = opts;
   }
+  updateQESeq(); // seq numbers may need refresh if buyer names changed
   toast('Buyer "' + name + '" added.', 'success');
 });
 document.getElementById('qeNewBuyerInput').addEventListener('keydown', function(e) {
@@ -4804,6 +4847,7 @@ document.getElementById('qeBuyerCsvInput').addEventListener('change', function(i
         }
         sel.innerHTML = opts;
       }
+      updateQESeq();
       toast(added + ' buyer(s) imported.', 'success');
     } else {
       toast('No new buyers found in file.', 'error');
@@ -5150,4 +5194,5 @@ try {
 </script>
 </body>
 </html>
+
 
