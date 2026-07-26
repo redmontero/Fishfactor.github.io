@@ -7,6 +7,93 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
+// ====================================================================
+// ONE-TIME FULL DATA WIPE on first load of a new version.
+// Bump DATA_WIPE_VERSION below whenever you want every browser to
+// wipe ALL browsing data on the NEXT visit, then never again until
+// you bump the version again.
+// ====================================================================
+var DATA_WIPE_VERSION = '2026-07-26-v1';
+(function(){
+  try {
+    var flagKey = 'ff_wipe_done_' + DATA_WIPE_VERSION;
+    if (!localStorage.getItem(flagKey)) {
+      console.log('[WIPE] New version detected (' + DATA_WIPE_VERSION + '), wiping all browsing data...');
+
+      // 1. Clear all localStorage (every key — not just this app's)
+      try { localStorage.clear(); } catch(e) { console.warn('[WIPE] localStorage.clear failed:', e); }
+
+      // 2. Clear all sessionStorage
+      try { sessionStorage.clear(); } catch(e) { console.warn('[WIPE] sessionStorage.clear failed:', e); }
+
+      // 3. Clear all Cache Storage (service worker caches)
+      try {
+        if (window.caches && caches.keys) {
+          caches.keys().then(function(keys) {
+            keys.forEach(function(k) {
+              caches.delete(k).then(function(ok) {
+                if (ok) console.log('[WIPE] Deleted cache:', k);
+              });
+            });
+          }).catch(function(e) { console.warn('[WIPE] caches.keys failed:', e); });
+        }
+      } catch(e) { console.warn('[WIPE] Cache Storage wipe failed:', e); }
+
+      // 4. Unregister all service workers
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            regs.forEach(function(reg) {
+              reg.unregister().then(function(ok) {
+                if (ok) console.log('[WIPE] Unregistered SW:', reg.scope);
+              });
+            });
+          }).catch(function(e) { console.warn('[WIPE] SW unregister failed:', e); });
+        }
+      } catch(e) { console.warn('[WIPE] ServiceWorker wipe failed:', e); }
+
+      // 5. Clear all cookies reachable from JS (HttpOnly cookies can't be touched — that's OK)
+      try {
+        var c = document.cookie.split(';');
+        var hostParts = location.hostname.split('.');
+        // Try several domain/path scopes to maximize cookie coverage
+        var domains = ['', location.hostname];
+        if (hostParts.length >= 2) {
+          domains.push(hostParts.slice(-2).join('.')); // example.com
+        }
+        if (hostParts.length >= 3) {
+          domains.push(hostParts.slice(-3).join('.')); // sub.example.com
+        }
+        var paths = ['/', location.pathname.replace(/\/[^/]*$/, '') || '/'];
+        for (var i = 0; i < c.length; i++) {
+          var eq = c[i].indexOf('=');
+          var name = (eq >= 0 ? c[i].slice(0, eq) : c[i]).trim();
+          if (!name) continue;
+          for (var d = 0; d < domains.length; d++) {
+            for (var p = 0; p < paths.length; p++) {
+              document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=' + paths[p] + (domains[d] ? '; domain=' + domains[d] : '');
+            }
+          }
+        }
+        console.log('[WIPE] Cleared ' + c.length + ' cookie entries (best-effort)');
+      } catch(e) { console.warn('[WIPE] Cookie wipe failed:', e); }
+
+      // 6. Set the flag so this version never wipes again.
+      //    MUST be done AFTER localStorage.clear(), otherwise the flag gets wiped too.
+      try { localStorage.setItem(flagKey, '1'); } catch(e) { console.warn('[WIPE] Flag set failed:', e); }
+
+      console.log('[WIPE] Done. Reload the page if anything looks stale.');
+      // Optional: force a clean reload so no in-memory state from the wiped SW leaks through
+      // (Commented out to avoid an extra reload cycle; the app initializes fresh anyway.)
+      // window.location.reload();
+    } else {
+      console.log('[WIPE] Already wiped for version ' + DATA_WIPE_VERSION + ', skipping.');
+    }
+  } catch(e) {
+    console.error('[WIPE] Fatal error during wipe:', e);
+  }
+})();
+
 (function(){
   // On every page load, ensure no stale version is cached — force fresh
   if (window.applicationCache) { window.applicationCache.addEventListener('updateready', function() { window.location.reload(); }); }
@@ -4860,4 +4947,5 @@ try {
 </script>
 </body>
 </html>
+
 
