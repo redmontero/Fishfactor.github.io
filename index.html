@@ -1463,10 +1463,38 @@ function setupDataListener() {
       localStorage.setItem(ck('sp'), JSON.stringify(suppliers));
       changed = true;
     }
-    if (d.records && JSON.stringify(d.records) !== JSON.stringify(records)) {
-      records = d.records;
-      localStorage.setItem(ck('rc'), JSON.stringify(records));
-      changed = true;
+    // MERGE cloud records with local — never lose records that exist locally but not in cloud
+    // This prevents data loss when: offline saves haven't synced yet, or cloud has stale snapshot
+    if (d.records) {
+      var cloudRecs = d.records;
+      var localIds = {};
+      var cloudIds = {};
+      for (var li = 0; li < records.length; li++) {
+        if (records[li].id) localIds[records[li].id] = true;
+      }
+      for (var ci = 0; ci < cloudRecs.length; ci++) {
+        if (cloudRecs[ci].id) cloudIds[cloudRecs[ci].id] = true;
+      }
+      // Build merged list: cloud records + any local records whose ID is NOT in cloud
+      var merged = cloudRecs.slice();
+      var localOnlyCount = 0;
+      for (var mi = 0; mi < records.length; mi++) {
+        if (records[mi].id && !cloudIds[records[mi].id]) {
+          merged.push(records[mi]);
+          localOnlyCount++;
+        }
+      }
+      // Only update if merged differs from current local records
+      if (JSON.stringify(merged) !== JSON.stringify(records)) {
+        records = merged;
+        localStorage.setItem(ck('rc'), JSON.stringify(records));
+        changed = true;
+        if (localOnlyCount > 0) {
+          dbg('Cloud sync: preserved ' + localOnlyCount + ' local-only record(s) not yet in cloud');
+          // Re-push to cloud so local-only records get uploaded
+          pushCloud();
+        }
+      }
     }
     if (d.users && JSON.stringify(d.users) !== JSON.stringify(appUsers)) {
       appUsers = d.users;
