@@ -328,8 +328,10 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:.8}
 .table-scroll{min-width:500px;max-height:50vh;overflow-y:auto}
 table{width:100%;border-collapse:collapse}
 thead th{padding:9px 10px;font-size:10px;font-weight:700;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.5px;text-align:left;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0}
-tbody tr{border-bottom:1px solid rgba(42,70,80,.2);transition:background .15s}
-tbody tr:hover{background:rgba(232,168,50,.03)}
+tbody tr{border-bottom:1px solid rgba(42,70,80,.2);transition:background .15s,box-shadow .15s}
+tbody tr:hover{background:rgba(232,168,50,.05)}
+tbody tr.selected-row{background:rgba(232,168,50,.18);box-shadow:inset 4px 0 0 var(--accent),inset 0 -1px 0 rgba(232,168,50,.3)}
+tbody tr.selected-row:hover{background:rgba(232,168,50,.22)}
 tbody td{padding:9px 10px;font-size:12px;vertical-align:middle}
 .fish-badge,.supplier-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
 .price-cell{font-family:'Space Grotesk',sans-serif;font-weight:600;font-variant-numeric:tabular-nums;font-size:12px}
@@ -551,7 +553,7 @@ html.is-tablet tbody td{padding:10px 12px;font-size:12px}
 <main id="appMain" style="display:none">
   <div class="form-card"><div class="edit-bar" id="editBar"><i class="fa-solid fa-pen"></i><span>Editing record</span><button class="cancel-edit" id="cancelEditBtn">Cancel</button></div><div class="form-title" id="formTitle"><i class="fa-solid fa-pen-to-square"></i> New Entry</div><form id="fishForm" autocomplete="off"><div class="form-grid"><div class="form-group"><label>Date</label><input type="date" id="entryDate" required></div><div class="form-group"><label>Supplier</label><select id="supplier" required></select></div><div class="form-group"><label>Fish Type</label><select id="fishType" required></select></div><div class="form-group" style="display:flex;align-items:flex-end"><button type="button" id="quickEntryBtn" style="width:100%;height:46px;border-radius:var(--radius-sm);border:1.5px solid var(--accent);background:var(--accent-glow);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-bolt"></i> Quick Entry</button></div></div></form></div>
   <div class="date-filter-bar"><div class="date-filter-label"><i class="fa-solid fa-calendar-day" style="color:var(--accent)"></i> Showing: <span class="date-badge" id="dateBadge">--</span></div><button class="show-all-btn" id="showAllBtn"><i class="fa-solid fa-layer-group" style="font-size:10px"></i> All Dates</button></div>
-  <div class="table-area"><div class="table-title"><i class="fa-solid fa-table-list" style="color:var(--accent)"></i> Records <span class="record-count" id="recordCount">0</span></div><div class="table-filters"><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="searchInput" placeholder="Search..."></div><select class="filter-select" id="filterFish"><option value="">All Fish</option></select><select class="filter-select" id="filterSupplier"><option value="">All Suppliers</option></select></div></div>
+  <div class="table-area"><div class="table-title"><i class="fa-solid fa-table-list" style="color:var(--accent)"></i> Records <span class="record-count" id="recordCount">0</span></div><div class="table-filters"><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="searchInput" placeholder="Search fish / supplier / buyer — or type a rate (e.g. 1400) to see all amounts at that rate, sorted ascending"></div><select class="filter-select" id="filterFish"><option value="">All Fish</option></select><select class="filter-select" id="filterSupplier"><option value="">All Suppliers</option></select></div></div>
   <div class="table-container"><div class="table-scroll"><table><thead><tr><th>#</th><th>Supplier</th><th>Fish</th><th>Buyer</th><th>Rate</th><th>Amount</th><th>Weight</th><th>Date</th><th></th></tr></thead><tbody id="tableBody"></tbody></table><div class="empty-state" id="emptyState"><div class="empty-icon"><i class="fa-solid fa-fish-fins"></i></div><h3>No Records</h3><p id="emptyMsg">Add entries or import CSV.</p></div></div><div class="table-footer" id="tableFooter" style="display:none"><span class="total-label">Total</span><span class="total-amount" id="filteredTotal">0.00</span></div></div>
   <div class="summary-pdf-bar">
     <button type="button" class="summary-pdf-btn" id="summaryPdfBtn"><i class="fa-solid fa-file-pdf"></i> Summary PDF</button>
@@ -2673,8 +2675,12 @@ function submitAllQE() {
   if (scroll) scroll.scrollTop = 0;
   var firstRow = document.querySelector('#tableBody tr');
   if (firstRow) {
-    firstRow.style.background = 'rgba(60,198,138,0.15)';
-    setTimeout(function() { firstRow.style.background = ''; }, 1200);
+    firstRow.style.background = 'rgba(60,198,138,0.06)';
+    firstRow.style.boxShadow = 'inset 3px 0 0 rgba(60,198,138,0.4)';
+    setTimeout(function() {
+      firstRow.style.background = '';
+      firstRow.style.boxShadow = '';
+    }, 1500);
   }
 }
 
@@ -2981,6 +2987,8 @@ function clearForm() {
   var savedFish = document.getElementById('fishType').value;
   var savedDate = document.getElementById('entryDate').value;
   editingId = null;
+  // Remove selected-row highlight from all rows
+  document.querySelectorAll('#tableBody tr.selected-row').forEach(function(tr) { tr.classList.remove('selected-row'); });
   document.getElementById('fishForm').reset();
   document.getElementById('supplier').value = savedSupplier;
   document.getElementById('fishType').value = savedFish;
@@ -3001,6 +3009,13 @@ function editRecord(id) {
   }
   if (!r) return;
   editingId = id;
+  // Highlight the selected row in the table
+  document.querySelectorAll('#tableBody tr.selected-row').forEach(function(tr) { tr.classList.remove('selected-row'); });
+  var editBtnEl = document.querySelector('[data-edit-rec="' + id + '"]');
+  if (editBtnEl) {
+    var editRow = editBtnEl.closest('tr');
+    if (editRow) editRow.classList.add('selected-row');
+  }
   document.getElementById('entryDate').value = r.date;
   populateFormSelects();
   document.getElementById('supplier').value = r.supplier;
@@ -3101,6 +3116,11 @@ function getFilteredRecords() {
   var search = (document.getElementById('searchInput').value || '').toLowerCase();
   var fFish = document.getElementById('filterFish').value;
   var fSup = document.getElementById('filterSupplier').value;
+  // Detect numeric search — when user types a number (e.g. "1400" or "1400.00"),
+  // match it against the RATE column only, and sort results by AMOUNT ascending.
+  // For text searches (fish/supplier/buyer/date), keep the original OR-style matching.
+  var s = search.trim();
+  var isNumericSearch = /^[0-9]+(\.[0-9]+)?$/.test(s);
   var result = [];
   for (var i = 0; i < records.length; i++) {
     var r = records[i];
@@ -3108,16 +3128,31 @@ function getFilteredRecords() {
     if (fFish && r.fish !== fFish) continue;
     if (fSup && r.supplier !== fSup) continue;
     if (search) {
-      var txt = (r.fish + ' ' + r.supplier + ' ' + r.date + ' ' + r.amount + ' ' + r.rate).toLowerCase();
-      if (txt.indexOf(search) === -1) continue;
+      if (isNumericSearch) {
+        // Numeric: match against RATE only
+        var rateStr = String(r.rate).toLowerCase();
+        if (rateStr.indexOf(s) === -1) continue;
+      } else {
+        // Text: match against fish/supplier/buyer/date
+        var txt = (r.fish + ' ' + r.supplier + ' ' + r.buyer + ' ' + r.date).toLowerCase();
+        if (txt.indexOf(search) === -1) continue;
+      }
     }
     result.push(r);
   }
-  // Sort by date descending, then by creation time
-  result.sort(function(a, b) {
-    if (a.date !== b.date) return b.date.localeCompare(a.date);
-    return (b.createdAt || 0) - (a.createdAt || 0);
-  });
+  // Sort:
+  //   - Numeric search → by AMOUNT ascending (smallest amount first)
+  //   - Otherwise → by date descending, then by creation time
+  if (isNumericSearch) {
+    result.sort(function(a, b) {
+      return (a.amount || 0) - (b.amount || 0);
+    });
+  } else {
+    result.sort(function(a, b) {
+      if (a.date !== b.date) return b.date.localeCompare(a.date);
+      return (b.createdAt || 0) - (a.createdAt || 0);
+    });
+  }
   return result;
 }
 
@@ -4345,14 +4380,15 @@ function removeDuplicates() {
 function exportCSV() {
   var filtered = getFilteredRecords();
   if (!filtered.length) { toast('No records to export.', 'error'); return; }
-  // Seq is the FIRST column ("top of the page") so duplicate-with-sequence entries are easy to spot
-  var csv = 'Seq,Date,Supplier,Fish,Buyer,Rate,Amount,Weight\n';
+  // Seq is the LAST column (extreme right) so duplicate-with-sequence entries are easy to spot
+  var csv = 'Date,Supplier,Fish,Buyer,Rate,Amount,Weight,Seq\n';
   for (var i = 0; i < filtered.length; i++) {
     var r = filtered[i];
-    csv += (r.seq || '') + ',' + r.date + ',"' + (r.supplier || '').replace(/"/g, '""') + '","'
+    csv += r.date + ',"' + (r.supplier || '').replace(/"/g, '""') + '","'
       + (r.fish || '').replace(/"/g, '""') + '","'
       + (r.buyer || '').replace(/"/g, '""') + '",'
-      + r.rate.toFixed(2) + ',' + r.amount.toFixed(2) + ',' + r.weight.toFixed(2) + '\n';
+      + r.rate.toFixed(2) + ',' + r.amount.toFixed(2) + ',' + r.weight.toFixed(2)
+      + ',' + (r.seq || '') + '\n';
   }
   var blob = new Blob([csv], { type: 'text/csv' });
   var url = URL.createObjectURL(blob);
@@ -5194,5 +5230,6 @@ try {
 </script>
 </body>
 </html>
+
 
 
