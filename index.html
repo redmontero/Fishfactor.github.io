@@ -544,7 +544,6 @@ html.is-tablet tbody td{padding:10px 12px;font-size:12px}
     <button class="header-btn" id="cloudBtn" title="Cloud settings"><i class="fa-solid fa-cloud"></i></button>
     <button class="header-btn accent-btn" id="importBtn" title="Import CSV"><i class="fa-solid fa-file-import"></i> <span class="btn-label">Import</span></button>
     <button class="header-btn" id="exportBtn" title="Export CSV"><i class="fa-solid fa-file-export"></i> <span class="btn-label">Export</span></button>
-    <button class="header-btn" id="dedupBtn" title="Remove duplicates"><i class="fa-solid fa-clone"></i> <span class="btn-label">Dedup</span></button>
     <button class="lock-btn" id="lockBtn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
   </div>
 </header>
@@ -4736,7 +4735,6 @@ document.getElementById('importBtn').addEventListener('click', function() {
   document.getElementById('recordImportFile').click();
 });
 document.getElementById('exportBtn').addEventListener('click', exportCSV);
-document.getElementById('dedupBtn').addEventListener('click', removeDuplicates);
   // clearAllBtn removed
 document.getElementById('lockBtn').addEventListener('click', logout);
 document.getElementById('userTagBtn').addEventListener('click', function() {
