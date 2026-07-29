@@ -181,6 +181,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(15,26,30,.9);backdrop-f
 .header-btn{padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:11px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit}
 .header-btn:active{background:var(--card-hover)}
 .header-btn.accent-btn{background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;border-color:transparent;font-weight:700}
+.header-btn.import-btn{background:var(--bg2);color:var(--fg-muted);border-color:var(--border);font-weight:500}
 .sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;transition:all .3s}
 .sync-dot.online{background:var(--success);box-shadow:0 0 8px rgba(60,198,138,.6)}
 .sync-dot.connecting{background:#e8d83c;box-shadow:0 0 8px rgba(232,216,60,.5);animation:sp 1s infinite}
@@ -542,8 +543,8 @@ html.is-tablet tbody td{padding:10px 12px;font-size:12px}
     <span id="roleBadge" class="role-badge admin">Admin</span>
     <span id="syncIndicator" class="sync-dot local" title="Local mode"></span>
     <button class="header-btn" id="cloudBtn" title="Cloud settings"><i class="fa-solid fa-cloud"></i></button>
-    <button class="header-btn accent-btn" id="importBtn" title="Import CSV"><i class="fa-solid fa-file-import"></i> <span class="btn-label">Import</span></button>
-    <button class="header-btn" id="exportBtn" title="Export CSV"><i class="fa-solid fa-file-export"></i> <span class="btn-label">Export</span></button>
+    <button class="header-btn import-btn" id="importBtn" title="Import CSV"><i class="fa-solid fa-file-import"></i> <span class="btn-label">Import</span></button>
+    <button class="header-btn accent-btn" id="exportBtn" title="Export CSV"><i class="fa-solid fa-file-export"></i> <span class="btn-label">Export</span></button>
     <button class="lock-btn" id="lockBtn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
   </div>
 </header>
@@ -5228,6 +5229,7 @@ try {
 </script>
 </body>
 </html>
+
 
 
 
