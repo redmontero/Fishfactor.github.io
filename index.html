@@ -560,6 +560,7 @@ html.is-tablet tbody td{padding:10px 12px;font-size:12px}
     <button type="button" class="summary-pdf-btn" id="fishSummaryPdfBtn"><i class="fa-solid fa-fish-fins"></i> Fish Summary PDF</button>
     <button type="button" class="summary-pdf-btn" id="cashSummaryPdfBtn" style="border-color:#3cc68a;color:#3cc68a;background:rgba(60,198,138,0.08)"><i class="fa-solid fa-coins"></i> Cash Summary</button>
     <button type="button" class="summary-pdf-btn" id="nonCashSummaryPdfBtn" style="border-color:#e05252;color:#e05252;background:rgba(224,82,82,0.08)"><i class="fa-solid fa-handshake"></i> Non-Cash Summary</button>
+    <div style="display:flex;align-items:center;gap:6px;margin-left:4px"><input type="date" id="datePdfDate" style="padding:6px 8px;border-radius:var(--radius-sm);border:1.5px solid var(--accent);background:var(--bg2);color:var(--accent);font-size:12px;font-family:inherit;outline:none;font-weight:600"><button type="button" class="summary-pdf-btn" id="datePdfBtn" style="border-color:var(--accent);color:var(--accent);background:var(--accent-glow)"><i class="fa-solid fa-calendar-check"></i> Date PDF</button></div>
   </div>
   <div class="stats-row"><div class="stat-card"><div class="stat-label">Entries</div><div class="stat-value" id="statEntries">0</div></div><div class="stat-card"><div class="stat-label">Weight</div><div class="stat-value success" id="statWeight">0 <span class="stat-unit">Kg</span></div></div><div class="stat-card"><div class="stat-label">Amount</div><div class="stat-value accent" id="statValue">0</div></div><div class="stat-card"><div class="stat-label">Avg/Kg</div><div class="stat-value" id="statAvg" style="color:var(--info)">0</div></div></div>
   <div class="mgmt-card" id="usersCard"><div class="mgmt-row"><div class="mgmt-icon usr"><i class="fa-solid fa-users-gear"></i></div><div class="mgmt-info"><span class="mgmt-name">Users</span><span class="mgmt-hint" id="usersHint">Manage access</span></div><span class="mgmt-count" id="usersCount">0</span><button class="mgmt-toggle" id="usersToggle"><i class="fa-solid fa-chevron-down"></i></button></div><div class="mgmt-body"><div class="mgmt-add"><input class="ni" type="text" id="newUserName" placeholder="Username"><input class="pi" type="password" id="newUserPass" placeholder="Password"><select class="ri" id="newUserRole"><option value="user">User</option><option value="admin">Admin</option></select><button class="mgmt-add-btn" id="addUserBtn"><i class="fa-solid fa-plus"></i> Add</button></div><div class="mgmt-list" id="usersList"></div></div></div>
@@ -1240,13 +1241,23 @@ function loadCompanyData() {
   try { suppliers = JSON.parse(localStorage.getItem(ck('sp')) || '[]'); } catch(e) { suppliers = []; }
   try { buyers    = JSON.parse(localStorage.getItem(ck('by')) || '[]'); } catch(e) { buyers = []; }
   try { records   = JSON.parse(localStorage.getItem(ck('rc')) || '[]'); } catch(e) { records   = []; }
+  // Backfill enteredAt for any existing records that don't have it (from createdAt)
+  var rcBefore = records.length;
+  var needsBackfillSave = false;
+  for (var ri = 0; ri < records.length; ri++) {
+    if (!records[ri].enteredAt && records[ri].createdAt) {
+      records[ri].enteredAt = new Date(records[ri].createdAt).toISOString();
+      needsBackfillSave = true;
+    }
+  }
   try { appUsers  = JSON.parse(localStorage.getItem(ck('users')) || '[]'); } catch(e) { appUsers  = []; }
   // Auto-dedup fish types, suppliers, buyers on load to fix past duplicates
   var ftBefore = fishTypes.length, spBefore = suppliers.length, byBefore = buyers.length;
   fishTypes = dedupArr(fishTypes);
   suppliers = dedupArr(suppliers);
   buyers = dedupArr(buyers);
-  if (fishTypes.length < ftBefore || suppliers.length < spBefore || buyers.length < byBefore) {
+  var backfilled = needsBackfillSave;
+  if (fishTypes.length < ftBefore || suppliers.length < spBefore || buyers.length < byBefore || backfilled) {
     saveLocal();
   }
 }
@@ -2644,7 +2655,8 @@ function submitAllQE() {
     var rec = {
       id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5) + '_' + added,
       date: date, fish: fish, supplier: sup, buyer: e.buyer,
-      rate: e.rate, amount: e.amt, weight: e.wt, createdAt: Date.now() + added
+      rate: e.rate, amount: e.amt, weight: e.wt, createdAt: Date.now() + added,
+      enteredAt: new Date().toISOString()
     };
     if (seqVal !== undefined) rec.seq = seqVal;
     records.push(rec);
@@ -3083,7 +3095,8 @@ function editRecord(id) {
         records.push({
           id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
           date: date, fish: fish, supplier: sup, buyer: buyer,
-          rate: rate, amount: amt, weight: amt / rate, createdAt: Date.now()
+          rate: rate, amount: amt, weight: amt / rate, createdAt: Date.now(),
+          enteredAt: new Date().toISOString()
         });
       }
     }
@@ -3189,7 +3202,7 @@ function renderTable() {
     } else {
       buyerCell = '<td style="font-size:12px;color:var(--info)">' + esc(r.buyer || '-') + '</td>';
     }
-    html += '<tr class="row-enter">'
+    html += '<tr class="row-enter" title="' + esc(r.enteredAt ? 'Entered: ' + new Date(r.enteredAt).toLocaleString() : '') + '">'
       + '<td>' + (i + 1) + (r.seq ? '<br><span style="font-size:9px;color:var(--accent);font-weight:700">seq ' + r.seq + '</span>' : '') + '</td>'
       + '<td><span class="supplier-badge" style="background:' + sc + '15;color:' + sc + '">' + esc(r.supplier) + '</span></td>'
       + '<td><span class="fish-badge" style="background:' + fc + '15;color:' + fc + '">' + esc(r.fish) + '</span></td>'
@@ -3515,6 +3528,267 @@ function generateSummaryPDF() {
     }
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Summary PDF';
+  }, 80);
+}
+
+// ====================================================================
+// Date-based PDF — select a date and generate PDF of all entries
+// ====================================================================
+
+document.getElementById('datePdfBtn').addEventListener('click', generateDatePDF);
+
+// Sync datePdfDate picker with entryDate when entryDate changes
+(function() {
+  var dpd = document.getElementById('datePdfDate');
+  var ed = document.getElementById('entryDate');
+  // Initialize datePdfDate with today's date
+  if (dpd && !dpd.value) dpd.value = ed.value || new Date().toISOString().split('T')[0];
+  ed.addEventListener('input', function() { dpd.value = ed.value; });
+  ed.addEventListener('change', function() { dpd.value = ed.value; });
+})();
+
+function generateDatePDF() {
+  var dateVal = document.getElementById('datePdfDate').value;
+  if (!dateVal) { toast('Please select a date first.', 'error'); return; }
+
+  // Filter all records for this entry date
+  var filtered = [];
+  for (var i = 0; i < records.length; i++) {
+    if (records[i].date === dateVal) filtered.push(records[i]);
+  }
+
+  if (filtered.length === 0) {
+    toast('No records found for ' + formatDateStr(dateVal) + '.', 'error');
+    return;
+  }
+
+  var btn = document.getElementById('datePdfBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ...';
+
+  setTimeout(function() {
+    try {
+      var jsPDF = window.jspdf.jsPDF;
+      var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      var pw = doc.internal.pageSize.getWidth();
+      var lm = 14;
+      var rm = 14;
+      var cw = pw - lm - rm;
+
+      // Compute summary totals
+      var totalWt = 0, totalAmt = 0;
+      for (var i = 0; i < filtered.length; i++) {
+        totalWt += filtered[i].weight;
+        totalAmt += filtered[i].amount;
+      }
+      var avgKg = totalWt > 0 ? totalAmt / totalWt : 0;
+
+      // ---- Header ----
+      doc.setFillColor(40, 60, 70);
+      doc.rect(0, 0, pw, 38, 'F');
+      doc.setTextColor(232, 168, 50);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Fish Factor', lm, 16);
+      doc.setTextColor(200, 220, 230);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      var compName = document.getElementById('headerCompName') ? document.getElementById('headerCompName').textContent : '';
+      if (compName && compName !== '-') doc.text(compName, lm, 23);
+
+      // Title top-right
+      doc.setTextColor(232, 168, 50);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('DAILY REPORT', pw - rm, 16, { align: 'right' });
+      doc.setTextColor(200, 220, 230);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      var genTime = new Date();
+      doc.text('Generated: ' + genTime.toLocaleDateString() + ' ' + genTime.toLocaleTimeString(), pw - rm, 22, { align: 'right' });
+
+      // ---- Date badge ----
+      var y = 46;
+      doc.setFillColor(232, 168, 50);
+      doc.roundedRect(lm, y - 5, cw, 18, 2, 2, 'F');
+      doc.setTextColor(15, 26, 30);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Entry Date: ' + formatDateStr(dateVal), lm + 4, y + 3);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(filtered.length + ' entries  |  Total: ' + formatPdfNum(totalAmt), lm + 4, y + 8);
+
+      // ---- Summary cards ----
+      y = 74;
+      var cardW = (cw - 12) / 4;
+      var cardH = 22;
+      var cards = [
+        { label: 'Entries', value: '' + filtered.length, color: [90, 184, 232] },
+        { label: 'Total Weight', value: totalWt.toFixed(1) + ' Kg', color: [60, 198, 138] },
+        { label: 'Total Amount', value: formatPdfNum(totalAmt), color: [232, 168, 50] },
+        { label: 'Avg/Kg', value: formatPdfNum(avgKg), color: [90, 184, 232] }
+      ];
+      for (var c = 0; c < cards.length; c++) {
+        var cx = lm + c * (cardW + 4);
+        doc.setFillColor(cards[c].color[0], cards[c].color[1], cards[c].color[2]);
+        doc.roundedRect(cx, y, cardW, 3, 1, 1, 'F');
+        doc.setTextColor(60, 60, 60);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.text(cards[c].label, cx + 2, y + 10);
+        doc.setTextColor(30, 30, 30);
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text(cards[c].value, cx + 2, y + 18);
+      }
+
+      // ---- Detail table ----
+      y = y + cardH + 8;
+      var cols = [7, 24, 24, 30, 28, 18, 28, 23]; // #, Supplier, Fish, Buyer, Rate, Amount, Weight, Entered — total 182mm
+      var totalColW = 0;
+      for (var ci = 0; ci < cols.length; ci++) totalColW += cols[ci];
+
+      // Table header
+      doc.setFillColor(40, 60, 70);
+      doc.rect(lm, y, totalColW, 5, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'bold');
+      var headers = ['#', 'Supplier', 'Fish', 'Buyer', 'Rate', 'Amount', 'Weight', 'Entered'];
+      var sRightCols = {0:true, 4:true, 5:true, 6:true};
+      var tx = lm + 2;
+      for (var h = 0; h < headers.length; h++) {
+        if (sRightCols[h]) { doc.text(headers[h], tx + cols[h] - 1, y + 4, { align: 'right' }); }
+        else { doc.text(headers[h], tx, y + 4); }
+        tx += cols[h];
+      }
+      y += 6;
+
+      // Table rows
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      for (var i = 0; i < filtered.length; i++) {
+        var r = filtered[i];
+        // Alternate row background
+        if (i % 2 === 0) {
+          doc.setFillColor(248, 248, 248);
+          doc.rect(lm, y, totalColW, 5.5, 'F');
+        }
+
+        // Check page break
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+          doc.setFillColor(40, 60, 70);
+          doc.rect(lm, y, totalColW, 8, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(7);
+          doc.setFont('helvetica', 'bold');
+          tx = lm + 2;
+          for (var h2 = 0; h2 < headers.length; h2++) {
+            if (sRightCols[h2]) { doc.text(headers[h2], tx + cols[h2] - 1, y + 5.5, { align: 'right' }); }
+            else { doc.text(headers[h2], tx, y + 5.5); }
+            tx += cols[h2];
+          }
+          y += 6;
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7.5);
+        }
+
+        doc.setTextColor(50, 50, 50);
+        // Format enteredAt as short time
+        var enteredTime = '-';
+        if (r.enteredAt) {
+          try {
+            var ea = new Date(r.enteredAt);
+            enteredTime = ea.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+          } catch(e) { enteredTime = '-'; }
+        }
+        var rx = lm + 2;
+        var rowTexts = [
+          '' + (i + 1) + (r.seq ? '(' + r.seq + ')' : ''),
+          truncateText(doc, r.supplier || '-', cols[1] - 2),
+          truncateText(doc, r.fish || '-', cols[2] - 2),
+          truncateText(doc, r.buyer || '-', cols[3] - 2),
+          formatPdfNum(r.rate),
+          formatPdfNum(r.amount),
+          r.weight.toFixed(1) + ' Kg',
+          enteredTime
+        ];
+        for (var ri = 0; ri < rowTexts.length; ri++) {
+          if (sRightCols[ri]) { doc.text(rowTexts[ri], rx + cols[ri] - 1, y + 4, { align: 'right' }); }
+          else { doc.text(rowTexts[ri], rx, y + 4); }
+          rx += cols[ri];
+        }
+        y += 5.5;
+      }
+
+      // Table footer totals
+      y += 2;
+      doc.setDrawColor(40, 60, 70);
+      doc.setLineWidth(0.5);
+      doc.line(lm, y, lm + totalColW, y);
+      y += 6;
+      doc.setTextColor(40, 60, 70);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('TOTAL', lm + 2, y);
+      doc.text(formatPdfNum(totalAmt), lm + totalColW - 1, y, { align: 'right' });
+      y += 5;
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Weight: ' + totalWt.toFixed(1) + ' Kg', lm + 2, y);
+      doc.text('Avg/Kg: ' + formatPdfNum(avgKg), lm + totalColW - 1, y, { align: 'right' });
+
+      // ---- Per-buyer sub-summary if multiple buyers ----
+      var buyerMap = {};
+      for (var b = 0; b < filtered.length; b++) {
+        var rb = filtered[b];
+        var bk = rb.buyer || 'Cash';
+        if (!buyerMap[bk]) buyerMap[bk] = { wt: 0, amt: 0, n: 0 };
+        buyerMap[bk].wt += rb.weight;
+        buyerMap[bk].amt += rb.amount;
+        buyerMap[bk].n++;
+      }
+      var buyerKeys = Object.keys(buyerMap);
+      if (buyerKeys.length > 1) {
+        y += 10;
+        doc.setFillColor(40, 60, 70);
+        doc.rect(lm, y, totalColW, 5.5, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Buyer-wise Breakdown', lm + 2, y + 4);
+        y += 5.5;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        for (var bi = 0; bi < buyerKeys.length; bi++) {
+          var bname = buyerKeys[bi];
+          var bd = buyerMap[bname];
+          if (bi % 2 === 0) {
+            doc.setFillColor(248, 248, 248);
+            doc.rect(lm, y, totalColW, 5, 'F');
+          }
+          doc.setTextColor(50, 50, 50);
+          doc.text(bname, lm + 2, y + 3.5);
+          doc.text('' + bd.n + ' entries', lm + 2 + 42, y + 3.5, { align: 'right' });
+          doc.text(bd.wt.toFixed(1) + ' Kg', lm + 2 + 80, y + 3.5, { align: 'right' });
+          doc.text(formatPdfNum(bd.amt), lm + totalColW - 1, y + 4.5, { align: 'right' });
+          y += 5;
+        }
+      }
+
+      // Save
+      var fileName = 'FishFactor_Daily_' + dateVal + '.pdf';
+      doc.save(fileName);
+      toast('Daily PDF for ' + formatDateStr(dateVal) + ' downloaded.', 'success');
+    } catch (e) {
+      console.error('Date PDF generation error:', e);
+      toast('Error generating PDF. Try again.', 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Date PDF';
   }, 80);
 }
 
@@ -4290,7 +4564,8 @@ document.getElementById('recordImportFile').addEventListener('change', function(
       records.push({
         id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5) + '_' + i,
         date: date, fish: fish, supplier: sup,
-        rate: rate, amount: amt, weight: wt, createdAt: Date.now() + i
+        rate: rate, amount: amt, weight: wt, createdAt: Date.now() + i,
+        enteredAt: new Date().toISOString()
       });
       imported++;
     }
@@ -4381,14 +4656,14 @@ function exportCSV() {
   var filtered = getFilteredRecords();
   if (!filtered.length) { toast('No records to export.', 'error'); return; }
   // Seq is the LAST column (extreme right) so duplicate-with-sequence entries are easy to spot
-  var csv = 'Date,Supplier,Fish,Buyer,Rate,Amount,Weight,Seq\n';
+  var csv = 'Date,Supplier,Fish,Buyer,Rate,Amount,Weight,Seq,EnteredAt\n';
   for (var i = 0; i < filtered.length; i++) {
     var r = filtered[i];
     csv += r.date + ',"' + (r.supplier || '').replace(/"/g, '""') + '","'
       + (r.fish || '').replace(/"/g, '""') + '","'
       + (r.buyer || '').replace(/"/g, '""') + '",'
       + r.rate.toFixed(2) + ',' + r.amount.toFixed(2) + ',' + r.weight.toFixed(2)
-      + ',' + (r.seq || '') + '\n';
+      + ',' + (r.seq || '') + ',' + (r.enteredAt || '') + '\n';
   }
   var blob = new Blob([csv], { type: 'text/csv' });
   var url = URL.createObjectURL(blob);
@@ -5229,7 +5504,3 @@ try {
 </script>
 </body>
 </html>
-
-
-
-
