@@ -526,6 +526,24 @@ html.is-tablet tbody td{padding:10px 12px;font-size:12px}
 <div class="modal-overlay" id="renameSupplierModal"><div class="modal" style="max-width:340px"><h3><i class="fa-solid fa-truck-field" style="color:var(--accent);margin-right:6px"></i>Rename Supplier</h3><p>Change name — all records will be updated.</p><input class="modal-input" type="text" id="renameSupplierInput" placeholder="New name"><div class="modal-actions"><button class="modal-btn" data-close="renameSupplierModal">Cancel</button><button class="modal-btn" id="confirmRenameSupplierBtn" style="background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">Rename</button></div></div></div>
 <!-- Rename buyer modal -->
 <div class="modal-overlay" id="renameBuyerModal"><div class="modal" style="max-width:340px"><h3><i class="fa-solid fa-cart-shopping" style="color:var(--accent);margin-right:6px"></i>Rename Buyer</h3><p>Change name — all records will be updated.</p><input class="modal-input" type="text" id="renameBuyerInput" placeholder="New name"><div class="modal-actions"><button class="modal-btn" data-close="renameBuyerModal">Cancel</button><button class="modal-btn" id="confirmRenameBuyerBtn" style="background:var(--accent);color:#0f1a1e;border-color:transparent;font-weight:700">Rename</button></div></div></div>
+  <!-- Change Supplier for a Date — full dedicated screen -->
+  <div class="screen hidden" id="changeSupplierScreen">
+    <div class="screen-logo" style="background:linear-gradient(135deg,var(--info),#3a9fd8)"><i class="fa-solid fa-truck-field"></i></div>
+    <div class="screen-title">Change Supplier by Date</div>
+    <div class="screen-sub">Change supplier for all entries on a specific date</div>
+    <div class="screen-box" style="max-width:420px">
+      <div class="s-field"><label><i class="fa-solid fa-calendar-day" style="color:var(--accent);margin-right:4px"></i>Date</label><input type="date" id="csDate" style="color:var(--accent);font-weight:600"></div>
+      <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:11px">
+        <div style="flex:1"><label style="display:block;font-size:10px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">From (Current)</label><select id="csFromSupplier" style="width:100%;padding:13px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--danger);font-size:14px;font-weight:600;font-family:inherit;outline:none"></select></div>
+        <div style="padding-bottom:14px"><i class="fa-solid fa-arrow-right" style="color:var(--fg-muted);font-size:18px"></i></div>
+        <div style="flex:1"><label style="display:block;font-size:10px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">To (New)</label><select id="csToSupplier" style="width:100%;padding:13px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--success);font-size:14px;font-weight:600;font-family:inherit;outline:none"></select></div>
+      </div>
+      <div id="csRecordCount" style="padding:12px 14px;border-radius:var(--radius-sm);background:var(--bg2);font-size:12px;color:var(--fg-muted);text-align:center;border:1px dashed var(--border);margin-bottom:11px">Select a date and suppliers to see affected records</div>
+      <div id="csRecordPreview" style="max-height:180px;overflow-y:auto;display:none;margin-bottom:11px;border-radius:var(--radius-sm)"></div>
+      <button class="s-btn" id="csConfirmBtn" style="background:linear-gradient(135deg,var(--info),#3a9fd8)"><i class="fa-solid fa-check"></i> Update Records</button>
+      <button class="s-btn outline" id="csCancelBtn" style="margin-top:8px"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    </div>
+  </div>
   <div class="modal-overlay" id="quickEntryModal"><div class="modal qe-modal" style="max-width:640px;max-height:90vh;display:flex;flex-direction:column"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:8px"><h3 style="margin-bottom:0"><i class="fa-solid fa-bolt" style="color:var(--accent);margin-right:6px"></i>Quick Entry</h3><div style="display:flex;align-items:center;gap:8px"><span id="qeDateBadge" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:var(--accent-glow);color:#fff;font-size:15px;font-weight:700;border:1px solid var(--accent);white-space:nowrap;line-height:1.4"><i class="fa-solid fa-calendar-day"></i><span id="qeDateText">-</span></span><button class="modal-btn" data-close="quickEntryModal" style="padding:6px 10px;border:none;background:transparent;color:var(--fg-muted);font-size:16px;cursor:pointer"><i class="fa-solid fa-xmark"></i></button></div></div><!-- Supplier + Fish info bar --><div class="qe-sup-info" id="qeSupInfo"><i class="fa-solid fa-truck-field"></i><span id="qeSupName">-</span><span style="margin:0 4px;opacity:.5">|</span><i class="fa-solid fa-fish-fins"></i><select id="qeFishSelect" style="flex:1;padding:4px 22px 4px 6px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--accent);font-size:12px;font-family:inherit;outline:none;font-weight:700;-webkit-appearance:none;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23e8a832'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 4px center"></select></div><p style="margin-bottom:8px;font-size:11px;color:var(--fg-muted)"><i class="fa-solid fa-circle-info" style="margin-right:3px"></i>Select <b>Cash</b> for cash sale, or pick a buyer for credit sale.</p><!-- Column headers --><div class="qe-header-row"><span>#</span><span>Buyer</span><span>Rate</span><span>Amount</span><span>Wt</span><span>Seq</span><span></span></div><!-- Buyer rows container --><div id="qeBuyerRows" style="flex:1;overflow-y:auto;max-height:52vh;min-height:60px"></div><!-- Total row --><div class="qe-total-row"><span class="qe-total-label">Total</span><span class="qe-total-amount" id="qeGrandTotal">0.00</span></div><!-- Add buyer row + manage buyers --><div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap"><button type="button" id="qeAddRowBtn" style="padding:7px 14px;border-radius:var(--radius-sm);border:1.5px dashed var(--border);background:transparent;color:var(--fg-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-plus"></i> Add Row</button><button type="button" id="qeSortBtn" style="padding:7px 14px;border-radius:var(--radius-sm);border:1.5px dashed var(--border);background:transparent;color:var(--fg-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-arrow-down-a-z"></i> Sort</button><div style="flex:1"></div><button type="button" id="qeNewBuyerToggle" style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit"><i class="fa-solid fa-user-plus" style="margin-right:3px"></i> New Buyer</button><label style="padding:5px 10px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--info);font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px"><i class="fa-solid fa-file-arrow-up"></i> Import CSV<input type="file" id="qeBuyerCsvInput" accept=".csv,.txt" style="display:none"></label></div><!-- Inline new buyer input (hidden by default) --><div id="qeNewBuyerRow" style="display:none;margin-top:6px;gap:6px;align-items:center"><input type="text" id="qeNewBuyerInput" placeholder="Buyer name" style="flex:1;padding:8px 10px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:12px;font-family:inherit;outline:none"><button type="button" id="qeNewBuyerSave" style="padding:8px 14px;border-radius:var(--radius-sm);border:none;background:var(--accent);color:#0f1a1e;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Add</button></div><!-- Submit --><div class="modal-actions" style="margin-top:10px;justify-content:stretch;gap:8px"><button type="button" id="qeSubmitAll" style="flex:1;height:44px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--accent),#d4922a);color:#0f1a1e;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-check-double"></i> Submit All</button></div></div></div>
 <!-- Cloud sync setup modal -->
 <div class="modal-overlay" id="setupModal"><div class="modal" style="max-width:430px"><div style="text-align:center;margin-bottom:14px"><div style="width:52px;height:52px;background:var(--accent-glow);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:22px;color:var(--accent);margin-bottom:8px"><i class="fa-solid fa-cloud-arrow-up"></i></div><h3>Cloud Sync Setup</h3></div><p style="text-align:center;margin-bottom:14px">Connect to Firebase Realtime Database for cross-device sync.</p><div class="setup-steps"><strong>Quick Setup:</strong><ol><li>Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li><li>Create a project, then Realtime Database, start in test mode</li><li>Settings > Project settings > Add web app, copy config JSON</li><li>Paste the full JSON below</li></ol></div><textarea class="setup-textarea" id="firebaseConfigInput" placeholder='Paste Firebase config JSON here:
@@ -552,7 +570,7 @@ html.is-tablet tbody td{padding:10px 12px;font-size:12px}
 <!-- Main app content -->
 <main id="appMain" style="display:none">
   <div class="form-card"><div class="edit-bar" id="editBar"><i class="fa-solid fa-pen"></i><span>Editing record</span><button class="cancel-edit" id="cancelEditBtn">Cancel</button></div><div class="form-title" id="formTitle"><i class="fa-solid fa-pen-to-square"></i> New Entry</div><form id="fishForm" autocomplete="off"><div class="form-grid"><div class="form-group"><label>Date</label><input type="date" id="entryDate" required></div><div class="form-group"><label>Supplier</label><select id="supplier" required></select></div><div class="form-group"><label>Fish Type</label><select id="fishType" required></select></div><div class="form-group" style="display:flex;align-items:flex-end"><button type="button" id="quickEntryBtn" style="width:100%;height:46px;border-radius:var(--radius-sm);border:1.5px solid var(--accent);background:var(--accent-glow);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-bolt"></i> Quick Entry</button></div></div></form></div>
-  <div class="date-filter-bar"><div class="date-filter-label"><i class="fa-solid fa-calendar-day" style="color:var(--accent)"></i> Showing: <span class="date-badge" id="dateBadge">--</span></div><button class="show-all-btn" id="showAllBtn"><i class="fa-solid fa-layer-group" style="font-size:10px"></i> All Dates</button></div>
+  <div class="date-filter-bar"><div class="date-filter-label"><i class="fa-solid fa-calendar-day" style="color:var(--accent)"></i> Showing: <span class="date-badge" id="dateBadge">--</span></div><div style="display:flex;gap:6px"><button class="show-all-btn" id="showAllBtn"><i class="fa-solid fa-layer-group" style="font-size:10px"></i> All Dates</button><button class="show-all-btn" id="changeSupplierBtn" style="border-color:var(--info);color:var(--info);background:rgba(90,184,232,0.08)"><i class="fa-solid fa-truck-field" style="font-size:10px"></i> Change Supplier</button></div></div>
   <div class="table-area"><div class="table-title"><i class="fa-solid fa-table-list" style="color:var(--accent)"></i> Records <span class="record-count" id="recordCount">0</span></div><div class="table-filters"><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="searchInput" placeholder="Search fish / supplier / buyer — or type a rate (e.g. 1400) to see all amounts at that rate, sorted ascending"></div><select class="filter-select" id="filterFish"><option value="">All Fish</option></select><select class="filter-select" id="filterSupplier"><option value="">All Suppliers</option></select></div></div>
   <div class="table-container"><div class="table-scroll"><table><thead><tr><th>#</th><th>Supplier</th><th>Fish</th><th>Buyer</th><th>Rate</th><th>Amount</th><th>Weight</th><th>Date</th><th></th></tr></thead><tbody id="tableBody"></tbody></table><div class="empty-state" id="emptyState"><div class="empty-icon"><i class="fa-solid fa-fish-fins"></i></div><h3>No Records</h3><p id="emptyMsg">Add entries or import CSV.</p></div></div><div class="table-footer" id="tableFooter" style="display:none"><span class="total-label">Total</span><span class="total-amount" id="filteredTotal">0.00</span></div></div>
   <div class="summary-pdf-bar">
@@ -2072,6 +2090,7 @@ function setTodayDate() {
   }
   document.getElementById('dateBadge').textContent = fmtDate(filterDate);
   document.getElementById('showAllBtn').style.display = filterDate ? 'flex' : 'none';
+  document.getElementById('changeSupplierBtn').style.display = filterDate ? 'flex' : 'none';
   // Re-render stats and table if filterDate was just set
   if (needsRender) {
     renderTable();
@@ -2083,6 +2102,7 @@ function showAllDates() {
   filterDate = null;
   document.getElementById('dateBadge').textContent = 'All Dates';
   document.getElementById('showAllBtn').style.display = 'none';
+  document.getElementById('changeSupplierBtn').style.display = 'none';
   renderTable();
   renderStats();
 }
@@ -2466,6 +2486,20 @@ function addQEBuyerRow(presetBuyer) {
 
   // Wire delete button
   row.querySelector('.qe-del-row').addEventListener('click', function() {
+    // If this row was loaded from an existing record, also delete that record
+    var existingId = row.getAttribute('data-existing-id');
+    if (existingId) {
+      for (var ri = records.length - 1; ri >= 0; ri--) {
+        if (records[ri].id === existingId) {
+          records.splice(ri, 1);
+          break;
+        }
+      }
+      save();
+      renderTable();
+      renderStats();
+      toast('Record deleted.', 'success');
+    }
     row.remove();
     renumberQERows();
     updateQETotal();
@@ -3242,6 +3276,7 @@ function renderTable() {
   tbody.innerHTML = html;
   document.getElementById('filteredTotal').textContent = fmtN(totalAmt);
   document.getElementById('showAllBtn').style.display = filterDate ? 'flex' : 'none';
+  document.getElementById('changeSupplierBtn').style.display = filterDate ? 'flex' : 'none';
 }
 
 // Render the summary statistics cards
@@ -3280,6 +3315,7 @@ function applyDateFilter() {
     ? fmtDate(filterDate)
     : 'All Dates';
   document.getElementById('showAllBtn').style.display = filterDate ? 'flex' : 'none';
+  document.getElementById('changeSupplierBtn').style.display = filterDate ? 'flex' : 'none';
   renderTable();
   renderStats();
 }
@@ -5205,6 +5241,146 @@ document.getElementById('cancelEditBtn').addEventListener('click', function() {
   sub.onclick = submitAllQE;
 });
 document.getElementById('showAllBtn').addEventListener('click', showAllDates);
+
+// ====================================================================
+// Change Supplier by Date
+// ====================================================================
+
+document.getElementById('changeSupplierBtn').addEventListener('click', function() {
+  // Populate date with current entry date
+  var currentDate = document.getElementById('entryDate').value;
+  document.getElementById('csDate').value = currentDate || '';
+
+  // Populate supplier dropdowns
+  var sortedSup = suppliers.slice().sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+  var fromEl = document.getElementById('csFromSupplier');
+  var toEl = document.getElementById('csToSupplier');
+  var fromHtml = '<option value="">Select supplier</option>';
+  var toHtml = '<option value="">Select supplier</option>';
+  for (var i = 0; i < sortedSup.length; i++) {
+    fromHtml += '<option value="' + escA(sortedSup[i]) + '">' + esc(sortedSup[i]) + '</option>';
+    toHtml += '<option value="' + escA(sortedSup[i]) + '">' + esc(sortedSup[i]) + '</option>';
+  }
+  fromEl.innerHTML = fromHtml;
+  toEl.innerHTML = toHtml;
+
+  // If current supplier is selected in main form, pre-select it as "From"
+  var mainSup = document.getElementById('supplier').value;
+  if (mainSup) fromEl.value = mainSup;
+
+  document.getElementById('csRecordCount').textContent = 'Select a date and suppliers to see affected records';
+  document.getElementById('csRecordCount').style.borderColor = 'var(--border)';
+  document.getElementById('csRecordPreview').style.display = 'none';
+  document.getElementById('csRecordPreview').innerHTML = '';
+
+  // Show the dedicated screen
+  document.getElementById('changeSupplierScreen').classList.remove('hidden');
+  updateChangeSupplierCount();
+});
+
+// Back button on the Change Supplier screen
+document.getElementById('csCancelBtn').addEventListener('click', function() {
+  document.getElementById('changeSupplierScreen').classList.add('hidden');
+});
+
+function updateChangeSupplierCount() {
+  var dateVal = document.getElementById('csDate').value;
+  var fromSup = document.getElementById('csFromSupplier').value;
+  var toSup = document.getElementById('csToSupplier').value;
+  var countEl = document.getElementById('csRecordCount');
+  var previewEl = document.getElementById('csRecordPreview');
+
+  if (!dateVal || !fromSup || !toSup) {
+    countEl.textContent = 'Select a date and suppliers to see affected records';
+    countEl.style.borderColor = 'var(--border)';
+    countEl.style.color = 'var(--fg-muted)';
+    previewEl.style.display = 'none';
+    return;
+  }
+  if (fromSup === toSup) {
+    countEl.textContent = 'From and To suppliers are the same';
+    countEl.style.borderColor = 'var(--danger)';
+    countEl.style.color = 'var(--danger)';
+    previewEl.style.display = 'none';
+    return;
+  }
+
+  // Count matching records
+  var matching = [];
+  for (var i = 0; i < records.length; i++) {
+    if (records[i].date === dateVal && records[i].supplier === fromSup) {
+      matching.push(records[i]);
+    }
+  }
+
+  countEl.style.color = matching.length > 0 ? 'var(--info)' : 'var(--fg-muted)';
+  countEl.style.borderColor = matching.length > 0 ? 'var(--info)' : 'var(--border)';
+  countEl.textContent = matching.length + ' record' + (matching.length !== 1 ? 's' : '') + ' will change from "' + fromSup + '" to "' + toSup + '" on ' + formatDateStr(dateVal);
+
+  // Show preview of affected records (up to 8)
+  if (matching.length > 0) {
+    previewEl.style.display = '';
+    var html = '<div style="display:flex;flex-direction:column;gap:3px;margin-top:8px">';
+    var previewLimit = Math.min(matching.length, 8);
+    for (var i = 0; i < previewLimit; i++) {
+      var r = matching[i];
+      html += '<div style="display:flex;justify-content:space-between;padding:4px 10px;border-radius:4px;background:var(--bg);font-size:11px">'
+        + '<span>' + esc(r.fish || '-') + '</span>'
+        + '<span style="color:var(--info)">' + esc(r.buyer || '-') + '</span>'
+        + '<span style="font-weight:600">' + fmtN(r.amount) + '</span></div>';
+    }
+    if (matching.length > previewLimit) {
+      html += '<div style="text-align:center;font-size:10px;color:var(--fg-muted);padding:2px">...and ' + (matching.length - previewLimit) + ' more</div>';
+    }
+    html += '</div>';
+    previewEl.innerHTML = html;
+  } else {
+    previewEl.style.display = 'none';
+  }
+}
+
+// Live count updates when any field changes
+document.getElementById('csDate').addEventListener('input', updateChangeSupplierCount);
+document.getElementById('csDate').addEventListener('change', updateChangeSupplierCount);
+document.getElementById('csFromSupplier').addEventListener('change', updateChangeSupplierCount);
+document.getElementById('csToSupplier').addEventListener('change', updateChangeSupplierCount);
+
+document.getElementById('csConfirmBtn').addEventListener('click', function() {
+  var dateVal = document.getElementById('csDate').value;
+  var fromSup = document.getElementById('csFromSupplier').value;
+  var toSup = document.getElementById('csToSupplier').value;
+
+  if (!dateVal) { toast('Select a date.', 'error'); return; }
+  if (!fromSup) { toast('Select current supplier.', 'error'); return; }
+  if (!toSup) { toast('Select new supplier.', 'error'); return; }
+  if (fromSup === toSup) { toast('Suppliers are the same.', 'error'); return; }
+
+  var updated = 0;
+  for (var i = 0; i < records.length; i++) {
+    if (records[i].date === dateVal && records[i].supplier === fromSup) {
+      records[i].supplier = toSup;
+      updated++;
+    }
+  }
+
+  if (updated === 0) { toast('No matching records found.', 'error'); return; }
+
+  // Ensure new supplier exists in suppliers list
+  var exists = false;
+  for (var i = 0; i < suppliers.length; i++) {
+    if (suppliers[i].toLowerCase() === toSup.toLowerCase()) { exists = true; break; }
+  }
+  if (!exists) suppliers.push(toSup);
+
+  document.getElementById('changeSupplierScreen').classList.add('hidden');
+  save();
+  renderTable();
+  renderStats();
+  renderSuppliers();
+  populateFormSelects();
+  populateFilterSelects();
+  toast('Changed ' + updated + ' record' + (updated > 1 ? 's' : '') + ' from "' + fromSup + '" to "' + toSup + '" on ' + formatDateStr(dateVal), 'success');
+});
 document.getElementById('installBtn').addEventListener('click', function() {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
@@ -5527,3 +5703,4 @@ try {
 </script>
 </body>
 </html>
+
